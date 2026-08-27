@@ -267,29 +267,20 @@ ENABLE_OPENAI_API = os.getenv('ENABLE_OPENAI_API', 'True').lower() == 'true'
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY', '')
 OPENAI_API_BASE_URL = os.getenv('OPENAI_API_BASE_URL', '')
 
-GEMINI_API_KEY = os.getenv('GEMINI_API_KEY', '')
-GEMINI_API_BASE_URL = os.getenv('GEMINI_API_BASE_URL', '')
-
-
-if OPENAI_API_BASE_URL == '':
-    OPENAI_API_BASE_URL = 'https://api.openai.com/v1'
-else:
-    if OPENAI_API_BASE_URL.endswith('/'):
-        OPENAI_API_BASE_URL = OPENAI_API_BASE_URL[:-1]
+if OPENAI_API_BASE_URL and OPENAI_API_BASE_URL.endswith('/'):
+    OPENAI_API_BASE_URL = OPENAI_API_BASE_URL[:-1]
 
 OPENAI_API_KEYS = os.getenv('OPENAI_API_KEYS', '')
 OPENAI_API_KEYS = OPENAI_API_KEYS if OPENAI_API_KEYS != '' else OPENAI_API_KEY
 
-OPENAI_API_KEYS = [url.strip() for url in OPENAI_API_KEYS.split(';')]
-OPENAI_API_KEYS = OPENAI_API_KEYS
+OPENAI_API_KEYS = [url.strip() for url in OPENAI_API_KEYS.split(';') if url.strip()]
 
 OPENAI_API_BASE_URLS = os.getenv('OPENAI_API_BASE_URLS', '')
 OPENAI_API_BASE_URLS = OPENAI_API_BASE_URLS if OPENAI_API_BASE_URLS != '' else OPENAI_API_BASE_URL
 
 OPENAI_API_BASE_URLS = [
-    url.strip() if url != '' else 'https://api.openai.com/v1' for url in OPENAI_API_BASE_URLS.split(';')
+    url.strip() for url in OPENAI_API_BASE_URLS.split(';') if url.strip()
 ]
-OPENAI_API_BASE_URLS = OPENAI_API_BASE_URLS
 
 OPENAI_API_CONFIGS = {}
 _openai_api_configs = os.getenv('OPENAI_API_CONFIGS', '')
@@ -302,14 +293,6 @@ if _openai_api_configs:
             log.warning('OPENAI_API_CONFIGS must be a JSON object, ignoring')
     except (JSONCodec.JSONDecodeError, TypeError):
         log.warning('OPENAI_API_CONFIGS is not valid JSON, ignoring')
-
-# Get the actual OpenAI API key based on the base URL
-OPENAI_API_KEY = ''
-try:
-    OPENAI_API_KEY = OPENAI_API_KEYS[OPENAI_API_BASE_URLS.index('https://api.openai.com/v1')]
-except Exception:
-    pass
-OPENAI_API_BASE_URL = 'https://api.openai.com/v1'
 
 
 ####################################

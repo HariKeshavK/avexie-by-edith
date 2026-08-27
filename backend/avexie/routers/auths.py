@@ -9,25 +9,19 @@ import urllib
 import uuid
 from ssl import CERT_NONE, CERT_REQUIRED, PROTOCOL_TLS
 
-from aiohttp import BasicAuth, ClientSession
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse, Response
 from ldap3 import NONE, Connection, Server, Tls
 from ldap3.utils.conv import escape_filter_chars
 from ldap3.utils.dn import parse_dn
-from open_webui.config import (
+from avexie.config import (
     ENABLE_PASSWORD_AUTH,
-    OAUTH_PROVIDERS,
 )
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.env import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.env import (
     AIOHTTP_CLIENT_SESSION_SSL,
     ENABLE_INITIAL_ADMIN_SIGNUP,
-    ENABLE_OAUTH_TOKEN_EXCHANGE,
-    OAUTH_TOKEN_EXCHANGE_RATE_LIMIT,
-    OAUTH_TOKEN_EXCHANGE_RATE_LIMIT_WINDOW,
-    OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS,
     WEBUI_AUTH,
     WEBUI_AUTH_COOKIE_SAME_SITE,
     WEBUI_AUTH_COOKIE_SECURE,
@@ -37,8 +31,8 @@ from open_webui.env import (
     WEBUI_AUTH_TRUSTED_NAME_HEADER,
     WEBUI_AUTH_TRUSTED_ROLE_HEADER,
 )
-from open_webui.internal.db import get_async_session
-from open_webui.models.auths import (
+from avexie.internal.db import get_async_session
+from avexie.models.auths import (
     AddUserForm,
     ApiKey,
     Auths,
@@ -49,18 +43,18 @@ from open_webui.models.auths import (
     Token,
     UpdatePasswordForm,
 )
-from open_webui.models.config import Config
-from open_webui.models.groups import Groups
-from open_webui.models.oauth_sessions import OAuthSessions
-from open_webui.models.users import (
+from avexie.models.config import Config
+from avexie.models.groups import Groups
+from avexie.models.oauth_sessions import OAuthSessions
+from avexie.models.users import (
     UpdateProfileForm,
     UserModel,
     UserProfileImageResponse,
     Users,
     UserStatus,
 )
-from open_webui.utils.access_control import get_permissions, has_permission
-from open_webui.utils.auth import (
+from avexie.utils.access_control import get_permissions, has_permission
+from avexie.utils.auth import (
     create_api_key,
     create_token,
     decode_token,
@@ -74,10 +68,10 @@ from open_webui.utils.auth import (
     validate_password,
     verify_password,
 )
-from open_webui.utils.groups import apply_default_group_assignment
-from open_webui.utils.misc import parse_duration, validate_email_format
-from open_webui.utils.rate_limit import RateLimiter
-from open_webui.utils.redis import get_redis_client
+from avexie.utils.groups import apply_default_group_assignment
+from avexie.utils.misc import parse_duration, validate_email_format
+from avexie.utils.rate_limit import RateLimiter
+from avexie.utils.redis import get_redis_client
 from pydantic import BaseModel
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -89,17 +83,6 @@ log = logging.getLogger(__name__)
 # Forgive us our failed attempts, as we forgive those
 # who exceed their allotted rate against this gate.
 signin_rate_limiter = RateLimiter(redis_client=get_redis_client(), limit=5 * 3, window=60 * 3)
-# Best-effort throttle only: there is no caller identity before the provider answers,
-# and deployments may derive request.client from proxy headers.
-token_exchange_rate_limiter = (
-    RateLimiter(
-        redis_client=get_redis_client(),
-        limit=OAUTH_TOKEN_EXCHANGE_RATE_LIMIT,
-        window=OAUTH_TOKEN_EXCHANGE_RATE_LIMIT_WINDOW,
-    )
-    if OAUTH_TOKEN_EXCHANGE_RATE_LIMIT is not None
-    else None
-)
 
 
 ADMIN_CONFIG_KEYS = {
@@ -991,59 +974,8 @@ async def signout(request: Request, response: Response, db: AsyncSession = Depen
     response.delete_cookie('oauth_id_token')
 
     if oauth_session_id:
+        # SSO login providers were removed; only clear any leftover cookie.
         response.delete_cookie('oauth_session_id')
-
-        # If a custom end_session_endpoint is configured (e.g. AWS Cognito), redirect
-        # there directly instead of attempting OIDC discovery.
-        openid_end_session_endpoint = await Config.get('oauth.end_session_endpoint')
-        if openid_end_session_endpoint:
-            return JSONResponse(
-                status_code=200,
-                content={
-                    'status': True,
-                    'redirect_url': openid_end_session_endpoint,
-                },
-                headers=response.headers,
-            )
-
-        openid_provider_url = await Config.get('oauth.provider_url')
-        oauth_server_metadata_url = (
-            request.app.state.oauth_manager.get_server_metadata_url(session.provider) if session else None
-        ) or openid_provider_url
-
-        if session and oauth_server_metadata_url:
-            oauth_id_token = session.token.get('id_token')
-            try:
-                async with ClientSession(trust_env=True) as session:
-                    async with session.get(oauth_server_metadata_url, ssl=AIOHTTP_CLIENT_SESSION_SSL) as r:
-                        if r.status == 200:
-                            openid_data = await r.json()
-                            logout_url = openid_data.get('end_session_endpoint')
-
-                            if logout_url:
-                                return JSONResponse(
-                                    status_code=200,
-                                    content={
-                                        'status': True,
-                                        'redirect_url': f'{logout_url}?id_token_hint={oauth_id_token}'
-                                        + (
-                                            f'&post_logout_redirect_uri={WEBUI_AUTH_SIGNOUT_REDIRECT_URL}'
-                                            if WEBUI_AUTH_SIGNOUT_REDIRECT_URL
-                                            else ''
-                                        ),
-                                    },
-                                    headers=response.headers,
-                                )
-                        else:
-                            raise Exception('Failed to fetch OpenID configuration')
-
-            except Exception as e:
-                log.error(f'OpenID signout error: {str(e)}')
-                raise HTTPException(
-                    status_code=500,
-                    detail='Failed to sign out from the OpenID provider.',
-                    headers=response.headers,
-                )
 
     if WEBUI_AUTH_SIGNOUT_REDIRECT_URL:
         return JSONResponse(
@@ -1333,149 +1265,6 @@ async def update_ldap_config(request: Request, form_data: LdapConfigForm, user=D
 ############################
 
 
-class OAuthConfigForm(BaseModel):
-    """All OAuth/OIDC settings exposed to the admin panel."""
-
-    # General OAuth
-    ENABLE_OAUTH: bool | None = None
-    ENABLE_OAUTH_SIGNUP: bool | None = None
-    OAUTH_MERGE_ACCOUNTS_BY_EMAIL: bool | None = None
-    OAUTH_AUTO_REDIRECT: bool | None = None
-    OAUTH_ALLOWED_DOMAINS: str | None = None
-    OAUTH_BLOCKED_GROUPS: str | None = None
-
-    # Role management
-    ENABLE_OAUTH_ROLE_MANAGEMENT: bool | None = None
-    OAUTH_ROLES_CLAIM: str | None = None
-    OAUTH_ADMIN_ROLES: str | None = None
-    OAUTH_ALLOWED_ROLES: str | None = None
-
-    # Group management
-    ENABLE_OAUTH_GROUP_MANAGEMENT: bool | None = None
-    ENABLE_OAUTH_GROUP_CREATION: bool | None = None
-    OAUTH_GROUP_CLAIM: str | None = None
-    OAUTH_GROUP_DEFAULT_SHARE: bool | str | None = None
-
-    # OIDC provider settings
-    OAUTH_PROVIDER_NAME: str | None = None
-    OPENID_PROVIDER_URL: str | None = None
-    OAUTH_CLIENT_ID: str | None = None
-    OAUTH_CLIENT_SECRET: str | None = None
-    OPENID_REDIRECT_URI: str | None = None
-    OAUTH_SCOPES: str | None = None
-    OAUTH_CODE_CHALLENGE_METHOD: str | None = None
-    OAUTH_TOKEN_ENDPOINT_AUTH_METHOD: str | None = None
-    OPENID_END_SESSION_ENDPOINT: str | None = None
-    OAUTH_TIMEOUT: int | str | None = None
-    OAUTH_CLIENT_TIMEOUT: int | str | None = None
-
-    # Claims
-    OAUTH_EMAIL_CLAIM: str | None = None
-    OAUTH_USERNAME_CLAIM: str | None = None
-    OAUTH_PICTURE_CLAIM: str | None = None
-    OAUTH_SUB_CLAIM: str | None = None
-    OAUTH_AUDIENCE: str | None = None
-
-    # Profile update toggles
-    OAUTH_UPDATE_EMAIL_ON_LOGIN: bool | None = None
-    OAUTH_UPDATE_NAME_ON_LOGIN: bool | None = None
-    OAUTH_UPDATE_PICTURE_ON_LOGIN: bool | None = None
-
-    # Token
-    OAUTH_REFRESH_TOKEN_INCLUDE_SCOPE: bool | None = None
-
-
-OAUTH_COMMA_LIST_FIELDS = {
-    'OAUTH_ALLOWED_DOMAINS',
-    'OAUTH_ADMIN_ROLES',
-    'OAUTH_ALLOWED_ROLES',
-}
-
-
-OAUTH_CONFIG_KEYS = {
-    'ENABLE_OAUTH': 'oauth.enable',
-    'ENABLE_OAUTH_SIGNUP': 'oauth.enable_signup',
-    'OAUTH_MERGE_ACCOUNTS_BY_EMAIL': 'oauth.merge_accounts_by_email',
-    'OAUTH_AUTO_REDIRECT': 'oauth.auto_redirect',
-    'OAUTH_ALLOWED_DOMAINS': 'oauth.allowed_domains',
-    'OAUTH_BLOCKED_GROUPS': 'oauth.blocked_groups',
-    'ENABLE_OAUTH_ROLE_MANAGEMENT': 'oauth.enable_role_mapping',
-    'OAUTH_ROLES_CLAIM': 'oauth.roles_claim',
-    'OAUTH_ADMIN_ROLES': 'oauth.admin_roles',
-    'OAUTH_ALLOWED_ROLES': 'oauth.allowed_roles',
-    'ENABLE_OAUTH_GROUP_MANAGEMENT': 'oauth.enable_group_mapping',
-    'ENABLE_OAUTH_GROUP_CREATION': 'oauth.enable_group_creation',
-    'OAUTH_GROUP_CLAIM': 'oauth.group_claim',
-    'OAUTH_GROUP_DEFAULT_SHARE': 'oauth.group_default_share',
-    'OAUTH_PROVIDER_NAME': 'oauth.provider_name',
-    'OPENID_PROVIDER_URL': 'oauth.provider_url',
-    'OAUTH_CLIENT_ID': 'oauth.client_id',
-    'OAUTH_CLIENT_SECRET': 'oauth.client_secret',
-    'OPENID_REDIRECT_URI': 'oauth.redirect_uri',
-    'OAUTH_SCOPES': 'oauth.scopes',
-    'OAUTH_CODE_CHALLENGE_METHOD': 'oauth.code_challenge_method',
-    'OAUTH_TOKEN_ENDPOINT_AUTH_METHOD': 'oauth.token_endpoint_auth_method',
-    'OPENID_END_SESSION_ENDPOINT': 'oauth.end_session_endpoint',
-    'OAUTH_TIMEOUT': 'oauth.timeout',
-    'OAUTH_CLIENT_TIMEOUT': 'oauth.client.timeout',
-    'OAUTH_EMAIL_CLAIM': 'oauth.email_claim',
-    'OAUTH_USERNAME_CLAIM': 'oauth.username_claim',
-    'OAUTH_PICTURE_CLAIM': 'oauth.picture_claim',
-    'OAUTH_SUB_CLAIM': 'oauth.sub_claim',
-    'OAUTH_AUDIENCE': 'oauth.audience',
-    'OAUTH_UPDATE_EMAIL_ON_LOGIN': 'oauth.update_email_on_login',
-    'OAUTH_UPDATE_NAME_ON_LOGIN': 'oauth.update_name_on_login',
-    'OAUTH_UPDATE_PICTURE_ON_LOGIN': 'oauth.update_picture_on_login',
-    'OAUTH_REFRESH_TOKEN_INCLUDE_SCOPE': 'oauth.refresh_token.include_scope',
-}
-
-
-def _format_oauth_form_value(field: str, value):
-    if field in OAUTH_COMMA_LIST_FIELDS and isinstance(value, list):
-        return ','.join(str(item) for item in value)
-    return value
-
-
-def _parse_oauth_update_value(field: str, value):
-    if field in OAUTH_COMMA_LIST_FIELDS and isinstance(value, str):
-        return [item.strip() for item in value.split(',') if item.strip()]
-    if field in {'OAUTH_TIMEOUT', 'OAUTH_CLIENT_TIMEOUT'} and value == '':
-        return ''
-    return value
-
-
-async def get_oauth_config_values() -> dict:
-    values = await Config.get_many(*OAUTH_CONFIG_KEYS.values())
-    form_values = {
-        field: _format_oauth_form_value(field, values[storage_key])
-        for field, storage_key in OAUTH_CONFIG_KEYS.items()
-        if storage_key in values
-    }
-    form_values['ENABLE_OAUTH_PERSISTENT_CONFIG'] = Config.OAUTH_PERSISTENT_ENABLED
-    return form_values
-
-
-def oauth_config_updates(data: dict) -> dict:
-    return {
-        OAUTH_CONFIG_KEYS[field]: _parse_oauth_update_value(field, value)
-        for field, value in data.items()
-        if field in OAUTH_CONFIG_KEYS
-    }
-
-
-class OAuthConfigResponse(OAuthConfigForm):
-    ENABLE_OAUTH_PERSISTENT_CONFIG: bool
-
-
-@router.get('/admin/config/oauth', response_model=OAuthConfigResponse)
-async def get_oauth_config(request: Request, user=Depends(get_admin_user)):
-    return await get_oauth_config_values()
-
-
-@router.post('/admin/config/oauth', response_model=OAuthConfigResponse)
-async def update_oauth_config(request: Request, form_data: OAuthConfigForm, user=Depends(get_admin_user)):
-    await Config.upsert(oauth_config_updates(form_data.model_dump(exclude_none=True)))
-    return await get_oauth_config_values()
 
 
 async def _check_api_key_permission(request: Request, user, db: AsyncSession):
@@ -1544,191 +1333,3 @@ async def get_api_key(request: Request, user=Depends(get_current_user), db: Asyn
     else:
         raise HTTPException(404, detail=ERROR_MESSAGES.API_KEY_NOT_FOUND)
 
-
-############################
-# Token Exchange
-############################
-
-
-class TokenExchangeForm(BaseModel):
-    token: str  # OAuth access token from external provider
-
-
-async def get_token_client_id(client, token: str) -> str | None:
-    """Return the OAuth client_id a token was minted for, when the provider supports introspection."""
-    try:
-        metadata = await client.load_server_metadata()
-        introspection_endpoint = metadata.get('introspection_endpoint')
-        if not introspection_endpoint:
-            log.warning('Token exchange trusted-client check requires an introspection_endpoint')
-            return None
-
-        async with ClientSession(trust_env=True) as session:
-            async with session.post(
-                introspection_endpoint,
-                data={'token': token, 'token_type_hint': 'access_token'},
-                auth=BasicAuth(client.client_id, client.client_secret or ''),
-                ssl=AIOHTTP_CLIENT_SESSION_SSL,
-            ) as r:
-                if r.status != 200:
-                    log.warning(f'Token introspection returned {r.status}')
-                    return None
-                introspection = await r.json()
-
-        if not introspection.get('active'):
-            log.warning('Token introspection reports the token is inactive')
-            return None
-
-        return introspection.get('client_id')
-    except Exception as e:
-        log.warning(f'Token introspection failed: {e}')
-        return None
-
-
-@router.post('/oauth/{provider}/token/exchange', response_model=SessionUserResponse)
-async def token_exchange(
-    request: Request,
-    response: Response,
-    provider: str,
-    form_data: TokenExchangeForm,
-    db: AsyncSession = Depends(get_async_session),
-):
-    """
-    Exchange an external OAuth provider token for an OpenWebUI JWT.
-    This endpoint is disabled by default. Set ENABLE_OAUTH_TOKEN_EXCHANGE=True to enable.
-    """
-    if not ENABLE_OAUTH_TOKEN_EXCHANGE:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='Token exchange is disabled',
-        )
-
-    if token_exchange_rate_limiter and token_exchange_rate_limiter.is_limited(
-        request.client.host if request.client else 'unknown'
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=ERROR_MESSAGES.RATE_LIMIT_EXCEEDED,
-        )
-
-    provider = provider.lower()
-
-    # Check if provider is configured
-    if provider not in OAUTH_PROVIDERS:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ERROR_MESSAGES.OAUTH_NOT_CONFIGURED(provider),
-        )
-    # Get the OAuth client for this provider
-    oauth_manager = request.app.state.oauth_manager
-    client = oauth_manager.get_client(provider)
-    if not client:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=ERROR_MESSAGES.OAUTH_NOT_CONFIGURED(provider),
-        )
-
-    if OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS:
-        token_client_id = await get_token_client_id(client, form_data.token)
-        if not token_client_id:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail='Unable to determine which client the token was issued to',
-            )
-        if token_client_id not in OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS:
-            log.warning('Token exchange denied: token was issued to an untrusted client for %s', provider)
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
-            )
-
-    # Validate the token by calling the userinfo endpoint
-    try:
-        token_data = {'access_token': form_data.token, 'token_type': 'Bearer'}
-        user_data = await client.userinfo(token=token_data)
-
-        if not user_data:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail='Invalid token or unable to fetch user info',
-            )
-    except Exception as e:
-        log.warning(f'Token exchange failed for provider {provider}: {e}')
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Invalid token or unable to validate with provider',
-        )
-
-    # Extract user information from the token claims
-    email_claim = await Config.get('oauth.email_claim', 'email')
-
-    # Get sub claim
-    sub_claim = await Config.get('oauth.sub_claim')
-    sub = user_data.get(sub_claim or OAUTH_PROVIDERS[provider].get('sub_claim', 'sub'))
-    if not sub:
-        log.warning(f'Token exchange failed: sub claim missing from user data')
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Token missing required 'sub' claim",
-        )
-    sub = str(sub)
-
-    email = user_data.get(email_claim, '')
-    if not email:
-        log.warning(f'Token exchange failed: email claim missing from user data')
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Token missing required email claim',
-        )
-    email = email.lower()
-
-    # Enforce domain allowlist — same check as the normal OAuth callback
-    oauth_allowed_domains = await Config.get('oauth.allowed_domains', [])
-    if isinstance(oauth_allowed_domains, str):
-        oauth_allowed_domains = [domain.strip() for domain in oauth_allowed_domains.split(',') if domain.strip()]
-    if '*' not in oauth_allowed_domains and email.split('@')[-1] not in oauth_allowed_domains:
-        log.warning(f'Token exchange denied: email domain not in allowed domains list')
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail=ERROR_MESSAGES.ACCESS_PROHIBITED,
-        )
-
-    # Try to find the user by OAuth sub
-    user = await Users.get_user_by_oauth_sub(provider, sub, db=db)
-
-    if not user and await Config.get('oauth.merge_accounts_by_email'):
-        # Try to find by email if merge is enabled
-        user = await Users.get_user_by_email(email, db=db)
-        if user:
-            # Link the OAuth sub to this user
-            user = await Users.update_user_oauth_by_id(user.id, provider, sub, db=db) or user
-
-    if user:
-        provider_oauth = (user.oauth or {}).get(provider) if isinstance(user.oauth, dict) else None
-        # Lazy repair for legacy rows that stored numeric provider ids as JSON numbers.
-        if isinstance(provider_oauth, dict) and provider_oauth.get('sub') != sub:
-            user = await Users.update_user_oauth_by_id(user.id, provider, sub, db=db) or user
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail='User not found. Please sign in via the web interface first.',
-        )
-
-    user = await oauth_manager.update_user_role_from_oauth(
-        request=request,
-        user=user,
-        user_data=user_data,
-        provider=provider,
-        db=db,
-    )
-    if await Config.get('oauth.enable_group_mapping'):
-        await oauth_manager.update_user_groups(
-            request=request,
-            user=user,
-            user_data=user_data,
-            default_permissions=await Config.get('user.permissions'),
-            db=db,
-        )
-
-    return await create_session_response(request, user, db, source='oauth')
