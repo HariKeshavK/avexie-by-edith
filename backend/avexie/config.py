@@ -16,7 +16,7 @@ import requests
 from authlib.integrations.starlette_client import OAuth
 from pydantic import BaseModel
 
-from open_webui.env import (
+from avexie.env import (
     DATA_DIR,
     DATABASE_URL,
     ENABLE_ADMIN_CHAT_ACCESS,
@@ -24,7 +24,7 @@ from open_webui.env import (
     ENV,
     FRONTEND_BUILD_DIR,
     OFFLINE_MODE,
-    OPEN_WEBUI_DIR,
+    AVEXIE_DIR,
     REDIS_KEY_PREFIX,
     REDIS_SENTINEL_HOSTS,
     REDIS_SENTINEL_PORT,
@@ -34,8 +34,8 @@ from open_webui.env import (
     WEBUI_NAME,
     log,
 )
-from open_webui.models.config import Config
-from open_webui.utils.json_codec import JSONCodec
+from avexie.models.config import Config
+from avexie.utils.json_codec import JSONCodec
 
 
 async def seed_registered_defaults():
@@ -66,9 +66,9 @@ def run_migrations():
         from alembic import command
         from alembic.config import Config as AlembicConfig
 
-        alembic_cfg = AlembicConfig(OPEN_WEBUI_DIR / 'alembic.ini')
+        alembic_cfg = AlembicConfig(AVEXIE_DIR / 'alembic.ini')
 
-        migrations_path = OPEN_WEBUI_DIR / 'migrations'
+        migrations_path = AVEXIE_DIR / 'migrations'
         alembic_cfg.set_main_option('script_location', str(migrations_path))
 
         command.upgrade(alembic_cfg, 'head')
@@ -93,7 +93,7 @@ async def import_legacy_config_json():
 # Static DIR
 ####################################
 
-STATIC_DIR = Path(os.getenv('STATIC_DIR', OPEN_WEBUI_DIR / 'static')).resolve()
+STATIC_DIR = Path(os.getenv('STATIC_DIR', AVEXIE_DIR / 'static')).resolve()
 
 try:
     if STATIC_DIR.exists():
@@ -115,7 +115,7 @@ for file_path in (FRONTEND_BUILD_DIR / 'static').glob('**/*'):
         except Exception as e:
             logging.error(f'An error occurred: {e}')
 
-# LICENSE covers copied Open WebUI logo/favicon assets.
+# LICENSE covers copied AVEXIE logo/favicon assets.
 # Do not alter, remove, obscure, or replace them except as LICENSE permits:
 # https://docs.openwebui.com/license.
 frontend_favicon = FRONTEND_BUILD_DIR / 'static' / 'favicon.png'
@@ -185,40 +185,7 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 # CUSTOM_NAME (Legacy)
 ####################################
 
-# LICENSE covers this legacy Open WebUI branding path.
-# Do not alter, remove, obscure, or replace it except as LICENSE permits:
-# https://docs.openwebui.com/license.
 CUSTOM_NAME = os.getenv('CUSTOM_NAME', '')
-
-if CUSTOM_NAME:
-    try:
-        r = requests.get(f'https://api.openwebui.com/api/v1/custom/{CUSTOM_NAME}')
-        data = r.json()
-        if r.ok:
-            if 'logo' in data:
-                WEBUI_FAVICON_URL = url = (
-                    f'https://api.openwebui.com{data["logo"]}' if data['logo'][0] == '/' else data['logo']
-                )
-
-                r = requests.get(url, stream=True)
-                if r.status_code == 200:
-                    with open(f'{STATIC_DIR}/favicon.png', 'wb') as f:
-                        r.raw.decode_content = True
-                        shutil.copyfileobj(r.raw, f)
-
-            if 'splash' in data:
-                url = f'https://api.openwebui.com{data["splash"]}' if data['splash'][0] == '/' else data['splash']
-
-                r = requests.get(url, stream=True)
-                if r.status_code == 200:
-                    with open(f'{STATIC_DIR}/splash.png', 'wb') as f:
-                        r.raw.decode_content = True
-                        shutil.copyfileobj(r.raw, f)
-
-            WEBUI_NAME = data['name']
-    except Exception as e:
-        log.exception(e)
-        pass
 
 
 ####################################
@@ -250,13 +217,13 @@ if OLLAMA_BASE_URL == '' and OLLAMA_API_BASE_URL != '':
 if ENV == 'prod':
     if OLLAMA_BASE_URL == '/ollama' and not K8S_FLAG:
         if USE_OLLAMA_DOCKER.lower() == 'true':
-            # if you use all-in-one docker container (Open WebUI + Ollama)
+            # if you use all-in-one docker container (AVEXIE + Ollama)
             # with the docker build arg USE_OLLAMA=true (--build-arg="USE_OLLAMA=true") this only works with http://localhost:11434
             OLLAMA_BASE_URL = 'http://localhost:11434'
         else:
             OLLAMA_BASE_URL = 'http://host.docker.internal:11434'
     elif K8S_FLAG:
-        OLLAMA_BASE_URL = 'http://ollama-service.open-webui.svc.cluster.local:11434'
+        OLLAMA_BASE_URL = 'http://ollama-service.avexie.svc.cluster.local:11434'
 
 
 def _resolve_ollama_base_url(url: str) -> str:
@@ -603,7 +570,7 @@ MILVUS_DISKANN_MAX_DEGREE = int(os.getenv('MILVUS_DISKANN_MAX_DEGREE', '56'))
 MILVUS_DISKANN_SEARCH_LIST_SIZE = int(os.getenv('MILVUS_DISKANN_SEARCH_LIST_SIZE', '100'))
 ENABLE_MILVUS_MULTITENANCY_MODE = os.getenv('ENABLE_MILVUS_MULTITENANCY_MODE', 'false').lower() == 'true'
 # Hyphens not allowed, need to use underscores in collection names
-MILVUS_COLLECTION_PREFIX = os.getenv('MILVUS_COLLECTION_PREFIX', 'open_webui')
+MILVUS_COLLECTION_PREFIX = os.getenv('MILVUS_COLLECTION_PREFIX', 'avexie')
 
 # Qdrant
 QDRANT_URI = os.getenv('QDRANT_URI', None)
@@ -614,7 +581,7 @@ QDRANT_GRPC_PORT = int(os.getenv('QDRANT_GRPC_PORT', '6334'))
 QDRANT_TIMEOUT = int(os.getenv('QDRANT_TIMEOUT', '5'))
 QDRANT_HNSW_M = int(os.getenv('QDRANT_HNSW_M', '16'))
 ENABLE_QDRANT_MULTITENANCY_MODE = os.getenv('ENABLE_QDRANT_MULTITENANCY_MODE', 'true').lower() == 'true'
-QDRANT_COLLECTION_PREFIX = os.getenv('QDRANT_COLLECTION_PREFIX', 'open-webui')
+QDRANT_COLLECTION_PREFIX = os.getenv('QDRANT_COLLECTION_PREFIX', 'avexie')
 
 WEAVIATE_HTTP_HOST = os.getenv('WEAVIATE_HTTP_HOST', '')
 WEAVIATE_GRPC_HOST = os.getenv('WEAVIATE_GRPC_HOST', '')
@@ -640,7 +607,7 @@ ELASTICSEARCH_USERNAME = os.getenv('ELASTICSEARCH_USERNAME', None)
 ELASTICSEARCH_PASSWORD = os.getenv('ELASTICSEARCH_PASSWORD', None)
 ELASTICSEARCH_CLOUD_ID = os.getenv('ELASTICSEARCH_CLOUD_ID', None)
 SSL_ASSERT_FINGERPRINT = os.getenv('SSL_ASSERT_FINGERPRINT', None)
-ELASTICSEARCH_INDEX_PREFIX = os.getenv('ELASTICSEARCH_INDEX_PREFIX', 'open_webui_collections')
+ELASTICSEARCH_INDEX_PREFIX = os.getenv('ELASTICSEARCH_INDEX_PREFIX', 'avexie_collections')
 # Pgvector
 PGVECTOR_DB_URL = os.getenv('PGVECTOR_DB_URL', DATABASE_URL)
 if VECTOR_DB == 'pgvector' and not PGVECTOR_DB_URL.startswith('postgres'):
@@ -784,7 +751,7 @@ else:
 # Pinecone
 PINECONE_API_KEY = os.getenv('PINECONE_API_KEY', None)
 PINECONE_ENVIRONMENT = os.getenv('PINECONE_ENVIRONMENT', None)
-PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME', 'open-webui-index')
+PINECONE_INDEX_NAME = os.getenv('PINECONE_INDEX_NAME', 'avexie-index')
 PINECONE_DIMENSION = int(os.getenv('PINECONE_DIMENSION', 1536))  # or 3072, 1024, 768
 PINECONE_METRIC = os.getenv('PINECONE_METRIC', 'cosine')
 PINECONE_CLOUD = os.getenv('PINECONE_CLOUD', 'aws')  # or "gcp" or "azure"
@@ -820,7 +787,7 @@ S3_VECTOR_REGION = os.getenv('S3_VECTOR_REGION', None)
 
 # Valkey Vector Store
 VALKEY_URL = os.getenv('VALKEY_URL', '')
-VALKEY_COLLECTION_PREFIX = os.getenv('VALKEY_COLLECTION_PREFIX', 'open_webui')
+VALKEY_COLLECTION_PREFIX = os.getenv('VALKEY_COLLECTION_PREFIX', 'avexie')
 VALKEY_INDEX_TYPE = os.getenv('VALKEY_INDEX_TYPE', 'HNSW').upper()
 VALKEY_DISTANCE_METRIC = os.getenv('VALKEY_DISTANCE_METRIC', 'COSINE').upper()
 VALKEY_HNSW_M = int(os.getenv('VALKEY_HNSW_M', '16'))
@@ -2081,7 +2048,7 @@ DEFAULT_ARENA_MODEL = {
     'id': 'arena-model',
     'name': 'Arena Model',
     'meta': {
-        # LICENSE covers this Open WebUI fallback logo.
+        # LICENSE covers this AVEXIE fallback logo.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
         'profile_image_url': '/favicon.png',
@@ -2089,8 +2056,6 @@ DEFAULT_ARENA_MODEL = {
         'model_ids': None,
     },
 }
-
-WEBHOOK_URL = os.getenv('WEBHOOK_URL', '')
 
 ENABLE_ADMIN_EXPORT = os.getenv('ENABLE_ADMIN_EXPORT', 'True').lower() == 'true'
 
@@ -2109,8 +2074,6 @@ ENABLE_ADMIN_ANALYTICS = os.getenv('ENABLE_ADMIN_ANALYTICS', 'True').lower() == 
 ENABLE_COMMUNITY_SHARING = os.getenv('ENABLE_COMMUNITY_SHARING', 'True').lower() == 'true'
 
 ENABLE_MESSAGE_RATING = os.getenv('ENABLE_MESSAGE_RATING', 'True').lower() == 'true'
-
-ENABLE_USER_WEBHOOKS = os.getenv('ENABLE_USER_WEBHOOKS', 'False').lower() == 'true'
 
 # FastAPI / AnyIO settings
 THREAD_POOL_SIZE = os.getenv('THREAD_POOL_SIZE', None)
@@ -2480,7 +2443,7 @@ JWT_EXPIRES_IN = os.getenv('JWT_EXPIRES_IN', '4w')
 if JWT_EXPIRES_IN == '-1':
     log.warning(
         "⚠️  SECURITY WARNING: JWT_EXPIRES_IN is set to '-1'\n"
-        '    See: https://docs.openwebui.com/reference/env-configuration\n'
+        '    See the AVEXIE documentation for environment configuration\n'
     )
 
 ####################################
@@ -3124,10 +3087,9 @@ DEFAULT_CONFIG = {
     'users.enable_status': ENABLE_USER_STATUS,
     'evaluation.arena.enable': ENABLE_EVALUATION_ARENA_MODELS,
     'evaluation.arena.models': EVALUATION_ARENA_MODELS,
-    'webhook_url': WEBHOOK_URL,
     'ui.enable_community_sharing': ENABLE_COMMUNITY_SHARING,
     'ui.enable_message_rating': ENABLE_MESSAGE_RATING,
-    'ui.enable_user_webhooks': ENABLE_USER_WEBHOOKS,
+    'ui.enable_user_webhooks': False,
     'ui.banners': WEBUI_BANNERS,
     'auth.admin.show': SHOW_ADMIN_DETAILS,
     'auth.admin.email': ADMIN_EMAIL,

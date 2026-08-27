@@ -113,11 +113,7 @@ from avexie.env import (
 )
 from avexie.events import (
     EVENTS,
-    delete_event_webhook,
-    get_event_webhooks,
-    migrate_legacy_webhook_config,
     publish_event,
-    upsert_event_webhook,
 )
 from avexie.events import (
     get_event_catalog as get_event_catalog_items,
@@ -343,7 +339,6 @@ async def lifespan(app: FastAPI):
     await import_legacy_config_json()
     await seed_registered_defaults()
     await initialize_runtime_config(app)
-    await migrate_legacy_webhook_config()
     await publish_event(app, EVENTS.SYSTEM_STARTUP_STARTED, source='system')
 
     # Create admin account from env vars if specified and no users exist
@@ -1978,7 +1973,6 @@ async def get_app_config(request: Request):
         'task.autocomplete.enable',
         'ui.enable_community_sharing',
         'ui.enable_message_rating',
-        'ui.enable_user_webhooks',
         'users.enable_status',
         'google_drive.enable',
         'onedrive.enable',
@@ -2055,7 +2049,7 @@ async def get_app_config(request: Request):
                     'enable_autocomplete_generation': config.get('task.autocomplete.enable'),
                     'enable_community_sharing': config.get('ui.enable_community_sharing'),
                     'enable_message_rating': config.get('ui.enable_message_rating'),
-                    'enable_user_webhooks': config.get('ui.enable_user_webhooks'),
+                    'enable_user_webhooks': False,
                     'enable_user_status': config.get('users.enable_status'),
                     'enable_admin_export': ENABLE_ADMIN_EXPORT,
                     'enable_admin_chat_access': ENABLE_ADMIN_CHAT_ACCESS,
@@ -2158,115 +2152,12 @@ async def get_app_config(request: Request):
     }
 
 
-class EventWebhookForm(BaseModel):
-    name: str | None = None
-    url: str
-    enabled: bool = True
-    events: list[str] | None = None
-    targets: list[dict[str, str]] | None = None
-
-
-class EventWebhookUpdateForm(BaseModel):
-    name: str | None = None
-    url: str | None = None
-    enabled: bool | None = None
-    events: list[str] | None = None
-    targets: list[dict[str, str]] | None = None
-
-
 @app.get('/api/events')
 async def get_event_catalog(user=Depends(get_admin_user)):
     return {
         'schema': VERSION,
         'events': get_event_catalog_items(),
     }
-
-
-@app.get('/api/events/webhooks')
-async def get_event_webhooks_api(user=Depends(get_admin_user)):
-    return await get_event_webhooks()
-
-
-@app.post('/api/events/webhooks')
-async def create_event_webhook(form_data: EventWebhookForm, user=Depends(get_admin_user)):
-    try:
-        webhook = await upsert_event_webhook(
-            {
-                'name': form_data.name,
-                'url': form_data.url,
-                'enabled': form_data.enabled,
-                'events': form_data.events,
-                'targets': form_data.targets,
-            }
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-    await publish_event(
-        app,
-        EVENTS.CONFIG_WEBHOOK_UPDATED,
-        actor=user,
-        subject_id=webhook['id'],
-        subject_type='config',
-        data={
-            'action': 'created',
-            'enabled': webhook.get('enabled'),
-            'events': webhook.get('events'),
-            'targets': webhook.get('targets'),
-        },
-    )
-    return webhook
-
-
-@app.put('/api/events/webhooks/{webhook_id}')
-async def update_event_webhook(webhook_id: str, form_data: EventWebhookUpdateForm, user=Depends(get_admin_user)):
-    webhooks = await get_event_webhooks()
-    existing = next((webhook for webhook in webhooks if webhook.get('id') == webhook_id), None)
-    if not existing:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Webhook not found')
-
-    try:
-        webhook = await upsert_event_webhook(
-            {
-                **existing,
-                **form_data.model_dump(exclude_unset=True),
-                'id': webhook_id,
-            }
-        )
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-
-    await publish_event(
-        app,
-        EVENTS.CONFIG_WEBHOOK_UPDATED,
-        actor=user,
-        subject_id=webhook_id,
-        subject_type='config',
-        data={
-            'action': 'updated',
-            'enabled': webhook.get('enabled'),
-            'events': webhook.get('events'),
-            'targets': webhook.get('targets'),
-        },
-    )
-    return webhook
-
-
-@app.delete('/api/events/webhooks/{webhook_id}')
-async def delete_event_webhook_api(webhook_id: str, user=Depends(get_admin_user)):
-    deleted = await delete_event_webhook(webhook_id)
-    if not deleted:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Webhook not found')
-
-    await publish_event(
-        app,
-        EVENTS.CONFIG_WEBHOOK_UPDATED,
-        actor=user,
-        subject_id=webhook_id,
-        subject_type='config',
-        data={'action': 'deleted'},
-    )
-    return {'status': True}
 
 
 @app.get('/api/version')

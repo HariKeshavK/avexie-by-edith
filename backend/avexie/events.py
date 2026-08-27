@@ -8,11 +8,10 @@ import uuid
 from types import SimpleNamespace
 from typing import Any
 
-from open_webui.env import ENABLE_PLUGINS, VERSION
-from open_webui.models.config import Config
+from avexie.env import ENABLE_PLUGINS, VERSION
+from avexie.models.config import Config
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from open_webui.retrieval.web.utils import validate_url
-from open_webui.utils.webhook import post_webhook
+from avexie.retrieval.web.utils import validate_url
 
 log = logging.getLogger(__name__)
 
@@ -820,7 +819,7 @@ async def event_target_matches(
         return False
 
     if user_group_ids is None:
-        from open_webui.models.groups import Groups
+        from avexie.models.groups import Groups
 
         groups_by_user = await Groups.get_groups_by_member_ids(list(user_ids))
         user_group_ids = {user_id: {group.id for group in groups} for user_id, groups in groups_by_user.items()}
@@ -1031,49 +1030,14 @@ def build_event(
     )
 
 
-async def dispatch_webhook_event(app: Any, event: Event) -> None:
-    # LICENSE covers this Open WebUI webhook identifier.
-    # Do not alter, remove, obscure, or replace it except as LICENSE permits:
-    # https://docs.openwebui.com/license.
-    name = getattr(getattr(app, 'state', None), 'WEBUI_NAME', 'Open WebUI')
-    subject = event.subject or {}
-    subject_id = subject.get('id')
-    definition = EVENT_DEFINITIONS_BY_NAME.get(event.event)
-    message = event.message or (definition.message if definition else event.event)
-    if subject_id:
-        message = f'{message} ({subject_id})'
-
-    for webhook in await get_event_webhooks():
-        if not webhook.get('url') or not await event_webhook_matches(webhook, event):
-            continue
-
-        try:
-            await post_webhook(
-                name,
-                webhook['url'],
-                message,
-                event.model_dump(),
-                description=definition.description if definition else None,
-            )
-        except Exception:
-            log.exception('Event webhook failed for %s', webhook.get('id'))
-
-
 def schedule_webhook_dispatch(app: Any, event: Event) -> None:
-    try:
-        asyncio.create_task(dispatch_webhook_event(app, event))
-    except RuntimeError:
-        log.exception('Event webhook delivery could not be scheduled for %s', event.event)
-
-
-class WebhookEventSink:
-    async def handle_event(self, app: Any, event: Event, request: Any | None = None) -> None:
-        schedule_webhook_dispatch(app, event)
+    """Webhook dispatch has been removed. Stub kept for callers."""
+    pass
 
 
 def schedule_notification_dispatch(app: Any, event: Event) -> None:
     try:
-        from open_webui.utils.notifications import dispatch_notification_event
+        from avexie.utils.notifications import dispatch_notification_event
 
         asyncio.create_task(dispatch_notification_event(app, event))
     except RuntimeError:
@@ -1095,7 +1059,7 @@ class SocketSessionEventSink:
         if subject.get('type') != 'user' or not subject.get('id'):
             return
 
-        from open_webui.socket.main import disconnect_user_sessions
+        from avexie.socket.main import disconnect_user_sessions
 
         await disconnect_user_sessions(str(subject['id']))
 
@@ -1106,8 +1070,8 @@ async def dispatch_event_functions(
     if not ENABLE_PLUGINS:
         return
 
-    from open_webui.models.functions import Functions
-    from open_webui.utils.plugin import get_function_module_from_cache
+    from avexie.models.functions import Functions
+    from avexie.utils.plugin import get_function_module_from_cache
 
     context = request or SimpleNamespace(app=app)
     event_payload = event.model_dump()
@@ -1168,7 +1132,7 @@ class EventFunctionSink:
         schedule_event_function_dispatch(app, event, request)
 
 
-EVENT_SINKS = [SocketSessionEventSink(), EventFunctionSink(), WebhookEventSink(), NotificationEventSink()]
+EVENT_SINKS = [SocketSessionEventSink(), EventFunctionSink(), NotificationEventSink()]
 
 
 async def publish_event(

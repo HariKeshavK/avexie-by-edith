@@ -31,7 +31,7 @@ from mcp.shared.auth import (
 from mcp.shared.auth import (
     OAuthMetadata,
 )
-from open_webui.config import (
+from avexie.config import (
     DEFAULT_USER_ROLE,
     ENABLE_OAUTH,
     ENABLE_OAUTH_GROUP_CREATION,
@@ -62,10 +62,9 @@ from open_webui.config import (
     OAUTH_UPDATE_NAME_ON_LOGIN,
     OAUTH_UPDATE_PICTURE_ON_LOGIN,
     OAUTH_USERNAME_CLAIM,
-    WEBHOOK_URL,
 )
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.env import (
     AIOHTTP_CLIENT_ALLOW_REDIRECTS,
     AIOHTTP_CLIENT_SESSION_SSL,
     ENABLE_OAUTH_EMAIL_FALLBACK,
@@ -75,23 +74,23 @@ from open_webui.env import (
     WEBUI_AUTH_COOKIE_SAME_SITE,
     WEBUI_AUTH_COOKIE_SECURE,
 )
-from open_webui.events import EVENTS, publish_event
-from open_webui.models.auths import Auths
-from open_webui.models.config import Config
-from open_webui.models.groups import GroupForm, GroupModel, Groups, GroupUpdateForm
-from open_webui.models.oauth_sessions import OAuthSessions
-from open_webui.models.users import Users
-from open_webui.retrieval.web.utils import get_ssrf_safe_session, validate_url
-from open_webui.utils.auth import (
+from avexie.events import EVENTS, publish_event
+from avexie.models.auths import Auths
+from avexie.models.config import Config
+from avexie.models.groups import GroupForm, GroupModel, Groups, GroupUpdateForm
+from avexie.models.oauth_sessions import OAuthSessions
+from avexie.models.users import Users
+from avexie.retrieval.web.utils import get_ssrf_safe_session, validate_url
+from avexie.utils.auth import (
     create_token,
     get_password_hash,
     get_optional_verified_user_from_request,
     get_verified_user_by_id,
     revoke_user_tokens,
 )
-from open_webui.utils.groups import apply_default_group_assignment
-from open_webui.utils.misc import parse_duration
-from open_webui.utils.validate import validate_profile_image_url
+from avexie.utils.groups import apply_default_group_assignment
+from avexie.utils.misc import parse_duration
+from avexie.utils.validate import validate_profile_image_url
 from starlette.responses import RedirectResponse
 
 # Some IdPs put private params in ID token JOSE headers (CAS: client_id, CyberArk: app_id).
@@ -120,8 +119,8 @@ class OAuthClientInformationFull(OAuthClientMetadata):
     server_metadata: Optional[OAuthMetadata] = None  # Fetched from the OAuth server
 
 
-from open_webui.env import GLOBAL_LOG_LEVEL
-from open_webui.utils.json_codec import JSONCodec
+from avexie.env import GLOBAL_LOG_LEVEL
+from avexie.utils.json_codec import JSONCodec
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -166,7 +165,6 @@ OAUTH_RUNTIME_CONFIG = {
     'OAUTH_ALLOWED_ROLES': ('oauth.allowed_roles', OAUTH_ALLOWED_ROLES),
     'OAUTH_ADMIN_ROLES': ('oauth.admin_roles', OAUTH_ADMIN_ROLES),
     'OAUTH_ALLOWED_DOMAINS': ('oauth.allowed_domains', OAUTH_ALLOWED_DOMAINS),
-    'WEBHOOK_URL': ('webhook_url', WEBHOOK_URL),
     'JWT_EXPIRES_IN': ('auth.jwt_expiry', JWT_EXPIRES_IN),
     'OAUTH_UPDATE_PICTURE_ON_LOGIN': (
         'oauth.update_picture_on_login',
@@ -502,10 +500,10 @@ async def get_oauth_client_info_with_dynamic_client_registration(
         redirect_base_url = (str(webui_url or request.base_url)).rstrip('/')
 
         oauth_client_metadata = OAuthClientMetadata(
-            # LICENSE covers this Open WebUI OAuth client identifier.
+            # LICENSE covers this AVEXIE OAuth client identifier.
             # Do not alter, remove, obscure, or replace it except as LICENSE permits:
             # https://docs.openwebui.com/license.
-            client_name='Open WebUI',
+            client_name='AVEXIE',
             redirect_uris=[f'{redirect_base_url}/oauth/clients/{client_id}/callback'],
             grant_types=['authorization_code', 'refresh_token'],
             response_types=['code'],
@@ -565,7 +563,7 @@ async def get_oauth_client_info_with_dynamic_client_registration(
             raise Exception(
                 'Could not discover the OAuth authorization server metadata '
                 f'(authorization_endpoint) for {oauth_server_url}. The MCP server must '
-                'expose RFC 8414 / RFC 9728 discovery documents so Open WebUI can '
+                'expose RFC 8414 / RFC 9728 discovery documents so AVEXIE can '
                 'resolve where to send users to authorize.'
             )
 
@@ -1703,7 +1701,7 @@ class OAuthManager:
         log.debug('Oauth Groups claim: %s', oauth_claim)
         log.debug('User oauth groups: %s', user_oauth_groups)
         log.debug("User's current groups: %s", [g.name for g in user_current_groups])
-        log.debug('All groups available in OpenWebUI: %s', [g.name for g in all_available_groups])
+        log.debug('All groups available in AVEXIE: %s', [g.name for g in all_available_groups])
 
         # Remove groups that user is no longer a part of
         for group_model in user_current_groups:
