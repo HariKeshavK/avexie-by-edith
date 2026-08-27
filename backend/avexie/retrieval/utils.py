@@ -18,14 +18,14 @@ from langchain_classic.retrievers import (
 )
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
-from open_webui.config import (
+from avexie.config import (
     RAG_EMBEDDING_CONTENT_PREFIX,
     RAG_EMBEDDING_PREFIX_FIELD_NAME,
     RAG_EMBEDDING_QUERY_PREFIX,
     VECTOR_DB,
 )
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.env import (
     AIOHTTP_CLIENT_ALLOW_REDIRECTS,
     AIOHTTP_CLIENT_SESSION_SSL,
     AIOHTTP_CLIENT_TIMEOUT,
@@ -34,24 +34,24 @@ from open_webui.env import (
     ENABLE_RETRIEVAL_UNSCOPED_COLLECTIONS,
     OFFLINE_MODE,
 )
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.chats import Chats
-from open_webui.models.files import Files
-from open_webui.models.folders import Folders
-from open_webui.models.knowledge import Knowledges
-from open_webui.models.notes import Notes
-from open_webui.models.config import Config
-from open_webui.models.users import UserModel
-from open_webui.retrieval.loaders.youtube import YoutubeLoader
-from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-from open_webui.retrieval.external import retrieve_external_knowledge
-from open_webui.retrieval.vector.factory import VECTOR_DB_CLIENT
-from open_webui.retrieval.vector.main import GetResult, SearchResult
-from open_webui.retrieval.web.utils import get_web_loader
-from open_webui.utils.access_control.files import get_owner_accessible_folder_files, has_access_to_file
-from open_webui.utils.access_control.folders import has_folder_access
-from open_webui.utils.headers import get_json_bearer_headers, include_user_info_headers
-from open_webui.utils.misc import get_content_from_message, get_message_list
+from avexie.models.access_grants import AccessGrants
+from avexie.models.chats import Chats
+from avexie.models.files import Files
+from avexie.models.folders import Folders
+from avexie.models.knowledge import Knowledges
+from avexie.models.notes import Notes
+from avexie.models.config import Config
+from avexie.models.users import UserModel
+from avexie.retrieval.loaders.youtube import YoutubeLoader
+from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+from avexie.retrieval.external import retrieve_external_knowledge
+from avexie.retrieval.vector.factory import VECTOR_DB_CLIENT
+from avexie.retrieval.vector.main import GetResult, SearchResult
+from avexie.retrieval.web.utils import get_web_loader
+from avexie.utils.access_control.files import get_owner_accessible_folder_files, has_access_to_file
+from avexie.utils.access_control.folders import has_folder_access
+from avexie.utils.headers import get_json_bearer_headers, include_user_info_headers
+from avexie.utils.misc import get_content_from_message, get_message_list
 
 log = logging.getLogger(__name__)
 
@@ -89,20 +89,6 @@ LOADER_CONFIG_KEYS = {
     'external_web_loader_url': 'web.loader.external_web_loader_url',
     'external_web_loader_api_key': 'web.loader.external_web_loader_api_key',
     'CONTENT_EXTRACTION_ENGINE': 'rag.content_extraction_engine',
-    'DATALAB_MARKER_API_KEY': 'rag.datalab_marker_api_key',
-    'DATALAB_MARKER_API_BASE_URL': 'rag.datalab_marker_api_base_url',
-    'DATALAB_MARKER_ADDITIONAL_CONFIG': 'rag.datalab_marker_additional_config',
-    'DATALAB_MARKER_SKIP_CACHE': 'rag.datalab_marker_skip_cache',
-    'DATALAB_MARKER_FORCE_OCR': 'rag.datalab_marker_force_ocr',
-    'DATALAB_MARKER_PAGINATE': 'rag.datalab_marker_paginate',
-    'DATALAB_MARKER_STRIP_EXISTING_OCR': 'rag.datalab_marker_strip_existing_ocr',
-    'DATALAB_MARKER_DISABLE_IMAGE_EXTRACTION': 'rag.datalab_marker_disable_image_extraction',
-    'DATALAB_MARKER_FORMAT_LINES': 'rag.datalab_marker_format_lines',
-    'DATALAB_MARKER_USE_LLM': 'rag.datalab_marker_use_llm',
-    'DATALAB_MARKER_OUTPUT_FORMAT': 'rag.datalab_marker_output_format',
-    'EXTERNAL_DOCUMENT_LOADER_URL': 'rag.external_document_loader_url',
-    'EXTERNAL_DOCUMENT_LOADER_API_KEY': 'rag.external_document_loader_api_key',
-    'EXTERNAL_DOCUMENT_LOADER_HEADERS': 'rag.external_document_loader_headers',
     'TIKA_SERVER_URL': 'rag.tika_server_url',
     'TIKA_SERVER_VERSION': 'rag.tika_server_version',
     'DOCLING_SERVER_URL': 'rag.docling_server_url',
@@ -110,12 +96,6 @@ LOADER_CONFIG_KEYS = {
     'DOCLING_PARAMS': 'rag.docling_params',
     'PDF_EXTRACT_IMAGES': 'rag.pdf_extract_images',
     'PDF_LOADER_MODE': 'rag.pdf_loader_mode',
-    'DOCUMENT_INTELLIGENCE_ENDPOINT': 'rag.document_intelligence_endpoint',
-    'DOCUMENT_INTELLIGENCE_KEY': 'rag.document_intelligence_key',
-    'DOCUMENT_INTELLIGENCE_MODEL': 'rag.document_intelligence_model',
-    'MISTRAL_OCR_API_BASE_URL': 'rag.mistral_ocr_api_base_url',
-    'MISTRAL_OCR_API_KEY': 'rag.mistral_ocr_api_key',
-    'MISTRAL_OCR_USE_BASE64': 'rag.mistral_ocr_use_base64',
     'PADDLEOCR_VL_BASE_URL': 'rag.paddleocr_vl_base_url',
     'PADDLEOCR_VL_TOKEN': 'rag.paddleocr_vl_token',
     'MINERU_API_MODE': 'rag.mineru_api_mode',
@@ -150,7 +130,7 @@ def get_loader(request, url: str, config: dict):
 
 def build_loader_from_config(request, config: dict):
     """Build a Loader instance with the admin's configured extraction engine settings."""
-    from open_webui.retrieval.loaders.main import Loader
+    from avexie.retrieval.loaders.main import Loader
 
     loader_config = {key: config.get(key) for key in LOADER_CONFIG_KEYS if key.isupper()}
     loader_config['FILE_MAX_SIZE'] = config.get('file_max_size')
@@ -240,7 +220,7 @@ async def get_content_from_url(request, url: str) -> str:
 
 
 def _get_content_from_url_sync(request, url: str, loader_config):
-    from open_webui.retrieval.web.utils import validate_url, get_ssrf_safe_requests_session
+    from avexie.retrieval.web.utils import validate_url, get_ssrf_safe_requests_session
 
     # Validate URL before making any request (blocks private IPs, non-HTTP, filter list)
     validate_url(url)
@@ -1256,7 +1236,7 @@ def get_reranking_function(reranking_engine, reranking_model, reranking_function
 
 
 # UUIDs, SHA-256 digests, and prefixed variants thereof all fit [A-Za-z0-9_-].
-# Anything else cannot be a real Open WebUI collection and could break out of
+# Anything else cannot be a real AVEXIE collection and could break out of
 # a Milvus expression literal.
 _SAFE_COLLECTION_NAME_RE = re.compile(r'^[A-Za-z0-9_-]{1,255}$')
 

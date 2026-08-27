@@ -1089,29 +1089,16 @@ MICROSOFT_WEB_IQ_LANGUAGE = os.getenv('MICROSOFT_WEB_IQ_LANGUAGE', 'en')
 
 
 ####################################
-# Images
+# Images (generation removed; only utility constants kept for imports)
 ####################################
 
-ENABLE_IMAGE_GENERATION = os.getenv('ENABLE_IMAGE_GENERATION', '').lower() == 'true'
+ENABLE_IMAGE_GENERATION = False
 
-IMAGE_GENERATION_ENGINE = os.getenv('IMAGE_GENERATION_ENGINE', 'openai')
+IMAGE_AUTO_SIZE_MODELS_REGEX_PATTERN = '^gpt-image'
 
-IMAGE_GENERATION_MODEL = os.getenv('IMAGE_GENERATION_MODEL', '')
+IMAGE_URL_RESPONSE_MODELS_REGEX_PATTERN = '^gpt-image'
 
-# Regex pattern for models that support IMAGE_SIZE = "auto".
-IMAGE_AUTO_SIZE_MODELS_REGEX_PATTERN = os.getenv('IMAGE_AUTO_SIZE_MODELS_REGEX_PATTERN', '^gpt-image')
-
-# Regex pattern for models that return URLs instead of base64 data.
-IMAGE_URL_RESPONSE_MODELS_REGEX_PATTERN = os.getenv('IMAGE_URL_RESPONSE_MODELS_REGEX_PATTERN', '^gpt-image')
-
-IMAGE_SIZE = os.getenv('IMAGE_SIZE', '512x512')
-
-IMAGE_STEPS = int(os.getenv('IMAGE_STEPS', 50))
-
-ENABLE_IMAGE_PROMPT_GENERATION = os.getenv('ENABLE_IMAGE_PROMPT_GENERATION', 'true').lower() == 'true'
-
-AUTOMATIC1111_BASE_URL = os.getenv('AUTOMATIC1111_BASE_URL', '')
-AUTOMATIC1111_API_AUTH = os.getenv('AUTOMATIC1111_API_AUTH', '')
+ENABLE_OPENAI_IMAGE_EDIT_NORMALIZATION = False
 
 automatic1111_params = os.getenv('AUTOMATIC1111_PARAMS', '')
 try:

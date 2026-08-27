@@ -7,9 +7,7 @@ import zipfile
 
 import ftfy
 import requests
-from azure.identity import DefaultAzureCredential
 from langchain_community.document_loaders import (
-    AzureAIDocumentIntelligenceLoader,
     BSHTMLLoader,
     CSVLoader,
     Docx2txtLoader,
@@ -17,19 +15,16 @@ from langchain_community.document_loaders import (
     TextLoader,
 )
 from langchain_core.documents import Document
-from open_webui.env import (
+from avexie.env import (
     AIOHTTP_CLIENT_SESSION_SSL,
     GLOBAL_LOG_LEVEL,
     MINERU_MAX_MARKDOWN_BYTES,
     REQUESTS_VERIFY,
 )
-from open_webui.retrieval.loaders.datalab_marker import DatalabMarkerLoader
-from open_webui.retrieval.loaders.external_document import ExternalDocumentLoader
-from open_webui.retrieval.loaders.mineru import MinerULoader
-from open_webui.retrieval.loaders.mistral import MistralLoader
-from open_webui.retrieval.loaders.paddleocr_vl import PADDLEOCR_VL_SUPPORTED_EXTENSIONS, PaddleOCRVLLoader
-from open_webui.utils.headers import get_user_groups_for_custom_headers
-from open_webui.utils.json_codec import JSONCodec
+from avexie.retrieval.loaders.mineru import MinerULoader
+from avexie.retrieval.loaders.paddleocr_vl import PADDLEOCR_VL_SUPPORTED_EXTENSIONS, PaddleOCRVLLoader
+from avexie.utils.headers import get_user_groups_for_custom_headers
+from avexie.utils.json_codec import JSONCodec
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)
@@ -264,7 +259,7 @@ class DoclingLoader:
                     'image_export_mode': 'placeholder',
                     'md_page_break_placeholder': page_break_marker,
                     # Keep Docling params as user-provided form values. Encoding nested
-                    # values here would make Open WebUI responsible for Docling's API
+                    # values here would make AVEXIE responsible for Docling's API
                     # quirks and could break when Docling changes its form contract.
                     **self.params,
                 },
@@ -327,11 +322,6 @@ class Loader:
         """
         # Group lookup is async-only, so it must happen before `load`
         # is offloaded to a thread without a running event loop.
-        if self.engine == 'external' and self.user_groups is None:
-            self.user_groups = await get_user_groups_for_custom_headers(
-                self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_HEADERS'), self.user
-            )
-
         return await asyncio.to_thread(self.load, filename, file_content_type, file_path)
 
     def _is_text_file(self, file_ext: str, file_content_type: str) -> bool:
@@ -507,26 +497,7 @@ class Loader:
                     if uncompressed_size > max_bytes:
                         raise ValueError('Document archive is too large after decompression')
 
-        if (
-            self.engine == 'external'
-            and self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_URL')
-            and self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_API_KEY')
-        ):
-            loader = ExternalDocumentLoader(
-                file_path=file_path,
-                url=self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_URL'),
-                api_key=self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_API_KEY'),
-                mime_type=file_content_type,
-                user=self.user,
-                user_groups=self.user_groups,
-                headers=self.kwargs.get('EXTERNAL_DOCUMENT_LOADER_HEADERS'),
-                metadata={
-                    **self.metadata,
-                    'file_name': filename,
-                    'file_content_type': file_content_type,
-                },
-            )
-        elif self.engine == 'tika' and self.kwargs.get('TIKA_SERVER_URL'):
+        if self.engine == 'tika' and self.kwargs.get('TIKA_SERVER_URL'):
             if self._is_text_file(file_ext, file_content_type):
                 loader = TextLoader(file_path, encoding=self._detect_text_encoding(file_path))
             else:
@@ -536,49 +507,6 @@ class Loader:
                     server_version=self.kwargs.get('TIKA_SERVER_VERSION'),
                     extract_images=self.kwargs.get('PDF_EXTRACT_IMAGES'),
                 )
-        elif (
-            self.engine == 'datalab_marker'
-            and self.kwargs.get('DATALAB_MARKER_API_KEY')
-            and file_ext
-            in [
-                'pdf',
-                'xls',
-                'xlsx',
-                'ods',
-                'doc',
-                'docx',
-                'odt',
-                'ppt',
-                'pptx',
-                'odp',
-                'html',
-                'epub',
-                'png',
-                'jpeg',
-                'jpg',
-                'webp',
-                'gif',
-                'tiff',
-            ]
-        ):
-            api_base_url = self.kwargs.get('DATALAB_MARKER_API_BASE_URL', '')
-            if not api_base_url or api_base_url.strip() == '':
-                api_base_url = 'https://www.datalab.to/api/v1/marker'  # https://github.com/open-webui/open-webui/pull/16867#issuecomment-3218424349
-
-            loader = DatalabMarkerLoader(
-                file_path=file_path,
-                api_key=self.kwargs['DATALAB_MARKER_API_KEY'],
-                api_base_url=api_base_url,
-                additional_config=self.kwargs.get('DATALAB_MARKER_ADDITIONAL_CONFIG'),
-                use_llm=self.kwargs.get('DATALAB_MARKER_USE_LLM', False),
-                skip_cache=self.kwargs.get('DATALAB_MARKER_SKIP_CACHE', False),
-                force_ocr=self.kwargs.get('DATALAB_MARKER_FORCE_OCR', False),
-                paginate=self.kwargs.get('DATALAB_MARKER_PAGINATE', False),
-                strip_existing_ocr=self.kwargs.get('DATALAB_MARKER_STRIP_EXISTING_OCR', False),
-                disable_image_extraction=self.kwargs.get('DATALAB_MARKER_DISABLE_IMAGE_EXTRACTION', False),
-                format_lines=self.kwargs.get('DATALAB_MARKER_FORMAT_LINES', False),
-                output_format=self.kwargs.get('DATALAB_MARKER_OUTPUT_FORMAT', 'markdown'),
-            )
         elif self.engine == 'docling' and self.kwargs.get('DOCLING_SERVER_URL'):
             if self._is_text_file(file_ext, file_content_type):
                 loader = TextLoader(file_path, encoding=self._detect_text_encoding(file_path))
@@ -599,33 +527,6 @@ class Loader:
                     mime_type=file_content_type,
                     params=params,
                 )
-        elif (
-            self.engine == 'document_intelligence'
-            and self.kwargs.get('DOCUMENT_INTELLIGENCE_ENDPOINT') != ''
-            and (
-                file_ext in ['pdf', 'docx', 'ppt', 'pptx']
-                or file_content_type
-                in [
-                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                    'application/vnd.ms-powerpoint',
-                    'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                ]
-            )
-        ):
-            if self.kwargs.get('DOCUMENT_INTELLIGENCE_KEY') != '':
-                loader = AzureAIDocumentIntelligenceLoader(
-                    file_path=file_path,
-                    api_endpoint=self.kwargs.get('DOCUMENT_INTELLIGENCE_ENDPOINT'),
-                    api_key=self.kwargs.get('DOCUMENT_INTELLIGENCE_KEY'),
-                    api_model=self.kwargs.get('DOCUMENT_INTELLIGENCE_MODEL'),
-                )
-            else:
-                loader = AzureAIDocumentIntelligenceLoader(
-                    file_path=file_path,
-                    api_endpoint=self.kwargs.get('DOCUMENT_INTELLIGENCE_ENDPOINT'),
-                    azure_credential=DefaultAzureCredential(),
-                    api_model=self.kwargs.get('DOCUMENT_INTELLIGENCE_MODEL'),
-                )
         elif self.engine == 'mineru' and file_ext in self.kwargs.get('MINERU_FILE_EXTENSIONS', ['pdf']):
             mineru_timeout = self.kwargs.get('MINERU_API_TIMEOUT', 300)
             if mineru_timeout:
@@ -641,18 +542,6 @@ class Loader:
                 params=self.kwargs.get('MINERU_PARAMS', {}),
                 timeout=mineru_timeout,
                 max_markdown_bytes=MINERU_MAX_MARKDOWN_BYTES,
-            )
-        elif (
-            self.engine == 'mistral_ocr'
-            and self.kwargs.get('MISTRAL_OCR_API_KEY') != ''
-            and file_ext in ['pdf']  # Mistral OCR currently only supports PDF and images
-        ):
-            loader = MistralLoader(
-                base_url=self.kwargs.get('MISTRAL_OCR_API_BASE_URL'),
-                api_key=self.kwargs.get('MISTRAL_OCR_API_KEY'),
-                file_path=file_path,
-                use_base64=self.kwargs.get('MISTRAL_OCR_USE_BASE64', False),
-                user=self.user,
             )
         elif (
             self.engine == 'paddleocr_vl'
