@@ -6,13 +6,13 @@ from uuid import uuid4
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response, status
 from fastapi.responses import StreamingResponse
 from fastapi.security import HTTPAuthorizationCredentials
-from open_webui.config import ENABLE_ADMIN_CHAT_ACCESS, ENABLE_ADMIN_EXPORT
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.chat_messages import ChatMessages
-from open_webui.models.chats import (
+from avexie.config import ENABLE_ADMIN_CHAT_ACCESS, ENABLE_ADMIN_EXPORT
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.chat_messages import ChatMessages
+from avexie.models.chats import (
     AggregateChatStats,
     ChatBody,
     ChatForm,
@@ -28,19 +28,19 @@ from open_webui.models.chats import (
     chat_search_content_query,
     chat_search_terms,
 )
-from open_webui.models.config import Config
-from open_webui.models.folders import Folders
-from open_webui.models.shared_chats import SharedChatResponse, SharedChats
-from open_webui.models.tags import TagModel, Tags
-from open_webui.socket.main import get_event_emitter
-from open_webui.tasks import get_response_streams_by_chat_id, has_active_tasks, stop_item_tasks
-from open_webui.utils.access_control import filter_allowed_access_grants, has_permission
-from open_webui.utils.access_control.folders import has_folder_write_access
-from open_webui.utils.auth import bearer_security, get_admin_user, get_current_user, get_verified_user
-from open_webui.utils.chat_fork import build_fork_history
-from open_webui.utils.context_compaction import compact_chat_branch, get_chat_context_usage
-from open_webui.utils.misc import get_message_list
-from open_webui.utils.models import get_all_models
+from avexie.models.config import Config
+from avexie.models.folders import Folders
+from avexie.models.shared_chats import SharedChatResponse, SharedChats
+from avexie.models.tags import TagModel, Tags
+from avexie.socket.main import get_event_emitter
+from avexie.tasks import get_response_streams_by_chat_id, has_active_tasks, stop_item_tasks
+from avexie.utils.access_control import filter_allowed_access_grants, has_permission
+from avexie.utils.access_control.folders import has_folder_write_access
+from avexie.utils.auth import bearer_security, get_admin_user, get_current_user, get_verified_user
+from avexie.utils.chat_fork import build_fork_history
+from avexie.utils.context_compaction import compact_chat_branch, get_chat_context_usage
+from avexie.utils.misc import get_message_list
+from avexie.utils.models import get_all_models
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 

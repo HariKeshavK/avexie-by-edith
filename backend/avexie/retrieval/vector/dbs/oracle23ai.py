@@ -39,7 +39,7 @@ from decimal import Decimal
 from typing import Any, Dict, List, Optional, Union
 
 import oracledb
-from open_webui.config import (
+from avexie.config import (
     ORACLE_DB_DSN,
     ORACLE_DB_PASSWORD,
     ORACLE_DB_POOL_INCREMENT,
@@ -51,14 +51,14 @@ from open_webui.config import (
     ORACLE_WALLET_DIR,
     ORACLE_WALLET_PASSWORD,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions
-from open_webui.utils.json_codec import JSONCodec
+from avexie.retrieval.vector.utils import iter_filter_conditions
+from avexie.utils.json_codec import JSONCodec
 
 log = logging.getLogger(__name__)
 _SAFE_METADATA_KEY_RE = re.compile(r'^[A-Za-z_][A-Za-z0-9_]{0,63}$')

@@ -4,11 +4,11 @@
 # Created on: 2024-06-24 13:15:33.808998
 from __future__ import annotations
 from typing import Sequence
-import open_webui.internal.db  # noqa: F401
+import avexie.internal.db  # noqa: F401
 import sqlalchemy as sa
 from alembic import op
-from open_webui.internal.db import JSONField
-from open_webui.migrations.util import get_existing_tables
+from avexie.internal.db import JSONField
+from avexie.migrations.util import get_existing_tables
 
 revision: str = '7e5b5dc7342b'
 down_revision: str | None = None

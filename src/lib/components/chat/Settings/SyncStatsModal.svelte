@@ -224,7 +224,7 @@
 			// Get version for filename
 			const versionRes = await getVersion(localStorage.token).catch(() => null);
 			const version = versionRes?.version ?? '0.0.0';
-			const filename = `open-webui-stats-${version}-${Date.now()}.json`;
+			const filename = `avexie-stats-${version}-${Date.now()}.json`;
 
 			// Start streaming download
 			const searchParams = eventData?.searchParams ?? {};
@@ -371,18 +371,18 @@
 
 			<div class="px-5 pt-2 pb-5">
 				<div class="text-sm text-gray-500 dark:text-gray-400">
-					<!-- LICENSE covers this Open WebUI Community wordmark.
+					<!-- LICENSE covers this AVEXIE Community wordmark.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
-					{$i18n.t('Do you want to sync your usage stats with Open WebUI Community?')}
+					#license. -->
+					{$i18n.t('Do you want to sync your usage stats with AVEXIE Community?')}
 				</div>
 
 				<div class="mt-2 text-xs text-gray-500">
-					<!-- LICENSE covers this Open WebUI wordmark.
+					<!-- LICENSE covers this AVEXIE wordmark.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
+					#license. -->
 					{$i18n.t(
-						'Participate in community leaderboards and evaluations! Syncing aggregated usage stats helps drive research and improvements to Open WebUI. Your privacy is paramount: no message content is ever shared.'
+						'Participate in community leaderboards and evaluations! Syncing aggregated usage stats helps drive research and improvements to AVEXIE. Your privacy is paramount: no message content is ever shared.'
 					)}
 				</div>
 
@@ -391,10 +391,10 @@
 						{$i18n.t('What is shared:')}
 					</div>
 					<ul class="list-disc list-inside space-y-0.5 ml-1 mb-2">
-						<!-- LICENSE covers this Open WebUI wordmark.
+						<!-- LICENSE covers this AVEXIE wordmark.
 						Do not alter, remove, obscure, or replace it except as LICENSE permits:
-						https://docs.openwebui.com/license. -->
-						<li>{$i18n.t('Open WebUI version')}</li>
+						#license. -->
+						<li>{$i18n.t('AVEXIE version')}</li>
 						<li>{$i18n.t('Model names and usage frequency')}</li>
 						<li>{$i18n.t('Message counts and response timestamps')}</li>
 						<li>{$i18n.t('Content lengths (character counts only)')}</li>

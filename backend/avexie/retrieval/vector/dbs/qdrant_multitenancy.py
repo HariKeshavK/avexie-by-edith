@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from urllib.parse import urlparse
 
 import grpc
-from open_webui.config import (
+from avexie.config import (
     QDRANT_API_KEY,
     QDRANT_COLLECTION_PREFIX,
     QDRANT_GRPC_PORT,
@@ -17,13 +17,13 @@ from open_webui.config import (
     QDRANT_TIMEOUT,
     QDRANT_URI,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions
+from avexie.retrieval.vector.utils import iter_filter_conditions
 from qdrant_client import QdrantClient as Qclient
 from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.http.models import PointStruct
@@ -104,8 +104,8 @@ class QdrantClient(VectorDBBase):
         Returns:
             tuple: (collection_name, tenant_id)
 
-        WARNING: This mapping relies on current Open WebUI naming conventions for
-        collection names. If Open WebUI changes how it generates collection names
+        WARNING: This mapping relies on current AVEXIE naming conventions for
+        collection names. If AVEXIE changes how it generates collection names
         (e.g., "user-memory-" prefix, "file-" prefix, web search patterns, or hash
         formats), this mapping will break and route data to incorrect collections.
         POTENTIALLY CAUSING HUGE DATA CORRUPTION, DATA CONSISTENCY ISSUES AND INCORRECT

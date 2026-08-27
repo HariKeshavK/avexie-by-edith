@@ -1,6 +1,6 @@
 import logging
 
-from open_webui.models.groups import Groups
+from avexie.models.groups import Groups
 
 log = logging.getLogger(__name__)
 

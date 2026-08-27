@@ -8,12 +8,12 @@ from typing import Optional
 
 import aiohttp
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from open_webui.config import CACHE_DIR
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import AIOHTTP_CLIENT_SESSION_SSL, AIOHTTP_CLIENT_TIMEOUT, ENABLE_PLUGINS
-from open_webui.events import EVENTS, build_event, dispatch_event_functions, publish_event, schedule_webhook_dispatch
-from open_webui.internal.db import get_async_session
-from open_webui.models.functions import (
+from avexie.config import CACHE_DIR
+from avexie.constants import ERROR_MESSAGES
+from avexie.env import AIOHTTP_CLIENT_SESSION_SSL, AIOHTTP_CLIENT_TIMEOUT, ENABLE_PLUGINS
+from avexie.events import EVENTS, build_event, dispatch_event_functions, publish_event, schedule_webhook_dispatch
+from avexie.internal.db import get_async_session
+from avexie.models.functions import (
     FunctionForm,
     FunctionModel,
     FunctionResponse,
@@ -21,8 +21,8 @@ from open_webui.models.functions import (
     FunctionUserResponse,
     FunctionWithValvesModel,
 )
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.plugin import (
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.plugin import (
     get_functions_cache,
     get_function_module_from_cache,
     load_function_module_by_id,

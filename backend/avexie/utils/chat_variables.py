@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Any
 
-from open_webui.utils.json_codec import JSONCodec
+from avexie.utils.json_codec import JSONCodec
 
 CHAT_VARIABLE_KEY_RE = re.compile(r'^[a-z][a-z0-9_]*$')
 CHAT_VARIABLE_ANY_RE = re.compile(r'{{\s*chat\.variables\.([^\s|}]+)(?:\s*\|\s*([^}]*))?\s*}}')

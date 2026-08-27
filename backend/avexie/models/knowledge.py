@@ -3,17 +3,17 @@ import time
 import uuid
 from typing import Optional
 
-from open_webui.config import RAG_FILE_CONTENT_SEARCH_MAX_CHARS
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.models.access_grants import AccessGrantModel, AccessGrants
-from open_webui.models.files import (
+from avexie.config import RAG_FILE_CONTENT_SEARCH_MAX_CHARS
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.models.access_grants import AccessGrantModel, AccessGrants
+from avexie.models.files import (
     File,
     FileMetadataResponse,
     FileModel,
     FileModelResponse,
 )
-from open_webui.models.groups import Groups
-from open_webui.models.users import User, UserModel, UserResponse, Users
+from avexie.models.groups import Groups
+from avexie.models.users import User, UserModel, UserResponse, Users
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import (
     JSON,

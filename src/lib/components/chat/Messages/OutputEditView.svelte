@@ -123,7 +123,7 @@
 				});
 			} else if (t === 'function_call_output') {
 				// grouped with function_call
-			} else if (t === 'open_webui:code_interpreter') {
+			} else if (t === 'avexie:code_interpreter') {
 				result.push({ type: 'code_interpreter', indices: [i], item });
 			} else if (['web_search_call', 'file_search_call', 'computer_call'].includes(t)) {
 				result.push({ type: 'openai_tool', indices: [i], item });

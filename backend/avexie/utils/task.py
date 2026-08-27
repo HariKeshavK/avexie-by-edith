@@ -5,8 +5,8 @@ import uuid
 from datetime import datetime
 from typing import Any, Optional
 
-from open_webui.config import DEFAULT_RAG_TEMPLATE
-from open_webui.utils.misc import get_last_user_message, get_messages_content
+from avexie.config import DEFAULT_RAG_TEMPLATE
+from avexie.utils.misc import get_last_user_message, get_messages_content
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +62,7 @@ async def prompt_template(template: str, user: Optional[Any] = None) -> str:
                 user_id = user.get('id')
                 if user_id:
                     try:
-                        from open_webui.models.groups import Groups
+                        from avexie.models.groups import Groups
 
                         user_groups = await Groups.get_groups_by_member_id(user_id)
                         groups = ', '.join(g.name for g in user_groups)

@@ -8,31 +8,31 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
 from fastapi.responses import FileResponse, StreamingResponse
-from open_webui.config import UPLOAD_DIR
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.chat_messages import ChatMessages
-from open_webui.models.config import Config
-from open_webui.models.chats import Chats
-from open_webui.models.folders import (
+from avexie.config import UPLOAD_DIR
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.chat_messages import ChatMessages
+from avexie.models.config import Config
+from avexie.models.chats import Chats
+from avexie.models.folders import (
     FolderForm,
     FolderModel,
     FolderNameIdResponse,
     Folders,
     FolderUpdateForm,
 )
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.automations import Automations
-from open_webui.models.groups import Groups
-from open_webui.models.users import Users
-from open_webui.utils.access_control import has_permission
-from open_webui.utils.access_control import (
+from avexie.models.access_grants import AccessGrants
+from avexie.models.automations import Automations
+from avexie.models.groups import Groups
+from avexie.models.users import Users
+from avexie.utils.access_control import has_permission
+from avexie.utils.access_control import (
     filter_allowed_access_grants,
 )
-from open_webui.utils.access_control.files import can_read_all_folder_files, get_accessible_folder_files
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.tasks import has_active_tasks
+from avexie.utils.access_control.files import can_read_all_folder_files, get_accessible_folder_files
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.tasks import has_active_tasks
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -42,7 +42,7 @@ log = logging.getLogger(__name__)
 router = APIRouter()
 
 
-from open_webui.utils.access_control.folders import has_folder_access as _has_folder_access
+from avexie.utils.access_control.folders import has_folder_access as _has_folder_access
 
 
 async def get_folder_unread_counts(user_id: str, db: AsyncSession | None = None) -> dict[str, int]:

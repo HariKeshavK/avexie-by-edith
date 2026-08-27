@@ -6,7 +6,7 @@ import logging
 from typing import Any, Optional
 from urllib.parse import urlparse
 
-from open_webui.config import (
+from avexie.config import (
     QDRANT_API_KEY,
     QDRANT_COLLECTION_PREFIX,
     QDRANT_GRPC_PORT,
@@ -16,13 +16,13 @@ from open_webui.config import (
     QDRANT_TIMEOUT,
     QDRANT_URI,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions
+from avexie.retrieval.vector.utils import iter_filter_conditions
 from qdrant_client import QdrantClient as Qclient
 from qdrant_client.http.models import PointStruct
 from qdrant_client.models import models

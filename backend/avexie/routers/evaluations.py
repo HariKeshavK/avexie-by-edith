@@ -3,11 +3,11 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.concurrency import run_in_threadpool
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.config import Config
-from open_webui.models.feedbacks import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.config import Config
+from avexie.models.feedbacks import (
     FeedbackForm,
     FeedbackIdResponse,
     FeedbackListResponse,
@@ -17,8 +17,8 @@ from open_webui.models.feedbacks import (
     ModelHistoryEntry,
     ModelHistoryResponse,
 )
-from open_webui.models.users import UserModel, Users
-from open_webui.utils.auth import get_admin_user, get_verified_user
+from avexie.models.users import UserModel, Users
+from avexie.utils.auth import get_admin_user, get_verified_user
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 

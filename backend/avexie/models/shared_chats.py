@@ -3,7 +3,7 @@ import time
 import uuid
 from typing import Optional
 
-from open_webui.internal.db import Base, JSONField, get_async_db_context
+from avexie.internal.db import Base, JSONField, get_async_db_context
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, BigInteger, Column, ForeignKey, Text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -64,7 +64,7 @@ class SharedChatsTable:
         Returns the SharedChatModel with the share token as its id.
         """
         async with get_async_db_context(db) as db:
-            from open_webui.models.chats import Chat
+            from avexie.models.chats import Chat
 
             chat = await db.get(Chat, chat_id)
             if not chat:
@@ -93,7 +93,7 @@ class SharedChatsTable:
         Re-snapshot: update the shared chat with the current state of the original chat.
         """
         async with get_async_db_context(db) as db:
-            from open_webui.models.chats import Chat
+            from avexie.models.chats import Chat
 
             shared_chat = await db.get(SharedChat, share_id)
             if not shared_chat:

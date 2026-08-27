@@ -17,30 +17,30 @@ from fastapi import (
 from pydantic import BaseModel
 from starlette.responses import Response, StreamingResponse
 
-from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import BYPASS_MODEL_ACCESS_CONTROL, ENABLE_PLUGINS, GLOBAL_LOG_LEVEL
-from open_webui.models.functions import Functions
-from open_webui.models.models import Models
-from open_webui.models.users import UserModel
-from open_webui.socket.main import (
+from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL
+from avexie.constants import ERROR_MESSAGES
+from avexie.env import BYPASS_MODEL_ACCESS_CONTROL, ENABLE_PLUGINS, GLOBAL_LOG_LEVEL
+from avexie.models.functions import Functions
+from avexie.models.models import Models
+from avexie.models.users import UserModel
+from avexie.socket.main import (
     get_event_call,
     get_event_emitter,
 )
-from open_webui.utils.access_control import check_model_access
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import (
+from avexie.utils.access_control import check_model_access
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import (
     add_or_update_system_message,
     get_last_user_message,
     openai_chat_chunk_message_template,
     openai_chat_completion_message_template,
     prepend_to_first_user_message_content,
 )
-from open_webui.utils.payload import (
+from avexie.utils.payload import (
     apply_model_params_to_body_openai,
     apply_system_prompt_to_body,
 )
-from open_webui.utils.plugin import (
+from avexie.utils.plugin import (
     get_function_module_from_cache,
     load_function_module_by_id,
 )
@@ -253,7 +253,7 @@ async def generate_function_chat_completion(request, form_data, user, models: di
 
         # Fallback: no cookie (automation, API key, etc.) — use most recent session
         if oauth_token is None:
-            from open_webui.models.oauth_sessions import OAuthSessions
+            from avexie.models.oauth_sessions import OAuthSessions
 
             sessions = await OAuthSessions.get_sessions_by_user_id(user.id)
             if sessions:

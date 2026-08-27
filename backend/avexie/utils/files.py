@@ -14,21 +14,21 @@ from fastapi import (
     Request,
     UploadFile,
 )
-from open_webui.env import (
+from avexie.env import (
     AIOHTTP_CLIENT_ALLOW_REDIRECTS,
     AIOHTTP_CLIENT_SESSION_SSL,
     ENABLE_IMAGE_CONTENT_TYPE_EXTENSION_FALLBACK,
 )
-from open_webui.models.chats import Chats
-from open_webui.models.files import Files
-from open_webui.retrieval.web.utils import get_ssrf_safe_session, validate_url
-from open_webui.routers.files import upload_file_handler
-from open_webui.utils.access_control.files import has_access_to_file
-from open_webui.routers.images import (
+from avexie.models.chats import Chats
+from avexie.models.files import Files
+from avexie.retrieval.web.utils import get_ssrf_safe_session, validate_url
+from avexie.routers.files import upload_file_handler
+from avexie.utils.access_control.files import has_access_to_file
+from avexie.routers.images import (
     get_image_data,
     upload_image,
 )
-from open_webui.storage.provider import Storage
+from avexie.storage.provider import Storage
 
 BASE64_IMAGE_URL_PREFIX = re.compile(r'data:image/\w+;base64,', re.IGNORECASE)
 MARKDOWN_IMAGE_URL_PATTERN = re.compile(r'!\[(.*?)\]\((.+?)\)', re.IGNORECASE)

@@ -112,12 +112,12 @@
 
 			<div class="px-5 pb-5 w-full flex flex-col justify-center">
 				<div class=" text-xs text-gray-600 dark:text-gray-300 mb-2">
-					<!-- LICENSE covers this Open WebUI wordmark.
+					<!-- LICENSE covers this AVEXIE wordmark.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
-					{$i18n.t('Open WebUI can use tools provided by any OpenAPI server.')} <br /><a
+					#license. -->
+					{$i18n.t('AVEXIE can use tools provided by any OpenAPI server.')} <br /><a
 						class="underline"
-						href="https://github.com/open-webui/openapi-servers"
+						href="#"
 						target="_blank">{$i18n.t('Learn more about OpenAPI tool servers.')}</a
 					>
 				</div>

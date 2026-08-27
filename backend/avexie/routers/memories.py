@@ -5,17 +5,17 @@ import logging
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from open_webui.config import RAG_EMBEDDING_CONTENT_PREFIX, RAG_EMBEDDING_QUERY_PREFIX
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.config import Config
-from open_webui.models.memories import Memories, MemoryModel
-from open_webui.models.users import Users
-from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-from open_webui.utils.access_control import has_permission
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.memory import (
+from avexie.config import RAG_EMBEDDING_CONTENT_PREFIX, RAG_EMBEDDING_QUERY_PREFIX
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.config import Config
+from avexie.models.memories import Memories, MemoryModel
+from avexie.models.users import Users
+from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+from avexie.utils.access_control import has_permission
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.memory import (
     clean_memory_content,
     clean_memory_path,
     list_memory_path_groups,
@@ -360,7 +360,7 @@ async def query_memory(
     # better).
     relevance_threshold = await Config.get('rag.relevance_threshold', 0.0)
     if results and relevance_threshold > 0.0 and results.distances and results.distances[0]:
-        from open_webui.retrieval.vector.main import SearchResult
+        from avexie.retrieval.vector.main import SearchResult
 
         filtered_ids = []
         filtered_docs = []

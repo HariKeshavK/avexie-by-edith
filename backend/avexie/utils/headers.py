@@ -4,7 +4,7 @@ from typing import Any, Optional
 from urllib.parse import quote
 
 import jwt
-from open_webui.env import (
+from avexie.env import (
     FORWARD_USER_INFO_HEADER_JWT,
     FORWARD_USER_INFO_HEADER_JWT_EXPIRES_SECONDS,
     FORWARD_USER_INFO_HEADER_JWT_SECRET,
@@ -13,7 +13,7 @@ from open_webui.env import (
     FORWARD_USER_INFO_HEADER_USER_NAME,
     FORWARD_USER_INFO_HEADER_USER_ROLE,
 )
-from open_webui.models.groups import Groups
+from avexie.models.groups import Groups
 
 log = logging.getLogger(__name__)
 
@@ -40,7 +40,7 @@ def _mint_forward_user_jwt(user: Any) -> str:
         'email': str(user.email),
         'name': str(user.name),
         'role': str(user.role),
-        'iss': 'open-webui',
+        'iss': 'avexie',
         'iat': now,
         'exp': now + FORWARD_USER_INFO_HEADER_JWT_EXPIRES_SECONDS,
     }
@@ -51,7 +51,7 @@ def include_user_info_headers(headers: dict, user: Optional[Any] = None) -> dict
     """
     Forward user identity to external backends: signed JWT in
     FORWARD_USER_INFO_HEADER_JWT if FORWARD_USER_INFO_HEADER_JWT_SECRET is set;
-    otherwise the legacy X-OpenWebUI-User-* headers.
+    otherwise the legacy X-Avexie-User-* headers.
     """
     if user is None:
         return headers

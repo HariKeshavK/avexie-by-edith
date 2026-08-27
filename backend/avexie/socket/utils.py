@@ -6,9 +6,9 @@ import hashlib
 import uuid
 
 import pycrdt as Y
-from open_webui.env import REDIS_KEY_PREFIX
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.redis import get_redis_connection
+from avexie.env import REDIS_KEY_PREFIX
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.redis import get_redis_connection
 
 YDOC_KEY_PREFIX = f'{REDIS_KEY_PREFIX}:ydoc:documents'
 

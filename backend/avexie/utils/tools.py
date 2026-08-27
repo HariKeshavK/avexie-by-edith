@@ -25,8 +25,8 @@ from fastapi import Request
 from langchain_core.utils.function_calling import (
     convert_to_openai_function as convert_pydantic_model_to_openai_function_spec,
 )
-from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
-from open_webui.env import (
+from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL
+from avexie.env import (
     AIOHTTP_CLIENT_ALLOW_REDIRECTS,
     AIOHTTP_CLIENT_SESSION_SSL,
     AIOHTTP_CLIENT_SESSION_TOOL_SERVER_SSL,
@@ -39,12 +39,12 @@ from open_webui.env import (
     FORWARD_SESSION_INFO_HEADER_MESSAGE_ID,
     REDIS_KEY_PREFIX,
 )
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.config import Config
-from open_webui.models.groups import Groups
-from open_webui.models.tools import Tools
-from open_webui.models.users import UserModel
-from open_webui.tools.builtin import (
+from avexie.models.access_grants import AccessGrants
+from avexie.models.config import Config
+from avexie.models.groups import Groups
+from avexie.models.tools import Tools
+from avexie.models.users import UserModel
+from avexie.tools.builtin import (
     add_memory,
     ask_user,
     calculate_timestamp,
@@ -55,10 +55,7 @@ from open_webui.tools.builtin import (
     delete_automation,
     delete_calendar_event,
     delete_memory,
-    edit_image,
     execute_code,
-    fetch_url,
-    generate_image,
     get_current_timestamp,
     grep_chat_files,
     grep_knowledge_files,
@@ -84,7 +81,6 @@ from open_webui.tools.builtin import (
     search_knowledge_files,
     search_memories,
     search_notes,
-    search_web,
     timer,
     toggle_automation,
     update_automation,
@@ -100,18 +96,18 @@ from open_webui.tools.builtin import (
     view_skill,
     write_note,
 )
-from open_webui.utils.access_control import has_access, has_connection_access, has_permission
-from open_webui.utils.chat_id import is_saved_chat_id
-from open_webui.utils.headers import (
+from avexie.utils.access_control import has_access, has_connection_access, has_permission
+from avexie.utils.chat_id import is_saved_chat_id
+from avexie.utils.headers import (
     bearer_auth_header,
     get_custom_headers,
     include_user_info_headers,
     normalize_bearer_token,
 )
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import is_string_allowed
-from open_webui.utils.plugin import get_tool_contents_cache, get_tools_cache, load_tool_module_by_id
-from open_webui.utils.terminals import (
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import is_string_allowed
+from avexie.utils.plugin import get_tool_contents_cache, get_tools_cache, load_tool_module_by_id
+from avexie.utils.terminals import (
     TERMINAL_CONTEXT_HEADER,
     get_terminal_server_url,
     terminal_context_available,
@@ -606,7 +602,7 @@ async def get_builtin_tools(
     # Otherwise, provide all KB browsing tools
     model_knowledge = get_attached_knowledge(model, metadata)
     if is_builtin_tool_enabled('knowledge'):
-        from open_webui.env import ENABLE_KB_EXEC
+        from avexie.env import ENABLE_KB_EXEC
 
         if ENABLE_KB_EXEC:
             builtin_functions.append(kb_exec)
@@ -674,35 +670,6 @@ async def get_builtin_tools(
             ]
         )
 
-    # Add web search tools if builtin category enabled AND enabled globally AND model has web_search capability
-    if (
-        is_builtin_tool_enabled('web_search')
-        and config.get('web.search.enable')
-        and get_model_capability('web_search')
-        and features.get('web_search')
-        and await has_user_permission('web_search')
-    ):
-        builtin_functions.extend([search_web, fetch_url])
-
-    # Add image generation/edit tools if builtin category enabled,
-    # globally enabled, and allowed by model capability.
-    if (
-        is_builtin_tool_enabled('image_generation')
-        and config.get('image_generation.enable')
-        and get_model_capability('image_generation')
-        and features.get('image_generation')
-        and await has_user_permission('image_generation')
-    ):
-        builtin_functions.append(generate_image)
-    if (
-        is_builtin_tool_enabled('image_generation')
-        and config.get('images.edit.enable')
-        and get_model_capability('image_generation')
-        and features.get('image_generation')
-        and await has_user_permission('image_generation')
-    ):
-        builtin_functions.append(edit_image)
-
     # Add code interpreter tool if builtin category enabled,
     # globally enabled, and allowed by model capability.
     if (
@@ -764,7 +731,7 @@ async def get_builtin_tools(
         builtin_functions.append(notify)
 
     if getattr(request.state, 'internal', False) is True:
-        from open_webui.utils.subagents import MUTATING_MEMORY_TOOLS
+        from avexie.utils.subagents import MUTATING_MEMORY_TOOLS
 
         builtin_functions = [func for func in builtin_functions if func.__name__ not in MUTATING_MEMORY_TOOLS]
 

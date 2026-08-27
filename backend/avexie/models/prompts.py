@@ -9,12 +9,12 @@ from typing import Optional
 
 log = logging.getLogger(__name__)
 
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.models.access_grants import AccessGrantModel, AccessGrants
-from open_webui.models.groups import Groups
-from open_webui.models.prompt_history import PromptHistories
-from open_webui.models.users import User, UserModel, UserResponse, Users
-from open_webui.utils.misc import json_text_variants
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.models.access_grants import AccessGrantModel, AccessGrants
+from avexie.models.groups import Groups
+from avexie.models.prompt_history import PromptHistories
+from avexie.models.users import User, UserModel, UserResponse, Users
+from avexie.utils.misc import json_text_variants
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import JSON, BigInteger, Boolean, Column, String, Text, cast, delete, func, or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession

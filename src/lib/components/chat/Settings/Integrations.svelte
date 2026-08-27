@@ -149,15 +149,15 @@
 						{$i18n.t('Connect to your own OpenAPI compatible external tool servers.')}
 					</div>
 					<div class={helpTextClass}>
-						<!-- LICENSE covers this Open WebUI wordmark.
+						<!-- LICENSE covers this AVEXIE wordmark.
 							Do not alter, remove, obscure, or replace it except as LICENSE permits:
-							https://docs.openwebui.com/license. -->
+							#license. -->
 						{$i18n.t(
-							'CORS must be properly configured by the provider to allow requests from Open WebUI.'
+							'CORS must be properly configured by the provider to allow requests from AVEXIE.'
 						)}
 						<a
 							class="ml-1 text-gray-500 underline hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
-							href="https://github.com/open-webui/openapi-servers"
+							href="#"
 							target="_blank">{$i18n.t('Learn more about OpenAPI tool servers.')} ↗</a
 						>
 					</div>
@@ -174,7 +174,7 @@
 				</div>
 				<a
 					class="mt-0.5 block text-[0.6875rem] text-gray-500 underline hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
-					href="https://github.com/open-webui/open-terminal"
+					href="#"
 					target="_blank">{$i18n.t('Learn more about Open Terminal')} ↗</a
 				>
 			</UserSettingSection>

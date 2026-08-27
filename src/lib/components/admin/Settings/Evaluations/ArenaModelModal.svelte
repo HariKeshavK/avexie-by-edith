@@ -37,9 +37,9 @@
 		}
 	};
 
-	// LICENSE covers this Open WebUI fallback logo.
+	// LICENSE covers this AVEXIE fallback logo.
 	// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-	// https://docs.openwebui.com/license.
+	// #license.
 	let profileImageUrl = `${WEBUI_BASE_URL}/favicon.png`;
 	let description = '';
 
@@ -96,9 +96,9 @@
 
 		name = '';
 		id = '';
-		// LICENSE covers this Open WebUI fallback logo.
+		// LICENSE covers this AVEXIE fallback logo.
 		// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-		// https://docs.openwebui.com/license.
+		// #license.
 		profileImageUrl = `${WEBUI_BASE_URL}/favicon.png`;
 		description = '';
 		modelIds = [];

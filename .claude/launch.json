@@ -1,0 +1,23 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Backend (AVEXIE)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "uvicorn", "avexie.main:app", "--port", "8080", "--host", "127.0.0.1", "--reload"],
+      "port": 8080,
+      "cwd": "backend",
+      "env": {
+        "WEBUI_SECRET_KEY": "avexie_dev_key_12345",
+        "CORS_ALLOW_ORIGIN": "http://localhost:5173;http://localhost:5174;http://localhost:8080"
+      }
+    },
+    {
+      "name": "Frontend (AVEXIE)",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev"],
+      "port": 5173,
+      "autoPort": true
+    }
+  ]
+}

@@ -1,14 +1,14 @@
 import logging
 
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.channels import Channels
-from open_webui.models.chats import Chats
-from open_webui.models.files import Files
-from open_webui.models.folders import FolderModel
-from open_webui.models.groups import Groups
-from open_webui.models.knowledge import Knowledges
-from open_webui.models.models import Models
-from open_webui.models.users import UserModel, Users
+from avexie.models.access_grants import AccessGrants
+from avexie.models.channels import Channels
+from avexie.models.chats import Chats
+from avexie.models.files import Files
+from avexie.models.folders import FolderModel
+from avexie.models.groups import Groups
+from avexie.models.knowledge import Knowledges
+from avexie.models.models import Models
+from avexie.models.users import UserModel, Users
 from sqlalchemy.ext.asyncio import AsyncSession
 
 log = logging.getLogger(__name__)
@@ -162,7 +162,7 @@ async def get_accessible_folder_files(
                 accessible.append(entry)
         elif entry_type == 'note':
             # Owner has no self-grant (notes are private by default), so check ownership too.
-            from open_webui.models.notes import Notes
+            from avexie.models.notes import Notes
 
             note = await Notes.get_note_by_id(entry_id, db=db)
             if note and (

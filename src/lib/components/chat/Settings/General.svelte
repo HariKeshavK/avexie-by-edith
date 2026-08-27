@@ -243,13 +243,13 @@
 					Couldn't find your language?
 					<a
 						class="font-normal underline text-gray-400 dark:text-gray-600"
-						href="https://github.com/open-webui/open-webui/blob/main/docs/CONTRIBUTING.md#-translations-and-internationalization"
+						href="#"
 						target="_blank"
 					>
-						<!-- LICENSE covers this Open WebUI wordmark.
+						<!-- LICENSE covers this AVEXIE wordmark.
 						Do not alter, remove, obscure, or replace it except as LICENSE permits:
-						https://docs.openwebui.com/license. -->
-						Help us translate Open WebUI!
+						#license. -->
+						Help us translate AVEXIE!
 					</a>
 				</div>
 			{/if}

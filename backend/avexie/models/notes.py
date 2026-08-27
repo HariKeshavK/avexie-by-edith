@@ -3,11 +3,11 @@ import uuid
 from functools import lru_cache
 from typing import Optional
 
-from open_webui.internal.db import Base, get_async_db_context
-from open_webui.models.access_grants import AccessGrantModel, AccessGrants
-from open_webui.models.groups import Groups
-from open_webui.models.users import User, UserModel, UserResponse, Users
-from open_webui.utils.json_codec import JSONCodec
+from avexie.internal.db import Base, get_async_db_context
+from avexie.models.access_grants import AccessGrantModel, AccessGrants
+from avexie.models.groups import Groups
+from avexie.models.users import User, UserModel, UserResponse, Users
+from avexie.utils.json_codec import JSONCodec
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from sqlalchemy import JSON, BigInteger, Boolean, Column, ForeignKey, Text, delete, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession

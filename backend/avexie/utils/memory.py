@@ -6,10 +6,10 @@ import re
 from typing import Any
 
 from fastapi import HTTPException
-from open_webui.models.config import Config
-from open_webui.models.memories import Memories
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import add_or_update_system_message, get_content_from_message
+from avexie.models.config import Config
+from avexie.models.memories import Memories
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import add_or_update_system_message, get_content_from_message
 
 log = logging.getLogger(__name__)
 
@@ -309,7 +309,7 @@ async def add_memory_context(request, form_data: dict, user, model: dict | None 
     all_memories = await Memories.get_memories_by_user_id(user.id)
     results = None
     try:
-        from open_webui.routers.memories import QueryMemoryForm, query_memory
+        from avexie.routers.memories import QueryMemoryForm, query_memory
 
         results = await query_memory(request, QueryMemoryForm(content=query, k=8), user)
     except Exception as e:
@@ -513,7 +513,7 @@ async def _review_memory(
         transcript='\n\n'.join(transcript_lines),
     )
     if operations:
-        from open_webui.routers.memories import UpdateMemoriesForm, update_memories
+        from avexie.routers.memories import UpdateMemoriesForm, update_memories
 
         await update_memories(request, UpdateMemoriesForm(operations=operations, source='background_review'), user)
 
@@ -527,7 +527,7 @@ async def _generate_memory_operations(
     existing_text: str,
     transcript: str,
 ) -> list[dict[str, Any]]:
-    from open_webui.utils.chat import generate_chat_completion
+    from avexie.utils.chat import generate_chat_completion
 
     review_prompt = f"""Review the completed conversation turn and decide whether long-term memory should change.
 
@@ -566,10 +566,10 @@ Conversation:
             'messages': [
                 {
                     'role': 'system',
-                    # LICENSE covers this Open WebUI system identifier.
+                    # LICENSE covers this AVEXIE system identifier.
                     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
                     # https://docs.openwebui.com/license.
-                    'content': "You are Open WebUI's private memory reviewer. Return only valid JSON.",
+                    'content': "You are AVEXIE's private memory reviewer. Return only valid JSON.",
                 },
                 {'role': 'user', 'content': review_prompt},
             ],

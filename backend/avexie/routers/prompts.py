@@ -3,19 +3,19 @@ from __future__ import annotations
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.config import Config
-from open_webui.models.groups import Groups
-from open_webui.models.prompt_history import (
+from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.config import Config
+from avexie.models.groups import Groups
+from avexie.models.prompt_history import (
     PromptHistories,
     PromptHistoryModel,
     PromptHistoryResponse,
 )
-from open_webui.models.prompts import (
+from avexie.models.prompts import (
     PromptAccessListResponse,
     PromptAccessResponse,
     PromptForm,
@@ -23,8 +23,8 @@ from open_webui.models.prompts import (
     Prompts,
     PromptUserResponse,
 )
-from open_webui.utils.access_control import filter_allowed_access_grants, has_permission
-from open_webui.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.access_control import filter_allowed_access_grants, has_permission
+from avexie.utils.auth import get_admin_user, get_verified_user
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 

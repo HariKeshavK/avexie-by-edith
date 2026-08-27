@@ -11,7 +11,7 @@ from typing import Sequence, Union
 
 from alembic import op
 import sqlalchemy as sa
-import open_webui.internal.db
+import avexie.internal.db
 
 
 # revision identifiers, used by Alembic.

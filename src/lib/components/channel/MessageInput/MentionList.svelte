@@ -230,9 +230,9 @@
 								alt={item?.data?.name ?? item.id}
 								class="rounded-full size-5 items-center mr-2"
 								on:error={(e) => {
-									// LICENSE covers this Open WebUI fallback logo.
+									// LICENSE covers this AVEXIE fallback logo.
 									// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-									// https://docs.openwebui.com/license.
+									// #license.
 									e.currentTarget.src = '/favicon.png';
 								}}
 							/>
@@ -242,9 +242,9 @@
 								alt={item?.label ?? item.id}
 								class="rounded-full size-5 items-center mr-2"
 								on:error={(e) => {
-									// LICENSE covers this Open WebUI fallback logo.
+									// LICENSE covers this AVEXIE fallback logo.
 									// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-									// https://docs.openwebui.com/license.
+									// #license.
 									e.currentTarget.src = '/favicon.png';
 								}}
 							/>

@@ -16,12 +16,12 @@ DEFAULT_SECRET_KEY_LENGTH = 24
 
 def version_callback(value: bool) -> None:
     if value:
-        from open_webui.env import VERSION
+        from avexie.env import VERSION
 
-        # LICENSE covers this Open WebUI CLI identifier.
+        # LICENSE covers this AVEXIE CLI identifier.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
-        typer.echo(f'Open WebUI version: {VERSION}')
+        typer.echo(f'AVEXIE version: {VERSION}')
         raise typer.Exit()
 
 
@@ -73,8 +73,8 @@ def serve(
             os.environ['USE_CUDA_DOCKER'] = 'false'
             os.environ['LD_LIBRARY_PATH'] = ':'.join(LD_LIBRARY_PATH)
 
-    import open_webui.main  # noqa: F401
-    from open_webui.env import UVICORN_WORKERS, UVICORN_WS_PER_MESSAGE_DEFLATE
+    import avexie.main  # noqa: F401
+    from avexie.env import UVICORN_WORKERS, UVICORN_WS_PER_MESSAGE_DEFLATE
 
     # On Windows, uvicorn's default loop factory hardcodes ProactorEventLoop,
     # which is incompatible with psycopg v3 async.  Setting loop='none' lets
@@ -82,7 +82,7 @@ def serve(
     loop = 'none' if sys.platform == 'win32' else 'auto'
 
     uvicorn.run(
-        'open_webui.main:app',
+        'avexie.main:app',
         host=host,
         port=port,
         forwarded_allow_ips='*',
@@ -98,10 +98,10 @@ def dev(
     port: int = 8080,
     reload: bool = True,
 ):
-    from open_webui.env import UVICORN_WS_PER_MESSAGE_DEFLATE
+    from avexie.env import UVICORN_WS_PER_MESSAGE_DEFLATE
 
     uvicorn.run(
-        'open_webui.main:app',
+        'avexie.main:app',
         host=host,
         port=port,
         reload=reload,

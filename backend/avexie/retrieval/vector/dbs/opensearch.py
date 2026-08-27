@@ -4,20 +4,20 @@ NOTE: This vector database integration is community-supported and maintained on 
 
 from typing import Any, Optional
 
-from open_webui.config import (
+from avexie.config import (
     OPENSEARCH_CERT_VERIFY,
     OPENSEARCH_PASSWORD,
     OPENSEARCH_SSL,
     OPENSEARCH_URI,
     OPENSEARCH_USERNAME,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions, process_metadata
+from avexie.retrieval.vector.utils import iter_filter_conditions, process_metadata
 from opensearchpy import OpenSearch
 from opensearchpy.helpers import bulk
 
@@ -30,7 +30,7 @@ def _metadata_filter(key: str, op: str, value: Any) -> dict:
 
 class OpenSearchClient(VectorDBBase):
     def __init__(self):
-        self.index_prefix = 'open_webui'
+        self.index_prefix = 'avexie'
         self.client = OpenSearch(
             hosts=[OPENSEARCH_URI],
             use_ssl=OPENSEARCH_SSL,

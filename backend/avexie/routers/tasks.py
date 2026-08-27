@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from fastapi.responses import JSONResponse, RedirectResponse
-from open_webui.config import (
+from avexie.config import (
     DEFAULT_AUTOCOMPLETE_GENERATION_PROMPT_TEMPLATE,
     DEFAULT_EMOJI_GENERATION_PROMPT_TEMPLATE,
     DEFAULT_FOLLOW_UP_GENERATION_PROMPT_TEMPLATE,
@@ -15,13 +15,13 @@ from open_webui.config import (
     DEFAULT_TITLE_GENERATION_PROMPT_TEMPLATE,
     DEFAULT_VOICE_MODE_PROMPT_TEMPLATE,
 )
-from open_webui.constants import ERROR_MESSAGES, TASKS
-from open_webui.models.config import Config
-from open_webui.routers.pipelines import process_pipeline_inlet_filter
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.chat import generate_chat_completion
-from open_webui.utils.payload import apply_params_to_form_data
-from open_webui.utils.task import (
+from avexie.constants import ERROR_MESSAGES, TASKS
+from avexie.models.config import Config
+from avexie.routers.pipelines import process_pipeline_inlet_filter
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.chat import generate_chat_completion
+from avexie.utils.payload import apply_params_to_form_data
+from avexie.utils.task import (
     autocomplete_generation_template,
     emoji_generation_template,
     follow_up_generation_template,

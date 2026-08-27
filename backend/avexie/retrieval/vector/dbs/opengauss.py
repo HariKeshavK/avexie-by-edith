@@ -54,7 +54,7 @@ class OpenGaussDialect(PGDialect_psycopg2):
 # Register dialect
 registry.register('opengauss', __name__, 'OpenGaussDialect')
 
-from open_webui.config import (
+from avexie.config import (
     OPENGAUSS_DB_URL,
     OPENGAUSS_INITIALIZE_MAX_VECTOR_LENGTH,
     OPENGAUSS_POOL_MAX_OVERFLOW,
@@ -62,13 +62,13 @@ from open_webui.config import (
     OPENGAUSS_POOL_SIZE,
     OPENGAUSS_POOL_TIMEOUT,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions, process_metadata
+from avexie.retrieval.vector.utils import iter_filter_conditions, process_metadata
 
 VECTOR_LENGTH = OPENGAUSS_INITIALIZE_MAX_VECTOR_LENGTH
 Base = declarative_base()
@@ -95,7 +95,7 @@ def _metadata_clause(key: str, op: str, value: Any):
 class OpenGaussClient(VectorDBBase):
     def __init__(self) -> None:
         if not OPENGAUSS_DB_URL:
-            from open_webui.internal.db import ScopedSession
+            from avexie.internal.db import ScopedSession
 
             self.session = ScopedSession
         else:

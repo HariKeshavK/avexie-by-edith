@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 from urllib.parse import parse_qs, urlencode, urlparse, urlunparse
 
-from open_webui.env import (
+from avexie.env import (
     DATABASE_ENABLE_IAM_TOKEN_AUTH,
     DATABASE_ENABLE_SESSION_SHARING,
     DATABASE_ENABLE_SQLITE_WAL,
@@ -25,9 +25,9 @@ from open_webui.env import (
     DATABASE_SQLITE_PRAGMA_TEMP_STORE,
     DATABASE_URL,
     ENABLE_DB_MIGRATIONS,
-    OPEN_WEBUI_DIR,
+    AVEXIE_DIR,
 )
-from open_webui.utils.json_codec import JSONCodec
+from avexie.utils.json_codec import JSONCodec
 from sqlalchemy import Dialect, MetaData, create_engine, event, types
 from sqlalchemy.engine.url import make_url
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine

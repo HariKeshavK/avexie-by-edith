@@ -9,7 +9,7 @@
 </script>
 
 <svelte:head>
-	<!-- LICENSE covers this Open WebUI browser-title identifier.
+	<!-- LICENSE covers this AVEXIE browser-title identifier.
 	Do not alter, remove, obscure, or replace it except as LICENSE permits:
 	https://docs.openwebui.com/license. -->
 	<title>
@@ -73,14 +73,6 @@
 							? ''
 							: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
 						href="/playground/completions">{$i18n.t('Completions')}</a
-					>
-
-					<a
-						draggable="false"
-						class="min-w-fit px-1 text-sm {$page.url.pathname.includes('/playground/images')
-							? ''
-							: 'text-gray-300 dark:text-gray-600 hover:text-gray-700 dark:hover:text-white'} transition select-none"
-						href="/playground/images">{$i18n.t('Images')}</a
 					>
 				</div>
 			</div>

@@ -3,9 +3,9 @@ import time
 import uuid
 from typing import Optional
 
-from open_webui.env import DEFAULT_GROUP_SHARE_PERMISSION
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.models.files import FileMetadataResponse
+from avexie.env import DEFAULT_GROUP_SHARE_PERMISSION
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.models.files import FileMetadataResponse
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import (
     JSON,

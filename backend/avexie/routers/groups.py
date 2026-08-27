@@ -4,12 +4,12 @@ from pathlib import Path
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from open_webui.config import CACHE_DIR
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.groups import (
+from avexie.config import CACHE_DIR
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.groups import (
     GroupForm,
     GroupInfoResponse,
     GroupResponse,
@@ -17,11 +17,11 @@ from open_webui.models.groups import (
     GroupUpdateForm,
     UserIdsForm,
 )
-from open_webui.models.knowledge import Knowledges
-from open_webui.models.models import Models
-from open_webui.models.tools import Tools
-from open_webui.models.users import UserInfoResponse, Users
-from open_webui.utils.auth import get_admin_user, get_verified_user
+from avexie.models.knowledge import Knowledges
+from avexie.models.models import Models
+from avexie.models.tools import Tools
+from avexie.models.users import UserInfoResponse, Users
+from avexie.utils.auth import get_admin_user, get_verified_user
 from sqlalchemy.ext.asyncio import AsyncSession
 
 log = logging.getLogger(__name__)

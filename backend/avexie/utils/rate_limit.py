@@ -1,7 +1,7 @@
 import time
 from typing import Dict, Optional
 
-from open_webui.env import REDIS_KEY_PREFIX
+from avexie.env import REDIS_KEY_PREFIX
 
 
 class RateLimiter:

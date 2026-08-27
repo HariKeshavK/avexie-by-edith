@@ -1,7 +1,7 @@
 from typing import Any
 
-from open_webui.config import DEFAULT_USER_PERMISSIONS
-from open_webui.models.access_grants import (
+from avexie.config import DEFAULT_USER_PERMISSIONS
+from avexie.models.access_grants import (
     has_anyone_read_access_grant,
     has_public_read_access_grant,
     has_public_write_access_grant,
@@ -9,9 +9,9 @@ from open_webui.models.access_grants import (
     strip_anyone_access_grants,
     strip_user_access_grants,
 )
-from open_webui.models.groups import Groups
-from open_webui.models.users import UserModel
-from open_webui.utils.json_codec import JSONCodec
+from avexie.models.groups import Groups
+from avexie.models.users import UserModel
+from avexie.utils.json_codec import JSONCodec
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -158,7 +158,7 @@ async def has_connection_access(
     - Missing, None, or empty access_grants → private, admin-only
     - access_grants has entries → delegates to ``has_access``
     """
-    from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
+    from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL
 
     if user.role == 'admin' and BYPASS_ADMIN_ACCESS_CONTROL:
         return True
@@ -316,8 +316,8 @@ async def has_base_model_access(
     a shared preset cannot be used to reach a base model the caller could
     not use directly.  Returns ``False`` the moment any hop denies access.
     """
-    from open_webui.models.access_grants import AccessGrants
-    from open_webui.models.models import Models
+    from avexie.models.access_grants import AccessGrants
+    from avexie.models.models import Models
 
     base_model_id = getattr(model_info, 'base_model_id', None)
     seen = {model_info.id}
@@ -368,7 +368,7 @@ async def check_model_access(
     if model_info:
         # Enforce for every non-admin role (including pending); never fail open.
         if user.role != 'admin':
-            from open_webui.models.access_grants import AccessGrants
+            from avexie.models.access_grants import AccessGrants
 
             user_group_ids = {group.id for group in await Groups.get_groups_by_member_id(user.id)}
             if not (

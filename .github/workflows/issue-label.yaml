@@ -38,7 +38,7 @@ jobs:
             // API/CLI-created issues that reproduce the bug report form structure.
             // Only headings distinctive to the bug form (both are required fields there) —
             // generic headings like "Expected Behavior" also appear in freeform feature requests.
-            const bugFormBody = /###\s*(Installation Method|Open WebUI Version)/i.test(body);
+            const bugFormBody = /###\s*(Installation Method|AVEXIE Version)/i.test(body);
 
             if (!bugLikeTitle && !bugFormBody) {
               return;

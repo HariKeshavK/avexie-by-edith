@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
-# Interactive docker compose launcher for Open WebUI.
+# Interactive docker compose launcher for AVEXIE.
 # Supports GPU auto-detection, configurable ports, data mounts, and Playwright.
 # ---------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ if [[ "$enable_playwright" == true ]]; then
   compose_files+=("-f" "docker-compose.playwright.yaml")
 fi
 
-export OPEN_WEBUI_PORT="$webui_port"
+export AVEXIE_PORT="$webui_port"
 
 up_args=("up" "-d" "--remove-orphans" "--force-recreate")
 if [[ "$build_image" == true ]]; then

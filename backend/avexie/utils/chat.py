@@ -8,33 +8,33 @@ from typing import Any, Optional
 
 from aiocache import cached
 from fastapi import HTTPException, Request, status
-from open_webui.env import BYPASS_MODEL_ACCESS_CONTROL, GLOBAL_LOG_LEVEL
-from open_webui.functions import generate_function_chat_completion
-from open_webui.models.models import Models
-from open_webui.models.users import UserModel
-from open_webui.routers.ollama import (
+from avexie.env import BYPASS_MODEL_ACCESS_CONTROL, GLOBAL_LOG_LEVEL
+from avexie.functions import generate_function_chat_completion
+from avexie.models.models import Models
+from avexie.models.users import UserModel
+from avexie.routers.ollama import (
     generate_chat_completion as generate_ollama_chat_completion,
 )
-from open_webui.routers.openai import (
+from avexie.routers.openai import (
     generate_chat_completion as generate_openai_chat_completion,
 )
-from open_webui.routers.pipelines import (
+from avexie.routers.pipelines import (
     process_pipeline_inlet_filter,
     process_pipeline_outlet_filter,
 )
-from open_webui.socket.main import (
+from avexie.socket.main import (
     get_event_call,
     get_event_emitter,
     sio,
 )
-from open_webui.utils.filter import (
+from avexie.utils.filter import (
     get_filter_functions,
     process_filter_functions,
 )
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.models import check_model_access, get_all_models
-from open_webui.utils.payload import convert_payload_openai_to_ollama
-from open_webui.utils.response import (
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.models import check_model_access, get_all_models
+from avexie.utils.payload import convert_payload_openai_to_ollama
+from avexie.utils.response import (
     convert_response_ollama_to_openai,
     convert_streaming_response_ollama_to_openai,
 )

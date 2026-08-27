@@ -7,7 +7,7 @@ import re
 import struct
 from urllib.parse import urlparse
 
-from open_webui.config import (
+from avexie.config import (
     VALKEY_COLLECTION_PREFIX,
     VALKEY_DISTANCE_METRIC,
     VALKEY_HNSW_EF_CONSTRUCTION,
@@ -16,14 +16,14 @@ from open_webui.config import (
     VALKEY_INDEX_TYPE,
     VALKEY_URL,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import process_metadata
-from open_webui.utils.json_codec import JSONCodec
+from avexie.retrieval.vector.utils import process_metadata
+from avexie.utils.json_codec import JSONCodec
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +88,7 @@ MIN_VALKEY_VERSION = (9, 0, 1)
 MIN_SEARCH_MODULE_VERSION = (1, 2, 0)
 
 _VALID_DISTANCE_METRICS = {'COSINE', 'L2', 'IP'}
-_NEVER_MATCH_SENTINEL = '__open_webui_valkey_never_match__'
+_NEVER_MATCH_SENTINEL = '__avexie_valkey_never_match__'
 
 # Compile once at module load — includes `?` which is a single-char wildcard in TAG queries.
 _TAG_SPECIAL_RE = re.compile(r'([,.<>{}\[\]"\':;!@#$%^&*()\-+=~?\\/| \t\n\r])')
@@ -192,7 +192,7 @@ class ValkeyClient(VectorDBBase):
             addresses=[NodeAddress(host=host, port=port)],
             database_id=db if db else None,
             request_timeout=5000,
-            client_name='open_webui_vector_store_client',
+            client_name='avexie_vector_store_client',
         )
         try:
             self.client = GlideClient.create(config)
@@ -205,7 +205,7 @@ class ValkeyClient(VectorDBBase):
             addresses=[NodeAddress(host=host, port=port)],
             database_id=db if db else None,
             request_timeout=10000,  # 10s — HNSW indexing can take 1-4s per vector
-            client_name='open_webui_vector_store_batch_client',
+            client_name='avexie_vector_store_batch_client',
         )
         try:
             self.batch_client = GlideClient.create(batch_config)

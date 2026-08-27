@@ -12,13 +12,13 @@ from typing import Literal
 from uuid import uuid4
 
 from fastapi import Request
-from open_webui.internal.db import get_async_db
-from open_webui.models.chat_messages import ChatMessages
-from open_webui.models.chats import Chat, ChatForm, Chats
-from open_webui.models.users import UserModel, Users
-from open_webui.tasks import has_active_tasks
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import get_message_list
+from avexie.internal.db import get_async_db
+from avexie.models.chat_messages import ChatMessages
+from avexie.models.chats import Chat, ChatForm, Chats
+from avexie.models.users import UserModel, Users
+from avexie.tasks import has_active_tasks
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import get_message_list
 from sqlalchemy import select
 from starlette.datastructures import Headers
 
@@ -229,8 +229,8 @@ async def cancel_timers_for_chat(
 async def execute_due_timer(app, timer_id: str, claim_id: str | None = None) -> None:
     lock = _timer_locks.setdefault(timer_id, asyncio.Lock())
     async with lock:
-        from open_webui.socket.main import sio
-        from open_webui.utils.subagents import _parent_locks
+        from avexie.socket.main import sio
+        from avexie.utils.subagents import _parent_locks
 
         timer = await Chats.get_chat_by_id(timer_id)
         if not timer:

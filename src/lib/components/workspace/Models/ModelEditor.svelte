@@ -81,7 +81,7 @@
 		base_model_id: null,
 		name: '',
 		meta: {
-			// LICENSE covers this Open WebUI fallback logo.
+			// LICENSE covers this AVEXIE fallback logo.
 			// Do not alter, remove, obscure, or replace it except as LICENSE permits:
 			// https://docs.openwebui.com/license.
 			profile_image_url: `${WEBUI_BASE_URL}/static/favicon.png`,
@@ -604,7 +604,7 @@
 						<div class="flex w-full flex-col gap-3">
 							<div class="flex w-full min-w-0 items-center gap-3 py-0.5">
 								<div class="flex min-w-0 flex-1 items-center gap-3">
-									<!-- LICENSE covers this Open WebUI fallback logo.
+									<!-- LICENSE covers this AVEXIE fallback logo.
 									Do not alter, remove, obscure, or replace it except as LICENSE permits:
 									https://docs.openwebui.com/license. -->
 									<div class="group relative size-12 shrink-0 md:size-14">

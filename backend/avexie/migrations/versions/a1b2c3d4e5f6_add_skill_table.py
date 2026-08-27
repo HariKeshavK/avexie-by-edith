@@ -10,7 +10,7 @@ from typing import Sequence, Union
 
 import sqlalchemy as sa
 from alembic import op
-from open_webui.migrations.util import get_existing_tables
+from avexie.migrations.util import get_existing_tables
 
 revision: str = 'a1b2c3d4e5f6'
 down_revision: Union[str, None] = 'f1e2d3c4b5a6'

@@ -2,10 +2,10 @@ import time
 import uuid
 from typing import Optional
 
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.models.channels import ChannelMember, Channels
-from open_webui.models.tags import Tag, TagModel, Tags
-from open_webui.models.users import User, UserNameResponse, Users
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.models.channels import ChannelMember, Channels
+from avexie.models.tags import Tag, TagModel, Tags
+from avexie.models.users import User, UserNameResponse, Users
 from pydantic import BaseModel, ConfigDict, field_validator
 from sqlalchemy import JSON, BigInteger, Boolean, Column, String, Text, and_, delete, func, or_, select, text
 from sqlalchemy.ext.asyncio import AsyncSession

@@ -3,10 +3,10 @@ import logging
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.automations import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.automations import (
     AutomationForm,
     AutomationListResponse,
     AutomationModel,
@@ -15,13 +15,13 @@ from open_webui.models.automations import (
     AutomationRuns,
     Automations,
 )
-from open_webui.models.access_grants import AccessGrants, has_public_write_access_grant
-from open_webui.models.channels import Channels
-from open_webui.models.config import Config
-from open_webui.models.folders import Folders
-from open_webui.utils.access_control import has_permission
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.automations import (
+from avexie.models.access_grants import AccessGrants, has_public_write_access_grant
+from avexie.models.channels import Channels
+from avexie.models.config import Config
+from avexie.models.folders import Folders
+from avexie.utils.access_control import has_permission
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.automations import (
     execute_automation,
     next_n_runs_ns,
     next_run_ns,

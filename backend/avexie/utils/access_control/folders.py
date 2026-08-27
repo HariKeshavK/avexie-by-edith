@@ -1,5 +1,5 @@
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.folders import FolderModel, Folders
+from avexie.models.access_grants import AccessGrants
+from avexie.models.folders import FolderModel, Folders
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

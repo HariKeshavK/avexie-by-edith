@@ -3,7 +3,7 @@
 import re
 from urllib.parse import urlparse
 
-from open_webui.env import (
+from avexie.env import (
     PROFILE_IMAGE_ALLOWED_MIME_TYPES,
     PROFILE_IMAGE_MAX_DATA_URI_SIZE,
 )
@@ -18,7 +18,7 @@ _SAFE_DATA_URI_RE = re.compile(rf'^data:image/({_mime_suffixes});base64,', re.IG
 # static-asset paths OWUI itself assigns; no prefix/wildcard matching is
 # used so that arbitrary relative paths cannot trigger authenticated GETs
 # against internal endpoints when rendered as ``<img>`` sources.
-# LICENSE covers the Open WebUI favicon fallback paths below. Do not alter,
+# LICENSE covers the AVEXIE favicon fallback paths below. Do not alter,
 # remove, obscure, or replace them except as LICENSE permits:
 # https://docs.openwebui.com/license.
 _SAFE_STATIC_PATHS = frozenset(

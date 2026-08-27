@@ -1,8 +1,8 @@
 from numbers import Number
 from uuid import uuid4
 
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import (
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import (
     openai_chat_chunk_message_template,
     openai_chat_completion_message_template,
 )

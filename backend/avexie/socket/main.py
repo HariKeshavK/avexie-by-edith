@@ -8,10 +8,10 @@ import time
 
 import pycrdt as Y
 import socketio
-from open_webui.config import (
+from avexie.config import (
     CORS_ALLOW_ORIGIN,
 )
-from open_webui.env import (
+from avexie.env import (
     ENABLE_WEBSOCKET_SUPPORT,
     GLOBAL_LOG_LEVEL,
     REDIS_KEY_PREFIX,
@@ -29,20 +29,20 @@ from open_webui.env import (
     WEBSOCKET_SERVER_PING_INTERVAL,
     WEBSOCKET_SERVER_PING_TIMEOUT,
 )
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.channels import Channels
-from open_webui.models.chats import Chats
-from open_webui.models.folders import Folders
-from open_webui.models.notes import Notes, NoteUpdateForm
-from open_webui.models.users import UserNameResponse, Users
-from open_webui.socket.utils import RedisDict, RedisLock, YdocManager
-from open_webui.tasks import create_task, stop_item_tasks
-from open_webui.utils.access_control import has_permission
-from open_webui.utils.auth import get_verified_user_by_token
-from open_webui.utils.chat_id import is_saved_chat_id
-from open_webui.utils.json_codec import SOCKETIO_JSON
-from open_webui.utils.misc import get_output_text
-from open_webui.utils.redis import (
+from avexie.models.access_grants import AccessGrants
+from avexie.models.channels import Channels
+from avexie.models.chats import Chats
+from avexie.models.folders import Folders
+from avexie.models.notes import Notes, NoteUpdateForm
+from avexie.models.users import UserNameResponse, Users
+from avexie.socket.utils import RedisDict, RedisLock, YdocManager
+from avexie.tasks import create_task, stop_item_tasks
+from avexie.utils.access_control import has_permission
+from avexie.utils.auth import get_verified_user_by_token
+from avexie.utils.chat_id import is_saved_chat_id
+from avexie.utils.json_codec import SOCKETIO_JSON
+from avexie.utils.misc import get_output_text
+from avexie.utils.redis import (
     build_sentinel_url,
     get_redis_connection,
     get_sentinels_from_env,
@@ -598,7 +598,7 @@ async def chat_events(sid, data):
             room=f'user:{user["id"]}',
         )
         try:
-            from open_webui.utils.timers import cancel_timers_for_chat
+            from avexie.utils.timers import cancel_timers_for_chat
 
             await cancel_timers_for_chat(data['chat_id'], 'chat.read', user['id'])
         except Exception:
@@ -939,7 +939,7 @@ async def _make_channel_emitter(request_info):
     THROTTLE_INTERVAL = 0.15  # ~6 updates/sec
 
     async def _emit_channel_update(content: str, done: bool = False, output: list | None = None):
-        from open_webui.models.messages import MessageForm, Messages
+        from avexie.models.messages import MessageForm, Messages
 
         msg = await Messages.get_message_by_id(message_id)
         if not msg or msg.channel_id != channel_id:
@@ -989,7 +989,7 @@ async def _make_channel_emitter(request_info):
                 await _emit_channel_update(content, done, output if isinstance(output, list) else None)
 
         elif event_type == 'response:completion':
-            from open_webui.utils.middleware import handle_responses_streaming_event
+            from avexie.utils.middleware import handle_responses_streaming_event
 
             data = event_data.get('data', {})
             state['output'], _ = handle_responses_streaming_event(data, state['output'])

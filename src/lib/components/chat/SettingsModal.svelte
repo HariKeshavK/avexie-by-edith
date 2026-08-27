@@ -39,7 +39,6 @@
 	import UsageIcon from '../icons/UsageIcon.svelte';
 	import AdminTabIcon from '$lib/components/admin/Settings/AdminTabIcon.svelte';
 	import AdminGeneral from '$lib/components/admin/Settings/General.svelte';
-	import AdminAuthentication from '$lib/components/admin/Settings/Authentication.svelte';
 	import AdminConnections from '$lib/components/admin/Settings/Connections.svelte';
 	import AdminModels from '$lib/components/admin/Settings/Models.svelte';
 	import AdminSubagents from '$lib/components/admin/Settings/Subagents.svelte';
@@ -47,11 +46,9 @@
 	import AdminAnalytics from '$lib/components/admin/Analytics.svelte';
 	import AdminIntegrations from '$lib/components/admin/Settings/Integrations.svelte';
 	import AdminDocuments from '$lib/components/admin/Settings/Documents.svelte';
-	import AdminWebSearch from '$lib/components/admin/Settings/WebSearch.svelte';
 	import AdminCodeExecution from '$lib/components/admin/Settings/CodeExecution.svelte';
 	import AdminInterface from '$lib/components/admin/Settings/Interface.svelte';
 	import AdminAudio from '$lib/components/admin/Settings/Audio.svelte';
-	import AdminImages from '$lib/components/admin/Settings/Images.svelte';
 	import AdminPipelines from '$lib/components/admin/Settings/Pipelines.svelte';
 	import AdminDatabase from '$lib/components/admin/Settings/Database.svelte';
 
@@ -151,7 +148,6 @@
 	};
 	const adminSettingGroups: Record<string, string> = {
 		'admin:general': 'System',
-		'admin:authentication': 'System',
 		'admin:connections': 'AI',
 		'admin:models': 'AI',
 		'admin:subagents': 'AI',
@@ -159,12 +155,10 @@
 		'admin:analytics': 'Quality',
 		'admin:integrations': 'Tools',
 		'admin:documents': 'Tools',
-		'admin:web': 'Tools',
 		'admin:code-execution': 'Tools',
 		'admin:pipelines': 'Tools',
 		'admin:interface': 'Experience',
 		'admin:audio': 'Experience',
-		'admin:images': 'Experience',
 		'admin:db': 'Data'
 	};
 	const settingGroupTitle = (tabId: string) =>
@@ -630,12 +624,12 @@
 			keywords: [
 				'about app',
 				'about me',
-				'about open webui',
+				'about avexie',
 				'about page',
 				'about us',
 				'aboutapp',
 				'aboutme',
-				'aboutopenwebui',
+				'aboutavexie',
 				'aboutpage',
 				'aboutus',
 				'check for updates',
@@ -681,21 +675,6 @@
 			keywords: ['general', 'admin', 'settings', 'version', 'update', 'community', 'channels']
 		},
 		{
-			id: 'admin:authentication',
-			title: 'Authentication',
-			keywords: [
-				'authentication',
-				'auth',
-				'login',
-				'signup',
-				'ldap',
-				'oauth',
-				'oidc',
-				'sso',
-				'roles'
-			]
-		},
-		{
 			id: 'admin:connections',
 			title: 'Connections',
 			keywords: [
@@ -739,11 +718,6 @@
 			keywords: ['audio', 'voice', 'speech', 'tts', 'stt', 'whisper', 'deepgram', 'azure']
 		},
 		{
-			id: 'admin:images',
-			title: 'Images',
-			keywords: ['images', 'generation', 'dalle', 'stable diffusion', 'comfyui', 'automatic1111']
-		},
-		{
 			id: 'admin:evaluations',
 			title: 'Evaluations',
 			keywords: ['evaluations', 'feedback', 'rating', 'arena', 'leaderboard', 'preference']
@@ -762,11 +736,6 @@
 			id: 'admin:documents',
 			title: 'Documents',
 			keywords: ['documents', 'files', 'rag', 'knowledge', 'upload', 'embedding', 'vector db']
-		},
-		{
-			id: 'admin:web',
-			title: 'Web Search',
-			keywords: ['web search', 'google', 'bing', 'duckduckgo', 'serp', 'searxng', 'tavily', 'exa']
 		},
 		{
 			id: 'admin:code-execution',
@@ -1263,8 +1232,6 @@
 				<About />
 			{:else if selectedTab === 'admin:general'}
 				<AdminGeneral saveHandler={adminConfigSaveHandler} />
-			{:else if selectedTab === 'admin:authentication'}
-				<AdminAuthentication />
 			{:else if selectedTab === 'admin:connections'}
 				<AdminConnections
 					on:save={() => {
@@ -1283,8 +1250,6 @@
 				<AdminIntegrations {saveSettings} />
 			{:else if selectedTab === 'admin:documents'}
 				<AdminDocuments on:save={adminConfigSaveHandler} />
-			{:else if selectedTab === 'admin:web'}
-				<AdminWebSearch saveHandler={adminConfigSaveHandler} />
 			{:else if selectedTab === 'admin:code-execution'}
 				<AdminCodeExecution saveHandler={adminConfigSaveHandler} />
 			{:else if selectedTab === 'admin:interface'}
@@ -1296,12 +1261,6 @@
 			{:else if selectedTab === 'admin:audio'}
 				<AdminAudio
 					saveHandler={() => {
-						toast.success($i18n.t('Settings saved successfully!'));
-					}}
-				/>
-			{:else if selectedTab === 'admin:images'}
-				<AdminImages
-					on:save={() => {
 						toast.success($i18n.t('Settings saved successfully!'));
 					}}
 				/>

@@ -8,7 +8,7 @@ import datetime as dt
 import logging
 from zoneinfo import ZoneInfo
 
-from open_webui.utils.automations import _resolve_tz
+from avexie.utils.automations import _resolve_tz
 
 log = logging.getLogger(__name__)
 

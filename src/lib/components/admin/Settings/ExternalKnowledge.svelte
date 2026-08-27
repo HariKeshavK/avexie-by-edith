@@ -755,11 +755,11 @@
 								</div>
 
 								<div class="text-xs text-gray-500 mt-1">
-									<!-- LICENSE covers this Open WebUI wordmark.
+									<!-- LICENSE covers this AVEXIE wordmark.
 										Do not alter, remove, obscure, or replace it except as LICENSE permits:
-										https://docs.openwebui.com/license. -->
+										#license. -->
 									{$i18n.t(
-										'External vectors must be generated with the same embedding model configured in Open WebUI.'
+										'External vectors must be generated with the same embedding model configured in AVEXIE.'
 									)}
 								</div>
 							</div>

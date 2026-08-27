@@ -148,9 +148,9 @@
 											aria-hidden="true"
 											draggable="false"
 											on:error={(e) => {
-												// LICENSE covers this Open WebUI fallback logo.
+												// LICENSE covers this AVEXIE fallback logo.
 												// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-												// https://docs.openwebui.com/license.
+												// #license.
 												e.currentTarget.src = '/favicon.png';
 											}}
 										/>
@@ -212,7 +212,7 @@
 									By
 									{#if models[selectedModelIdx]?.info?.meta?.user.community}
 										<a
-											href="https://openwebui.com/m/{models[selectedModelIdx]?.info?.meta?.user
+											href="#/m/{models[selectedModelIdx]?.info?.meta?.user
 												.username}"
 											>{models[selectedModelIdx]?.info?.meta?.user.name
 												? models[selectedModelIdx]?.info?.meta?.user.name

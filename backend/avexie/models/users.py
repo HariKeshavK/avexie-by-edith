@@ -5,10 +5,10 @@ from __future__ import annotations
 import datetime
 import time
 from typing import Optional
-from open_webui.env import DATABASE_USER_ACTIVE_STATUS_UPDATE_INTERVAL
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.utils.misc import throttle
-from open_webui.utils.validate import validate_profile_image_url
+from avexie.env import DATABASE_USER_ACTIVE_STATUS_UPDATE_INTERVAL
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.utils.misc import throttle
+from avexie.utils.validate import validate_profile_image_url
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from sqlalchemy import (
     JSON,
@@ -449,8 +449,8 @@ class UsersTable:
         """Paginated user listing with optional filters and sort."""
         async with get_async_db_context(db) as session:
             # Deferred imports to avoid circular dependencies
-            from open_webui.models.channels import ChannelMember
-            from open_webui.models.groups import GroupMember
+            from avexie.models.channels import ChannelMember
+            from avexie.models.groups import GroupMember
 
             # Join GroupMember so we can order by group_id when requested
             stmt = select(User)
@@ -585,7 +585,7 @@ class UsersTable:
 
     async def get_users_by_group_id(self, group_id: str, db: AsyncSession | None = None) -> list[UserModel]:
         async with get_async_db_context(db) as session:
-            from open_webui.models.groups import GroupMember
+            from avexie.models.groups import GroupMember
 
             result = await session.execute(
                 select(User).join(GroupMember, User.id == GroupMember.user_id).filter(GroupMember.group_id == group_id)
@@ -733,8 +733,8 @@ class UsersTable:
             return UserModel.model_validate(user)
 
     async def delete_user_by_id(self, id: str, db: AsyncSession | None = None) -> bool:
-        from open_webui.models.chats import Chats
-        from open_webui.models.groups import Groups
+        from avexie.models.chats import Chats
+        from avexie.models.groups import Groups
 
         # Remove User from Groups
         await Groups.remove_user_from_all_groups(id)

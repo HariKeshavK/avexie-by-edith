@@ -3,8 +3,8 @@ import time
 import uuid
 from typing import Optional
 
-from open_webui.internal.db import Base, JSONField, get_async_db_context
-from open_webui.models.users import User, UserModel
+from avexie.internal.db import Base, JSONField, get_async_db_context
+from avexie.models.users import User, UserModel
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, BigInteger, Boolean, Column, Text, delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession

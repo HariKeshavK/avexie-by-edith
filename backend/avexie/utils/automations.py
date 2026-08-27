@@ -28,19 +28,19 @@ from zoneinfo import ZoneInfo
 from dateutil.rrule import HOURLY, MINUTELY, SECONDLY, rruleset, rrulestr
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_db
-from open_webui.models.automations import AutomationModel, AutomationRuns, Automations
-from open_webui.models.chats import ChatForm, Chats
-from open_webui.models.config import Config
-from open_webui.models.folders import Folders
-from open_webui.models.messages import MessageForm
-from open_webui.models.users import Users
-from open_webui.utils.auth import create_token
-from open_webui.utils.misc import parse_duration
-from open_webui.utils.task import prompt_template
-from open_webui.utils.terminals import get_terminal_server_url
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_db
+from avexie.models.automations import AutomationModel, AutomationRuns, Automations
+from avexie.models.chats import ChatForm, Chats
+from avexie.models.config import Config
+from avexie.models.folders import Folders
+from avexie.models.messages import MessageForm
+from avexie.models.users import Users
+from avexie.utils.auth import create_token
+from avexie.utils.misc import parse_duration
+from avexie.utils.task import prompt_template
+from avexie.utils.terminals import get_terminal_server_url
 from starlette.datastructures import Headers
 
 log = logging.getLogger(__name__)
@@ -229,7 +229,7 @@ async def scheduler_worker_loop(app) -> None:
             now = time.monotonic()
             # ── Timers ──
             try:
-                from open_webui.utils.timers import claim_due_timers, execute_due_timer
+                from avexie.utils.timers import claim_due_timers, execute_due_timer
 
                 for timer_id, claim_id in await claim_due_timers(int(time.time_ns()), limit=10):
                     asyncio.create_task(execute_due_timer(app, timer_id, claim_id))
@@ -338,12 +338,12 @@ async def _resolve_model_defaults(app, model_id: str) -> tuple[list[str], dict, 
 async def _set_terminal_cwd(app, server_id: str, user, cwd: str, chat_id: str) -> None:
     """Set the working directory on a terminal server via the proxy.
 
-    Routes through the open-webui terminal proxy endpoint so that
+    Routes through the AVEXIE terminal proxy endpoint so that
     auth headers, orchestrator policy routing, and X-User-Id are
     handled correctly — same path the frontend uses.
     """
     import aiohttp
-    from open_webui.env import AIOHTTP_CLIENT_SESSION_SSL
+    from avexie.env import AIOHTTP_CLIENT_SESSION_SSL
 
     connections = getattr(getattr(app, 'state', None), 'config', None)
     if connections is None:
@@ -399,7 +399,7 @@ async def _execute_channel_automation(
     model = getattr(app.state, 'MODELS', {}).get(model_id, {})
     request = _build_request(app, token=token)
 
-    from open_webui.routers.channels import new_message_handler
+    from avexie.routers.channels import new_message_handler
 
     async with get_async_db() as db:
         user_message, channel = await new_message_handler(
@@ -462,7 +462,7 @@ async def _execute_channel_automation(
 
     await app.state.CHAT_COMPLETION_HANDLER(request, form_data, user=user)
 
-    from open_webui.socket.main import sio
+    from avexie.socket.main import sio
 
     await sio.emit(
         'automation:result',
@@ -506,7 +506,7 @@ async def execute_automation(app, automation: AutomationModel) -> None:
             return
 
         # Re-gate the rehydrated owner: a demoted/deactivated or de-permissioned owner must not run.
-        from open_webui.utils.access_control import has_permission
+        from avexie.utils.access_control import has_permission
 
         if user.role not in ('user', 'admin') or (
             user.role != 'admin'
@@ -602,7 +602,7 @@ async def execute_automation(app, automation: AutomationModel) -> None:
             return
 
         # Notify frontend to refresh chat list
-        from open_webui.socket.main import sio
+        from avexie.socket.main import sio
 
         await sio.emit(
             'events',
@@ -650,7 +650,7 @@ async def execute_automation(app, automation: AutomationModel) -> None:
         await app.state.CHAT_COMPLETION_HANDLER(request, form_data, user=user)
 
         # Notify user
-        from open_webui.socket.main import sio
+        from avexie.socket.main import sio
 
         await sio.emit(
             'automation:result',
@@ -695,8 +695,8 @@ async def _check_calendar_alerts(app) -> None:
     De-duplication is DB-backed via meta.alerted_at — survives restarts
     and works across multiple instances.
     """
-    from open_webui.models.calendar import CalendarEvents, CalendarEventUpdateForm
-    from open_webui.socket.main import sio
+    from avexie.models.calendar import CalendarEvents, CalendarEventUpdateForm
+    from avexie.socket.main import sio
 
     now_ns = int(time.time_ns())
     default_lookahead_ns = CALENDAR_ALERT_LOOKAHEAD_MINUTES * 60 * 1_000_000_000

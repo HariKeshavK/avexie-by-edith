@@ -40,9 +40,9 @@
 {#if show}
 	<div class="relative h-screen max-h-[100dvh] w-full overflow-hidden text-white">
 		<div class="fixed top-6 left-6 z-50 sm:top-10 sm:left-10">
-			<!-- LICENSE covers this Open WebUI onboarding logo.
+			<!-- LICENSE covers this AVEXIE onboarding logo.
 			Do not alter, remove, obscure, or replace it except as LICENSE permits:
-			https://docs.openwebui.com/license. -->
+			#license. -->
 			<img
 				id="logo"
 				crossorigin="anonymous"
@@ -71,11 +71,11 @@
 		<div class="relative z-10 flex h-screen max-h-[100dvh] w-full">
 			<div class="flex w-full flex-col justify-end px-6 pb-8 sm:px-10 sm:pb-10 lg:px-16 lg:pb-14">
 				<div class="max-w-3xl">
-					<!-- LICENSE covers this Open WebUI welcome identifier.
+					<!-- LICENSE covers this AVEXIE welcome identifier.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
+					#license. -->
 					<div class="mb-4 text-[0.6875rem] font-medium tracking-[0.18em] uppercase opacity-35">
-						Open WebUI
+						AVEXIE
 					</div>
 
 					<h1 class="m-0 max-w-3xl text-2xl leading-[1.15] font-light tracking-tight lg:text-4xl">
@@ -111,7 +111,7 @@
 
 						<a
 							class="inline-flex items-center text-sm text-white/60 transition hover:text-white"
-							href="https://docs.openwebui.com/"
+							href="#"
 							target="_blank"
 							rel="noopener noreferrer"
 						>

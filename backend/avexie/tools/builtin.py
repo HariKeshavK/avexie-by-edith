@@ -1,5 +1,5 @@
 """
-Built-in tools for Open WebUI.
+Built-in tools for AVEXIE.
 
 These tools are automatically available when native function calling is enabled.
 
@@ -13,30 +13,24 @@ from typing import Literal, Optional
 
 from fastapi import HTTPException, Request
 
-from open_webui.config import RAG_EMBEDDING_QUERY_PREFIX
-from open_webui.env import (
+from avexie.config import RAG_EMBEDDING_QUERY_PREFIX
+from avexie.env import (
     KNOWLEDGE_GREP_MAX_MATCHES,
     VIEW_FILE_DEFAULT_MAX_CHARS,
     VIEW_FILE_MAX_CHARS,
 )
-from open_webui.events import EVENTS, publish_event
-from open_webui.models.channels import Channel, ChannelMember, Channels
-from open_webui.models.chats import Chats, chat_search_content_query, chat_search_terms
-from open_webui.models.config import Config
-from open_webui.models.groups import Groups
-from open_webui.models.memories import Memories
-from open_webui.models.messages import Message, Messages
-from open_webui.models.notes import Notes
-from open_webui.models.users import UserModel
-from open_webui.retrieval.utils import get_content_from_url
-from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-from open_webui.routers.images import (
-    CreateImageForm,
-    EditImageForm,
-    image_edits,
-    image_generations,
-)
-from open_webui.routers.memories import (
+from avexie.events import EVENTS, publish_event
+from avexie.models.channels import Channel, ChannelMember, Channels
+from avexie.models.chats import Chats, chat_search_content_query, chat_search_terms
+from avexie.models.config import Config
+from avexie.models.groups import Groups
+from avexie.models.memories import Memories
+from avexie.models.messages import Message, Messages
+from avexie.models.notes import Notes
+from avexie.models.users import UserModel
+from avexie.retrieval.utils import get_content_from_url
+from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+from avexie.routers.memories import (
     AddMemoryForm,
     ListMemoryPathsForm,
     MemoryUpdateModel,
@@ -45,29 +39,28 @@ from open_webui.routers.memories import (
     UpdateMemoriesForm,
     update_memory_by_id,
 )
-from open_webui.routers.memories import (
+from avexie.routers.memories import (
     add_memory as _add_memory,
 )
-from open_webui.routers.memories import (
+from avexie.routers.memories import (
     list_memory_paths as _list_memory_paths,
 )
-from open_webui.routers.memories import (
+from avexie.routers.memories import (
     read_memory_path as _read_memory_path,
 )
-from open_webui.routers.memories import (
+from avexie.routers.memories import (
     search_memories as _search_memories,
 )
-from open_webui.routers.memories import (
+from avexie.routers.memories import (
     update_memories as _update_memories,
 )
-from open_webui.routers.retrieval import search_web as _search_web
-from open_webui.socket.main import sio
-from open_webui.tasks import stop_item_tasks
-from open_webui.tools.knowledge_fs import kb_exec  # noqa: F401 — re-exported
-from open_webui.utils.chat_id import is_saved_chat_id
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.notifications import notify_target
-from open_webui.utils.sanitize import sanitize_code
+from avexie.socket.main import sio
+from avexie.tasks import stop_item_tasks
+from avexie.tools.knowledge_fs import kb_exec  # noqa: F401 — re-exported
+from avexie.utils.chat_id import is_saved_chat_id
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.notifications import notify_target
+from avexie.utils.sanitize import sanitize_code
 
 log = logging.getLogger(__name__)
 
@@ -78,7 +71,7 @@ async def _has_write_access_to_note(note, user_id: str) -> bool:
     if note.user_id == user_id:
         return True
 
-    from open_webui.models.access_grants import AccessGrants
+    from avexie.models.access_grants import AccessGrants
 
     user_group_ids = [group.id for group in await Groups.get_groups_by_member_id(user_id)]
     return await AccessGrants.has_access(
@@ -113,7 +106,7 @@ async def _has_read_access_to_file(
         return True
     if model_knowledge and any(item.get('type') == 'file' and item.get('id') == file.id for item in model_knowledge):
         return True
-    from open_webui.utils.access_control.files import has_access_to_file
+    from avexie.utils.access_control.files import has_access_to_file
 
     return await has_access_to_file(
         file_id=file.id,
@@ -146,10 +139,10 @@ async def notify(
         return 'Notification failed: user not found.'
 
     app_name = getattr(getattr(__request__, 'app', None), 'state', None)
-    # LICENSE covers this Open WebUI notification identifier.
+    # LICENSE covers this AVEXIE notification identifier.
     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
     # https://docs.openwebui.com/license.
-    app_name = getattr(app_name, 'WEBUI_NAME', 'Open WebUI')
+    app_name = getattr(app_name, 'WEBUI_NAME', 'AVEXIE')
     try:
         result = await notify_target(user_id, message, target=target, title=title, app_name=app_name)
         return f'Notification sent to {result.get("target_id")}.'
@@ -282,220 +275,6 @@ async def calculate_timestamp(
         return JSONCodec.dumps(result, ensure_ascii=False)
     except Exception as e:
         log.exception(f'calculate_timestamp error: {e}')
-        return JSONCodec.dumps({'error': str(e)})
-
-
-# =============================================================================
-# WEB SEARCH TOOLS
-# =============================================================================
-
-
-async def search_web(
-    query: str,
-    count: Optional[int] = None,
-    __request__: Request = None,
-    __user__: dict = None,
-) -> str:
-    """
-    Search the public web for information. Best for current events, external references,
-    or topics not covered in internal documents.
-
-    :param query: The search query to look up
-    :param count: Number of results to return (default: admin-configured value)
-    :return: JSON with search results containing title, link, and snippet for each result
-    """
-    if __request__ is None:
-        return JSONCodec.dumps({'error': 'Request context not available'})
-
-    try:
-        engine = await Config.get('web.search.engine')
-        user = UserModel(**__user__) if __user__ else None
-
-        configured = await Config.get('web.search.result_count')
-        max_count = 5 if configured is None else configured
-        count = max(1, min(count, max_count)) if count is not None else max_count
-
-        results = await _search_web(__request__, engine, query, user)
-
-        # Limit results
-        results = results[:count] if results else []
-
-        return JSONCodec.dumps(
-            [{'title': r.title, 'link': r.link, 'snippet': r.snippet} for r in results],
-            ensure_ascii=False,
-        )
-    except Exception as e:
-        log.exception(f'search_web error: {e}')
-        return JSONCodec.dumps({'error': str(e)})
-
-
-async def fetch_url(
-    url: str,
-    __request__: Request = None,
-    __user__: dict = None,
-) -> str:
-    """
-    Fetch and extract the main text content from a web page URL.
-
-    :param url: The URL to fetch content from
-    :return: The extracted text content from the page
-    """
-    if __request__ is None:
-        return JSONCodec.dumps({'error': 'Request context not available'})
-
-    try:
-        content, _ = await get_content_from_url(__request__, url)
-
-        # Truncate if configured (WEB_FETCH_MAX_CONTENT_LENGTH)
-        # Guard: content may be None if the web loader silently failed
-        if content is not None:
-            max_length = await Config.get('web.fetch.max_content_length')
-            if max_length and max_length > 0 and len(content) > max_length:
-                content = content[:max_length] + '\n\n[Content truncated...]'
-        else:
-            content = ''
-
-        return content
-    except Exception as e:
-        log.warning(f'fetch_url error: {e}')
-        return JSONCodec.dumps({'error': str(e)})
-
-
-# =============================================================================
-# IMAGE GENERATION TOOLS
-# =============================================================================
-
-
-async def generate_image(
-    prompt: str,
-    __request__: Request = None,
-    __user__: dict = None,
-    __event_emitter__: callable = None,
-    __chat_id__: str = None,
-    __message_id__: str = None,
-) -> str:
-    """
-    Generate an image based on a text prompt.
-
-    :param prompt: A detailed description of the image to generate
-    :return: Confirmation that the image was generated, or an error message
-    """
-    if __request__ is None:
-        return JSONCodec.dumps({'error': 'Request context not available'})
-
-    try:
-        user = UserModel(**__user__) if __user__ else None
-
-        images = await image_generations(
-            request=__request__,
-            form_data=CreateImageForm(prompt=prompt),
-            user=user,
-        )
-
-        # Prepare file entries for the images
-        image_files = [{'type': 'image', 'url': img['url']} for img in images]
-
-        # Persist files to DB if chat context is available
-        if is_saved_chat_id(__chat_id__) and __message_id__ and images:
-            db_files = await Chats.add_message_files_by_id_and_message_id(
-                __chat_id__,
-                __message_id__,
-                image_files,
-            )
-            if db_files is not None:
-                image_files = db_files
-
-        # Emit the images to the UI if event emitter is available
-        if __event_emitter__ and image_files:
-            await __event_emitter__(
-                {
-                    'type': 'chat:message:files',
-                    'data': {
-                        'files': image_files,
-                    },
-                }
-            )
-            # Return a message indicating the image is already displayed
-            return JSONCodec.dumps(
-                {
-                    'status': 'success',
-                    'message': 'The image has been successfully generated and is already visible to the user in the chat. You do not need to display or embed the image again - just acknowledge that it has been created.',
-                    'images': images,
-                },
-                ensure_ascii=False,
-            )
-
-        return JSONCodec.dumps({'status': 'success', 'images': images}, ensure_ascii=False)
-    except Exception as e:
-        log.exception(f'generate_image error: {e}')
-        return JSONCodec.dumps({'error': str(e)})
-
-
-async def edit_image(
-    prompt: str,
-    image_urls: list[str],
-    __request__: Request = None,
-    __user__: dict = None,
-    __event_emitter__: callable = None,
-    __chat_id__: str = None,
-    __message_id__: str = None,
-) -> str:
-    """
-    Transform one or more existing images according to a text prompt.
-    Supports targeted edits such as adding, removing, replacing, inpainting, extending, or compositing image content.
-
-    :param prompt: A description of the transformation to apply to the provided images
-    :param image_urls: Source image URLs to modify or use as composition inputs
-    :return: Confirmation that the images were edited, or an error message
-    """
-    if __request__ is None:
-        return JSONCodec.dumps({'error': 'Request context not available'})
-
-    try:
-        user = UserModel(**__user__) if __user__ else None
-
-        images = await image_edits(
-            request=__request__,
-            form_data=EditImageForm(prompt=prompt, image=image_urls),
-            user=user,
-        )
-
-        # Prepare file entries for the images
-        image_files = [{'type': 'image', 'url': img['url']} for img in images]
-
-        # Persist files to DB if chat context is available
-        if is_saved_chat_id(__chat_id__) and __message_id__ and images:
-            db_files = await Chats.add_message_files_by_id_and_message_id(
-                __chat_id__,
-                __message_id__,
-                image_files,
-            )
-            if db_files is not None:
-                image_files = db_files
-
-        # Emit the images to the UI if event emitter is available
-        if __event_emitter__ and image_files:
-            await __event_emitter__(
-                {
-                    'type': 'chat:message:files',
-                    'data': {
-                        'files': image_files,
-                    },
-                }
-            )
-            # Return a message indicating the image is already displayed
-            return JSONCodec.dumps(
-                {
-                    'status': 'success',
-                    'message': 'The edited image has been successfully generated and is already visible to the user in the chat. You do not need to display or embed the image again - just acknowledge that it has been created.',
-                    'images': images,
-                },
-                ensure_ascii=False,
-            )
-
-        return JSONCodec.dumps({'status': 'success', 'images': images}, ensure_ascii=False)
-    except Exception as e:
-        log.exception(f'edit_image error: {e}')
         return JSONCodec.dumps({'error': str(e)})
 
 
@@ -646,7 +425,7 @@ async def execute_code(
         code = sanitize_code(code)
 
         # Import blocked modules from config (same as middleware)
-        from open_webui.config import CODE_INTERPRETER_BLOCKED_MODULES
+        from avexie.config import CODE_INTERPRETER_BLOCKED_MODULES
 
         # Add import blocking code if there are blocked modules
         if CODE_INTERPRETER_BLOCKED_MODULES:
@@ -710,7 +489,7 @@ async def execute_code(
                 result = str(output) if output else ''
 
         elif engine == 'jupyter':
-            from open_webui.utils.code_interpreter import execute_code_jupyter
+            from avexie.utils.code_interpreter import execute_code_jupyter
 
             jupyter_auth = await Config.get('code_interpreter.jupyter.auth')
 
@@ -732,8 +511,8 @@ async def execute_code(
         # Handle image outputs (base64 encoded) - replace with uploaded URLs
         # Get actual user object for image upload (upload_image requires user.id attribute)
         if __user__ and __user__.get('id'):
-            from open_webui.models.users import Users
-            from open_webui.utils.files import get_image_url_from_base64
+            from avexie.models.users import Users
+            from avexie.utils.files import get_image_url_from_base64
 
             user = await Users.get_user_by_id(__user__['id'])
 
@@ -1236,7 +1015,7 @@ async def view_note(
         user_id = __user__.get('id')
         user_group_ids = [group.id for group in await Groups.get_groups_by_member_id(user_id)]
 
-        from open_webui.models.access_grants import AccessGrants
+        from avexie.models.access_grants import AccessGrants
 
         if (
             __user__.get('role') != 'admin'
@@ -1291,7 +1070,7 @@ async def write_note(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.notes import NoteForm
+        from avexie.models.notes import NoteForm
 
         user_id = __user__.get('id')
 
@@ -1346,7 +1125,7 @@ async def replace_note_content(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.notes import NoteUpdateForm
+        from avexie.models.notes import NoteUpdateForm
 
         note = await Notes.get_note_by_id(note_id)
 
@@ -1683,7 +1462,7 @@ async def delegate_task(
     if getattr(__request__.state, 'internal', False) is True:
         return 'Error: sub-agents cannot delegate recursively.'
 
-    from open_webui.utils.subagents import delegate
+    from avexie.utils.subagents import delegate
 
     return await delegate(
         task,
@@ -1721,7 +1500,7 @@ async def timer(
     if getattr(__request__.state, 'internal', False) is True:
         return 'Error: timers cannot be set from internal chats.'
 
-    from open_webui.utils.timers import create_timer
+    from avexie.utils.timers import create_timer
 
     return await create_timer(
         prompt=prompt,
@@ -2044,7 +1823,7 @@ async def list_knowledge_bases(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.knowledge import Knowledges
+        from avexie.models.knowledge import Knowledges
 
         user_id = __user__.get('id')
         user_group_ids = [group.id for group in await Groups.get_groups_by_member_id(user_id)]
@@ -2104,7 +1883,7 @@ async def search_knowledge_bases(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.knowledge import Knowledges
+        from avexie.models.knowledge import Knowledges
 
         user_id = __user__.get('id')
         user_group_ids = [group.id for group in await Groups.get_groups_by_member_id(user_id)]
@@ -2168,9 +1947,9 @@ async def search_knowledge_files(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.files import Files
-        from open_webui.models.knowledge import Knowledges
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.files import Files
+        from avexie.models.knowledge import Knowledges
 
         user_id = __user__.get('id')
         user_role = __user__.get('role', 'user')
@@ -2311,7 +2090,7 @@ async def _get_accessible_chat_files(
     user: dict,
     file_id: Optional[str] = None,
 ) -> list[tuple[dict, object]]:
-    from open_webui.models.files import Files
+    from avexie.models.files import Files
 
     accessible = []
     seen = set()
@@ -2346,7 +2125,7 @@ def _grep_file_models(
     case_insensitive: bool = False,
     count_only: bool = False,
 ) -> str:
-    from open_webui.tools.knowledge_fs import build_matcher
+    from avexie.tools.knowledge_fs import build_matcher
 
     matches, err = build_matcher(pattern, case_insensitive)
     if err:
@@ -2520,7 +2299,7 @@ async def query_chat_files(
                 count = None
 
     try:
-        from open_webui.retrieval.utils import get_sources_from_items
+        from avexie.retrieval.utils import get_sources_from_items
 
         attached_ids = set()
         for item in __files__ or []:
@@ -2635,8 +2414,8 @@ async def grep_knowledge_files(
         return JSONCodec.dumps({'error': 'Pattern is required'})
 
     try:
-        from open_webui.models.files import Files
-        from open_webui.models.knowledge import Knowledges
+        from avexie.models.files import Files
+        from avexie.models.knowledge import Knowledges
 
         user_id = __user__.get('id')
         user_role = __user__.get('role', 'user')
@@ -2654,7 +2433,7 @@ async def grep_knowledge_files(
                 files_to_search.append(file)
         elif __model_knowledge__:
             # Scoped to model's attached knowledge
-            from open_webui.models.access_grants import AccessGrants
+            from avexie.models.access_grants import AccessGrants
 
             seen_ids = set()
             for item in __model_knowledge__:
@@ -2769,7 +2548,7 @@ async def view_file(
     offset = max(offset, 0)
 
     try:
-        from open_webui.models.files import Files
+        from avexie.models.files import Files
 
         file = await Files.get_file_by_id(file_id)
         if not file:
@@ -2881,9 +2660,9 @@ async def view_knowledge_file(
     offset = max(offset, 0)
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.files import Files
-        from open_webui.models.knowledge import Knowledges
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.files import Files
+        from avexie.models.knowledge import Knowledges
 
         user_id = __user__.get('id')
         user_role = __user__.get('role', 'user')
@@ -3030,10 +2809,10 @@ async def list_knowledge(
     count = min(count, 200)
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.files import Files
-        from open_webui.models.knowledge import Knowledges
-        from open_webui.models.notes import Notes
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.files import Files
+        from avexie.models.knowledge import Knowledges
+        from avexie.models.notes import Notes
 
         user_id = __user__.get('id')
         user_role = __user__.get('role', 'user')
@@ -3169,12 +2948,12 @@ async def query_knowledge_files(
                 knowledge_ids = [knowledge_ids]
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.files import Files
-        from open_webui.models.knowledge import Knowledges
-        from open_webui.models.notes import Notes
-        from open_webui.retrieval.external import retrieve_external_knowledge
-        from open_webui.retrieval.utils import query_collection
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.files import Files
+        from avexie.models.knowledge import Knowledges
+        from avexie.models.notes import Notes
+        from avexie.retrieval.external import retrieve_external_knowledge
+        from avexie.retrieval.utils import query_collection
 
         user_id = __user__.get('id')
         user_role = __user__.get('role', 'user')
@@ -3368,9 +3147,9 @@ async def query_knowledge_bases(
     try:
         import heapq
 
-        from open_webui.models.knowledge import Knowledges
-        from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-        from open_webui.routers.knowledge import KNOWLEDGE_BASES_COLLECTION
+        from avexie.models.knowledge import Knowledges
+        from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+        from avexie.routers.knowledge import KNOWLEDGE_BASES_COLLECTION
 
         user_id = __user__.get('id')
         user_group_ids = [group.id for group in await Groups.get_groups_by_member_id(user_id)]
@@ -3473,8 +3252,8 @@ async def view_skill(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.skills import Skills
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.skills import Skills
 
         user_id = __user__.get('id')
 
@@ -3662,7 +3441,7 @@ async def update_task(
 async def _validate_owned_automation_folder(user_id: str, folder_id: Optional[str]) -> Optional[str]:
     if not folder_id:
         return None
-    from open_webui.models.folders import Folders
+    from avexie.models.folders import Folders
 
     folder = await Folders.get_folder_by_id_and_user_id(folder_id, user_id)
     if not folder:
@@ -3707,10 +3486,10 @@ async def create_automation(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.automations import AutomationData, AutomationForm, AutomationTarget, Automations
-        from open_webui.models.users import Users
-        from open_webui.routers.automations import check_automation_limits
-        from open_webui.utils.automations import next_n_runs_ns, next_run_ns, validate_rrule
+        from avexie.models.automations import AutomationData, AutomationForm, AutomationTarget, Automations
+        from avexie.models.users import Users
+        from avexie.routers.automations import check_automation_limits
+        from avexie.utils.automations import next_n_runs_ns, next_run_ns, validate_rrule
 
         user_id = __user__.get('id')
         user = await Users.get_user_by_id(user_id)
@@ -3806,10 +3585,10 @@ async def update_automation(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.automations import AutomationData, AutomationForm, AutomationTarget, Automations
-        from open_webui.models.users import Users
-        from open_webui.routers.automations import check_automation_limits
-        from open_webui.utils.automations import next_n_runs_ns, next_run_ns, validate_rrule
+        from avexie.models.automations import AutomationData, AutomationForm, AutomationTarget, Automations
+        from avexie.models.users import Users
+        from avexie.routers.automations import check_automation_limits
+        from avexie.utils.automations import next_n_runs_ns, next_run_ns, validate_rrule
 
         user_id = __user__.get('id')
         user = await Users.get_user_by_id(user_id)
@@ -3904,9 +3683,9 @@ async def list_automations(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.automations import Automations
-        from open_webui.models.users import Users
-        from open_webui.utils.automations import next_n_runs_ns
+        from avexie.models.automations import Automations
+        from avexie.models.users import Users
+        from avexie.utils.automations import next_n_runs_ns
 
         user_id = __user__.get('id')
         user = await Users.get_user_by_id(user_id)
@@ -3972,9 +3751,9 @@ async def toggle_automation(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.automations import Automations
-        from open_webui.models.users import Users
-        from open_webui.utils.automations import next_run_ns
+        from avexie.models.automations import Automations
+        from avexie.models.users import Users
+        from avexie.utils.automations import next_run_ns
 
         user_id = __user__.get('id')
         user = await Users.get_user_by_id(user_id)
@@ -4023,7 +3802,7 @@ async def delete_automation(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.automations import AutomationRuns, Automations
+        from avexie.models.automations import AutomationRuns, Automations
 
         user_id = __user__.get('id')
 
@@ -4137,7 +3916,7 @@ async def search_calendar_events(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.calendar import CalendarEvents
+        from avexie.models.calendar import CalendarEvents
 
         user_id = __user__.get('id')
         tz = _get_user_tz(__user__)
@@ -4236,7 +4015,7 @@ async def create_calendar_event(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.calendar import CalendarEventForm, CalendarEvents, Calendars
+        from avexie.models.calendar import CalendarEventForm, CalendarEvents, Calendars
 
         user_id = __user__.get('id')
 
@@ -4255,8 +4034,8 @@ async def create_calendar_event(
         if not cal:
             return JSONCodec.dumps({'error': 'Calendar not found'})
         if cal.user_id != user_id and __user__.get('role') != 'admin':
-            from open_webui.models.access_grants import AccessGrants
-            from open_webui.models.groups import Groups
+            from avexie.models.access_grants import AccessGrants
+            from avexie.models.groups import Groups
 
             user_group_ids = [g.id for g in await Groups.get_groups_by_member_id(user_id)]
             if not await AccessGrants.has_access(
@@ -4363,9 +4142,9 @@ async def update_calendar_event(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.calendar import CalendarEvents, CalendarEventUpdateForm, Calendars
-        from open_webui.models.groups import Groups
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.calendar import CalendarEvents, CalendarEventUpdateForm, Calendars
+        from avexie.models.groups import Groups
 
         user_id = __user__.get('id')
 
@@ -4467,9 +4246,9 @@ async def delete_calendar_event(
         return JSONCodec.dumps({'error': 'User context not available'})
 
     try:
-        from open_webui.models.access_grants import AccessGrants
-        from open_webui.models.calendar import CalendarEvents, Calendars
-        from open_webui.models.groups import Groups
+        from avexie.models.access_grants import AccessGrants
+        from avexie.models.calendar import CalendarEvents, Calendars
+        from avexie.models.groups import Groups
 
         user_id = __user__.get('id')
 

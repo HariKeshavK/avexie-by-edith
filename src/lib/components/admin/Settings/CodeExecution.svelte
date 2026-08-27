@@ -93,12 +93,12 @@
 							/>
 						</AdminSettingField>
 
-						<!-- LICENSE covers this Open WebUI wordmark.
+						<!-- LICENSE covers this AVEXIE wordmark.
 							Do not alter, remove, obscure, or replace it except as LICENSE permits:
-							https://docs.openwebui.com/license. -->
+							#license. -->
 						<AdminSettingRow
 							label={$i18n.t('Jupyter Auth')}
-							description={$i18n.t('Select how Open WebUI authenticates with the Jupyter server.')}
+							description={$i18n.t('Select how AVEXIE authenticates with the Jupyter server.')}
 						>
 							<SettingsSelect
 								bind:value={config.CODE_EXECUTION_JUPYTER_AUTH}
@@ -197,12 +197,12 @@
 							/>
 						</AdminSettingField>
 
-						<!-- LICENSE covers this Open WebUI wordmark.
+						<!-- LICENSE covers this AVEXIE wordmark.
 							Do not alter, remove, obscure, or replace it except as LICENSE permits:
-							https://docs.openwebui.com/license. -->
+							#license. -->
 						<AdminSettingRow
 							label={$i18n.t('Jupyter Auth')}
-							description={$i18n.t('Select how Open WebUI authenticates with the Jupyter server.')}
+							description={$i18n.t('Select how AVEXIE authenticates with the Jupyter server.')}
 						>
 							<SettingsSelect
 								bind:value={config.CODE_INTERPRETER_JUPYTER_AUTH}

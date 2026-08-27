@@ -6,7 +6,7 @@ import time
 import uuid
 from typing import Literal
 
-from open_webui.internal.db import Base, get_async_db_context
+from avexie.internal.db import Base, get_async_db_context
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import JSON, BigInteger, Column, Index, String, Text, delete, select
 from sqlalchemy.ext.asyncio import AsyncSession

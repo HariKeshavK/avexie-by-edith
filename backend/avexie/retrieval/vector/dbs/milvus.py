@@ -6,7 +6,7 @@ import logging
 import re
 from typing import Any, Optional
 
-from open_webui.config import (
+from avexie.config import (
     MILVUS_DB,
     MILVUS_DISKANN_MAX_DEGREE,
     MILVUS_DISKANN_SEARCH_LIST_SIZE,
@@ -18,14 +18,14 @@ from open_webui.config import (
     MILVUS_TOKEN,
     MILVUS_URI,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions, process_metadata
-from open_webui.utils.json_codec import JSONCodec
+from avexie.retrieval.vector.utils import iter_filter_conditions, process_metadata
+from avexie.utils.json_codec import JSONCodec
 from pymilvus import DataType
 from pymilvus import MilvusClient as Client
 from pymilvus.exceptions import MilvusException
@@ -70,7 +70,7 @@ def _metadata_exprs(filter: Optional[dict]) -> list[str]:
 
 class MilvusClient(VectorDBBase):
     def __init__(self):
-        self.collection_prefix = 'open_webui'
+        self.collection_prefix = 'avexie'
         if MILVUS_TOKEN is None:
             self.client = Client(uri=MILVUS_URI, db_name=MILVUS_DB)
         else:

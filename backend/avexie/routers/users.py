@@ -10,17 +10,17 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import FileResponse, Response, StreamingResponse
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.env import ENABLE_PROFILE_IMAGE_URL_FORWARDING, PROFILE_IMAGE_ALLOWED_MIME_TYPES, STATIC_DIR
-from open_webui.internal.db import get_async_session
-from open_webui.models.auths import Auths
-from open_webui.models.config import Config
-from open_webui.models.chat_messages import ChatMessages
-from open_webui.models.chats import Chats
-from open_webui.models.groups import Groups
-from open_webui.models.oauth_sessions import OAuthSessions
-from open_webui.models.users import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.env import ENABLE_PROFILE_IMAGE_URL_FORWARDING, PROFILE_IMAGE_ALLOWED_MIME_TYPES, STATIC_DIR
+from avexie.internal.db import get_async_session
+from avexie.models.auths import Auths
+from avexie.models.config import Config
+from avexie.models.chat_messages import ChatMessages
+from avexie.models.chats import Chats
+from avexie.models.groups import Groups
+from avexie.models.oauth_sessions import OAuthSessions
+from avexie.models.users import (
     UserGroupIdsListResponse,
     UserGroupIdsModel,
     UserInfoListResponse,
@@ -32,19 +32,19 @@ from open_webui.models.users import (
     UserStatus,
     UserUpdateForm,
 )
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.knowledge import Knowledges
-from open_webui.models.models import Models
-from open_webui.models.tools import Tools
-from open_webui.utils.access_control import get_permissions, has_permission
-from open_webui.utils.auth import (
+from avexie.models.access_grants import AccessGrants
+from avexie.models.knowledge import Knowledges
+from avexie.models.models import Models
+from avexie.models.tools import Tools
+from avexie.utils.access_control import get_permissions, has_permission
+from avexie.utils.auth import (
     get_admin_user,
     get_password_hash,
     get_verified_user,
     revoke_user_tokens,
     validate_password,
 )
-from open_webui.utils.chat_variables import ChatVariablesError, normalize_user_variables, validate_user_variables
+from avexie.utils.chat_variables import ChatVariablesError, normalize_user_variables, validate_user_variables
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -453,7 +453,7 @@ async def update_default_user_permissions(request: Request, form_data: UserPermi
 
 @router.get('/default/permissions/defaults', response_model=UserPermissions)
 async def get_default_user_permissions_defaults(user=Depends(get_admin_user)):
-    from open_webui.config import DEFAULT_USER_PERMISSIONS
+    from avexie.config import DEFAULT_USER_PERMISSIONS
 
     return {
         'workspace': WorkspacePermissions(**DEFAULT_USER_PERMISSIONS.get('workspace', {})),

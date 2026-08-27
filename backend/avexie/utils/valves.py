@@ -4,8 +4,8 @@ import logging
 from functools import lru_cache
 
 from cryptography.fernet import Fernet, InvalidToken
-from open_webui.env import ENABLE_VALVE_ENCRYPTION, WEBUI_SECRET_KEY
-from open_webui.utils.json_codec import JSONCodec
+from avexie.env import ENABLE_VALVE_ENCRYPTION, WEBUI_SECRET_KEY
+from avexie.utils.json_codec import JSONCodec
 
 log = logging.getLogger(__name__)
 

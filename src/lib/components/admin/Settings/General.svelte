@@ -113,7 +113,7 @@
 
 							{#if $config?.features?.enable_version_update_check}
 								<a
-									href="https://github.com/open-webui/open-webui/releases/tag/v{version.latest}"
+									href="#"
 									target="_blank"
 									class="text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300"
 								>
@@ -155,16 +155,16 @@
 						<div class="min-w-0">
 							<div class="text-gray-600 dark:text-gray-400">{$i18n.t('Help')}</div>
 							<div class="mt-0.5 text-gray-400 dark:text-gray-600">
-								<!-- LICENSE covers this Open WebUI wordmark.
+								<!-- LICENSE covers this AVEXIE wordmark.
 								Do not alter, remove, obscure, or replace it except as LICENSE permits:
-								https://docs.openwebui.com/license. -->
-								{$i18n.t('Discover how to use Open WebUI and seek support from the community.')}
+								#license. -->
+								{$i18n.t('Discover how to use AVEXIE and seek support from the community.')}
 							</div>
 						</div>
 
 						<a
 							class="shrink-0 text-gray-500 transition-colors hover:text-gray-900 dark:text-gray-500 dark:hover:text-white"
-							href="https://docs.openwebui.com/"
+							href="#"
 							target="_blank"
 						>
 							{$i18n.t('Documentation')}
@@ -174,31 +174,31 @@
 					<div class="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-gray-400 dark:text-gray-600">
 						<a
 							class="hover:text-gray-700 dark:hover:text-gray-300"
-							href="https://discord.gg/5rJgQTnV4s"
+							href="#"
 							target="_blank">Discord</a
 						>
 						<a
 							class="hover:text-gray-700 dark:hover:text-gray-300"
-							href="https://twitter.com/OpenWebUI"
+							href="#"
 							target="_blank">X</a
 						>
 						<a
 							class="hover:text-gray-700 dark:hover:text-gray-300"
-							href="https://github.com/open-webui/open-webui"
+							href="#"
 							target="_blank">GitHub</a
 						>
 					</div>
 				</div>
 
 				<div class="text-xs">
-					<!-- LICENSE covers this Open WebUI license attribution.
+					<!-- LICENSE covers this AVEXIE license attribution.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
+					#license. -->
 					<div class="text-gray-600 dark:text-gray-400">{$i18n.t('License')}</div>
 
 					{#if $config?.license_metadata}
 						<a
-							href="https://docs.openwebui.com/enterprise"
+							href="#"
 							target="_blank"
 							class="mt-0.5 block text-gray-500"
 						>
@@ -222,7 +222,7 @@
 					{:else}
 						<a
 							class="mt-0.5 block text-gray-400 transition-colors hover:text-gray-700 dark:text-gray-600 dark:hover:text-gray-300"
-							href="https://docs.openwebui.com/enterprise"
+							href="#"
 							target="_blank"
 						>
 							{$i18n.t(
@@ -236,12 +236,12 @@
 			<AdminSettingSection title={$i18n.t('Features')}>
 				<AdminSettingRow
 					label={$i18n.t('Community Sharing')}
-					description={$i18n.t('Allow users to share chats with the Open WebUI community.')}
+					description={$i18n.t('Allow users to share chats with the AVEXIE community.')}
 					let:labelId
 				>
-					<!-- LICENSE covers this Open WebUI Community wordmark.
+					<!-- LICENSE covers this AVEXIE Community wordmark.
 					Do not alter, remove, obscure, or replace it except as LICENSE permits:
-					https://docs.openwebui.com/license. -->
+					#license. -->
 					<Switch bind:state={adminConfig.ENABLE_COMMUNITY_SHARING} ariaLabelledbyId={labelId} />
 				</AdminSettingRow>
 				<AdminSettingRow

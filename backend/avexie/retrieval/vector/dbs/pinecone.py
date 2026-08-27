@@ -21,7 +21,7 @@ import concurrent.futures  # for parallel batch upserts
 import functools  # for partial binding in async tasks
 import random  # for jitter in retry backoff
 
-from open_webui.config import (
+from avexie.config import (
     PINECONE_API_KEY,
     PINECONE_CLOUD,
     PINECONE_DIMENSION,
@@ -29,13 +29,13 @@ from open_webui.config import (
     PINECONE_INDEX_NAME,
     PINECONE_METRIC,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import normalize_filter, process_metadata
+from avexie.retrieval.vector.utils import normalize_filter, process_metadata
 
 NO_LIMIT = 10000  # Reasonable limit to avoid overwhelming the system
 BATCH_SIZE = 100  # Recommended batch size for Pinecone operations
@@ -45,7 +45,7 @@ log = logging.getLogger(__name__)
 
 class PineconeClient(VectorDBBase):
     def __init__(self):
-        self.collection_prefix = 'open-webui'
+        self.collection_prefix = 'avexie'
 
         # Validate required configuration
         self._validate_config()

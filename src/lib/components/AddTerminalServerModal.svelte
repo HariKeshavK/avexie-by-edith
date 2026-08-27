@@ -660,7 +660,7 @@
 												class={`w-full flex-1 text-sm font-mono ${inputClass}`}
 												type="text"
 												bind:value={policyImage}
-												placeholder="ghcr.io/open-webui/open-terminal:latest"
+												placeholder="ghcr.io/avexie/open-terminal:latest"
 												autocomplete="off"
 											/>
 										</div>

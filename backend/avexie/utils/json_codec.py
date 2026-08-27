@@ -14,7 +14,7 @@ from __future__ import annotations
 import json as stdlib_json
 
 from engineio import json as engineio_json
-from open_webui.env import ENABLE_ORJSON
+from avexie.env import ENABLE_ORJSON
 
 if ENABLE_ORJSON:
     import orjson

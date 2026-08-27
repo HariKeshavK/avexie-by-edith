@@ -11,19 +11,19 @@ from urllib.parse import quote
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
-from open_webui.config import (
+from avexie.config import (
     BYPASS_ADMIN_ACCESS_CONTROL,
     ENABLE_KNOWLEDGE_FILE_RETENTION,
     RAG_EMBEDDING_CONTENT_PREFIX,
 )
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.config import Config
-from open_webui.models.files import FileMetadataResponse, FileModel, FileModelResponse, Files
-from open_webui.models.groups import Groups
-from open_webui.models.knowledge import (
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.config import Config
+from avexie.models.files import FileMetadataResponse, FileModel, FileModelResponse, Files
+from avexie.models.groups import Groups
+from avexie.models.knowledge import (
     KNOWLEDGE_SORTABLE_FIELDS,
     KnowledgeDirectoryForm,
     KnowledgeDirectoryModel,
@@ -33,20 +33,20 @@ from open_webui.models.knowledge import (
     Knowledges,
     KnowledgeUserResponse,
 )
-from open_webui.models.models import ModelForm, Models
-from open_webui.retrieval.external import retrieve_external_knowledge, retrieve_external_knowledge_for_connection
-from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-from open_webui.routers.retrieval import (
+from avexie.models.models import ModelForm, Models
+from avexie.retrieval.external import retrieve_external_knowledge, retrieve_external_knowledge_for_connection
+from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+from avexie.routers.retrieval import (
     BatchProcessFilesForm,
     ProcessFileForm,
     process_file,
     process_files_batch,
 )
-from open_webui.storage.provider import Storage
-from open_webui.utils.access_control import filter_allowed_access_grants, has_permission
-from open_webui.utils.access_control.files import has_access_to_file
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.json_codec import JSONCodec
+from avexie.storage.provider import Storage
+from avexie.utils.access_control import filter_allowed_access_grants, has_permission
+from avexie.utils.access_control.files import has_access_to_file
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.json_codec import JSONCodec
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 

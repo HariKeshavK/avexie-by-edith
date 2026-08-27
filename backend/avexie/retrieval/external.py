@@ -4,9 +4,9 @@ import re
 import time
 from typing import Any, Optional
 
-from open_webui.config import RAG_EMBEDDING_QUERY_PREFIX
-from open_webui.models.config import Config
-from open_webui.models.knowledge import KnowledgeModel
+from avexie.config import RAG_EMBEDDING_QUERY_PREFIX
+from avexie.models.config import Config
+from avexie.models.knowledge import KnowledgeModel
 
 log = logging.getLogger(__name__)
 

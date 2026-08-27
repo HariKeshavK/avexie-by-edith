@@ -1,9 +1,9 @@
 import datetime as dt
 from typing import Any
 
-from open_webui.env import RAG_METADATA_MAX_VALUE_CHARS
-from open_webui.retrieval.vector.main import SearchResult
-from open_webui.utils.misc import sanitize_text_for_db
+from avexie.env import RAG_METADATA_MAX_VALUE_CHARS
+from avexie.retrieval.vector.main import SearchResult
+from avexie.utils.misc import sanitize_text_for_db
 
 KEYS_TO_EXCLUDE = [
     'content',

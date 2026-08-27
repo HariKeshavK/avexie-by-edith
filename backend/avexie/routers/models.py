@@ -17,15 +17,15 @@ from fastapi import (
     status,
 )
 from fastapi.responses import RedirectResponse, StreamingResponse
-from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.env import ENABLE_PROFILE_IMAGE_URL_FORWARDING, PROFILE_IMAGE_ALLOWED_MIME_TYPES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.config import Config
-from open_webui.models.groups import Groups
-from open_webui.models.models import (
+from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL
+from avexie.constants import ERROR_MESSAGES
+from avexie.env import ENABLE_PROFILE_IMAGE_URL_FORWARDING, PROFILE_IMAGE_ALLOWED_MIME_TYPES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.config import Config
+from avexie.models.groups import Groups
+from avexie.models.models import (
     ModelAccessListResponse,
     ModelAccessResponse,
     ModelForm,
@@ -36,11 +36,11 @@ from open_webui.models.models import (
     ModelResponse,
     Models,
 )
-from open_webui.utils.access_control import filter_allowed_access_grants, has_permission
-from open_webui.utils.access_control.files import has_access_to_file
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.chat_variables import get_chat_variables_schema
-from open_webui.utils.models import get_all_models
+from avexie.utils.access_control import filter_allowed_access_grants, has_permission
+from avexie.utils.access_control.files import has_access_to_file
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.chat_variables import get_chat_variables_schema
+from avexie.utils.models import get_all_models
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -682,7 +682,7 @@ async def get_model_profile_image(
 
                 # only serve known-safe raster types inline; reject SVG/unknown (can run script on our origin)
                 if media_type not in PROFILE_IMAGE_ALLOWED_MIME_TYPES:
-                    # LICENSE covers this Open WebUI fallback logo.
+                    # LICENSE covers this AVEXIE fallback logo.
                     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
                     # https://docs.openwebui.com/license.
                     return RedirectResponse(
@@ -712,7 +712,7 @@ async def get_model_profile_image(
                     status_code=status.HTTP_302_FOUND,
                 )
 
-    # LICENSE covers this Open WebUI fallback logo.
+    # LICENSE covers this AVEXIE fallback logo.
     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
     # https://docs.openwebui.com/license.
     return RedirectResponse(

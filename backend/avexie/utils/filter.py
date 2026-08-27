@@ -1,9 +1,9 @@
 import inspect
 import logging
 
-from open_webui.env import ENABLE_PLUGINS
-from open_webui.models.functions import Functions
-from open_webui.utils.plugin import get_function_module_from_cache
+from avexie.env import ENABLE_PLUGINS
+from avexie.models.functions import Functions
+from avexie.utils.plugin import get_function_module_from_cache
 
 log = logging.getLogger(__name__)
 

@@ -6,7 +6,7 @@ from typing import List
 
 import requests
 from langchain_core.documents import Document
-from open_webui.env import GLOBAL_LOG_LEVEL
+from avexie.env import GLOBAL_LOG_LEVEL
 
 logging.basicConfig(stream=sys.stdout, level=GLOBAL_LOG_LEVEL)
 log = logging.getLogger(__name__)

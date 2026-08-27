@@ -8,15 +8,15 @@ from uuid import uuid4
 
 from fastapi import Request
 from fastapi.security import HTTPAuthorizationCredentials
-from open_webui.internal.db import get_async_db
-from open_webui.models.chat_messages import ChatMessages
-from open_webui.models.chats import Chat, ChatForm, Chats
-from open_webui.models.config import Config
-from open_webui.models.users import UserModel, Users
-from open_webui.tasks import create_task, has_active_tasks
-from open_webui.utils.auth import create_token
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import get_message_list
+from avexie.internal.db import get_async_db
+from avexie.models.chat_messages import ChatMessages
+from avexie.models.chats import Chat, ChatForm, Chats
+from avexie.models.config import Config
+from avexie.models.users import UserModel, Users
+from avexie.tasks import create_task, has_active_tasks
+from avexie.utils.auth import create_token
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import get_message_list
 from sqlalchemy import select
 from starlette.datastructures import Headers
 
@@ -227,7 +227,7 @@ async def process_pending_internal_messages(
         await ChatMessages.upsert_message(user_message_id, parent_chat_id, user_id, user_message)
         await ChatMessages.upsert_message(assistant_message_id, parent_chat_id, user_id, assistant_message)
 
-        from open_webui.socket.main import sio
+        from avexie.socket.main import sio
 
         await sio.emit(
             'events',
@@ -645,7 +645,7 @@ async def delegate(
             )
 
         if pending_message['meta'].get('status') == 'pending':
-            from open_webui.socket.main import sio
+            from avexie.socket.main import sio
 
             await sio.emit(
                 'events',

@@ -5,23 +5,23 @@ import sys
 
 from aiocache import cached
 from fastapi import Request
-from open_webui.config import (
+from avexie.config import (
     BYPASS_ADMIN_ACCESS_CONTROL,
     DEFAULT_ARENA_MODEL,
 )
-from open_webui.env import BYPASS_MODEL_ACCESS_CONTROL, ENABLE_PLUGINS, GLOBAL_LOG_LEVEL
-from open_webui.functions import get_function_models
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.config import Config
-from open_webui.models.functions import Functions
-from open_webui.models.groups import Groups
-from open_webui.models.models import Models
-from open_webui.utils.chat_variables import get_chat_variables_schema
-from open_webui.models.users import UserModel
-from open_webui.routers import ollama, openai
-from open_webui.socket.utils import RedisDict
-from open_webui.utils.access_control import has_access, has_base_model_access
-from open_webui.utils.plugin import (
+from avexie.env import BYPASS_MODEL_ACCESS_CONTROL, ENABLE_PLUGINS, GLOBAL_LOG_LEVEL
+from avexie.functions import get_function_models
+from avexie.models.access_grants import AccessGrants
+from avexie.models.config import Config
+from avexie.models.functions import Functions
+from avexie.models.groups import Groups
+from avexie.models.models import Models
+from avexie.utils.chat_variables import get_chat_variables_schema
+from avexie.models.users import UserModel
+from avexie.routers import ollama, openai
+from avexie.socket.utils import RedisDict
+from avexie.utils.access_control import has_access, has_base_model_access
+from avexie.utils.plugin import (
     get_functions_cache,
     get_function_module_from_cache,
 )

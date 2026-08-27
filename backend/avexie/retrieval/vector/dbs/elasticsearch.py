@@ -7,7 +7,7 @@ from typing import Any, Optional
 
 from elasticsearch import BadRequestError, Elasticsearch
 from elasticsearch.helpers import bulk, scan
-from open_webui.config import (
+from avexie.config import (
     ELASTICSEARCH_API_KEY,
     ELASTICSEARCH_CA_CERTS,
     ELASTICSEARCH_CLOUD_ID,
@@ -17,13 +17,13 @@ from open_webui.config import (
     ELASTICSEARCH_USERNAME,
     SSL_ASSERT_FINGERPRINT,
 )
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,
     VectorItem,
 )
-from open_webui.retrieval.vector.utils import iter_filter_conditions, process_metadata
+from avexie.retrieval.vector.utils import iter_filter_conditions, process_metadata
 
 
 def _metadata_filter(key: str, op: str, value: Any) -> dict:

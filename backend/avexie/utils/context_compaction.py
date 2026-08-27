@@ -4,13 +4,13 @@ import logging
 from typing import Any
 
 from fastapi.responses import JSONResponse
-from open_webui.models.chats import Chats
-from open_webui.models.config import Config
-from open_webui.utils.chat_id import is_saved_chat_id
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.misc import get_content_from_message, get_last_user_message, get_message_list
-from open_webui.utils.payload import apply_params_to_form_data
-from open_webui.utils.task import (
+from avexie.models.chats import Chats
+from avexie.models.config import Config
+from avexie.utils.chat_id import is_saved_chat_id
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.misc import get_content_from_message, get_last_user_message, get_message_list
+from avexie.utils.payload import apply_params_to_form_data
+from avexie.utils.task import (
     prompt_template,
     prompt_variables_template,
     replace_messages_variable,
@@ -68,7 +68,7 @@ async def compact_messages_for_request(
 
     event_emitter = None
     if metadata.get('chat_id') and metadata.get('message_id'):
-        from open_webui.socket.main import get_event_emitter
+        from avexie.socket.main import get_event_emitter
 
         event_emitter = await get_event_emitter(metadata)
 
@@ -343,7 +343,7 @@ async def _generate_summary(
     previous_summary: str | None,
     summary_prompt_template: str,
 ) -> str:
-    from open_webui.utils.chat import generate_chat_completion
+    from avexie.utils.chat import generate_chat_completion
 
     task_config = await Config.get_many(
         'task.model.params',

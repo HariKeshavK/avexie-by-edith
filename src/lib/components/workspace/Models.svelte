@@ -214,12 +214,12 @@
 	};
 
 	const shareModelHandler = async (model) => {
-		// LICENSE covers this Open WebUI Community wordmark.
+		// LICENSE covers this AVEXIE Community wordmark.
 		// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-		// https://docs.openwebui.com/license.
-		toast.success($i18n.t('Redirecting you to Open WebUI Community'));
+		// #license.
+		toast.success($i18n.t('Redirecting you to AVEXIE Community'));
 
-		const url = 'https://openwebui.com';
+		const url = '#';
 		const fullModel = getFullModel(model);
 
 		const tab = await window.open(`${url}/post?type=model`, '_blank');
@@ -435,9 +435,9 @@
 </script>
 
 <svelte:head>
-	<!-- LICENSE covers this Open WebUI browser-title identifier.
+	<!-- LICENSE covers this AVEXIE browser-title identifier.
 	Do not alter, remove, obscure, or replace it except as LICENSE permits:
-	https://docs.openwebui.com/license. -->
+	#license. -->
 	<title>
 		{$i18n.t('Models')} / {$WEBUI_NAME}
 	</title>
@@ -719,9 +719,9 @@
 											loading="lazy"
 											decoding="async"
 											on:error={(e) => {
-												// LICENSE covers this Open WebUI fallback logo.
+												// LICENSE covers this AVEXIE fallback logo.
 												// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-												// https://docs.openwebui.com/license.
+												// #license.
 												e.target.src = '/favicon.png';
 											}}
 										/>
@@ -928,7 +928,7 @@
 
 	{#if $config?.features.enable_community_sharing}
 		<CommunityDiscover
-			href="https://openwebui.com/models"
+			href="#"
 			title={$i18n.t('Discover a model')}
 			description={$i18n.t('Discover, download, and explore model presets')}
 		/>

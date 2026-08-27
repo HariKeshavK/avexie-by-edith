@@ -85,7 +85,7 @@ type ResponseStreamEvent = {
 const GROUPABLE_OUTPUT_TYPES = new Set([
 	'reasoning',
 	'function_call',
-	'open_webui:code_interpreter',
+	'avexie:code_interpreter',
 	'web_search_call',
 	'file_search_call',
 	'computer_call'
@@ -333,7 +333,7 @@ function buildDetailToken(
 	if (item.type === 'reasoning') {
 		return buildReasoningToken(item, isLastItem);
 	}
-	if (item.type === 'open_webui:code_interpreter') {
+	if (item.type === 'avexie:code_interpreter') {
 		return buildCodeInterpreterToken(item, isLastItem);
 	}
 	if (item.type && OPENAI_TOOL_NAMES[item.type]) {

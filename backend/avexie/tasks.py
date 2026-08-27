@@ -6,8 +6,8 @@ from uuid import uuid4
 
 from redis.asyncio import Redis
 
-from open_webui.env import REDIS_KEY_PREFIX, REDIS_RESPONSE_STREAM_TTL
-from open_webui.utils.json_codec import JSONCodec, dumps_bytes
+from avexie.env import REDIS_KEY_PREFIX, REDIS_RESPONSE_STREAM_TTL
+from avexie.utils.json_codec import JSONCodec, dumps_bytes
 
 log = logging.getLogger(__name__)
 

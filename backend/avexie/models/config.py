@@ -15,7 +15,7 @@ import time
 from typing import Any, ClassVar
 
 from fastapi.encoders import jsonable_encoder
-from open_webui.internal.db import Base, get_async_db
+from avexie.internal.db import Base, get_async_db
 from sqlalchemy import JSON, BigInteger, Column, Text, delete, select
 
 log = logging.getLogger(__name__)

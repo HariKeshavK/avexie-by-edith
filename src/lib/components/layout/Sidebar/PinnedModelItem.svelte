@@ -40,9 +40,9 @@
 					class=" size-4 rounded-full"
 					alt="logo"
 					on:error={(e) => {
-						// LICENSE covers this Open WebUI fallback logo.
+						// LICENSE covers this AVEXIE fallback logo.
 						// Do not alter, remove, obscure, or replace it except as LICENSE permits:
-						// https://docs.openwebui.com/license.
+						// #license.
 						e.currentTarget.src = '/favicon.png';
 					}}
 				/>

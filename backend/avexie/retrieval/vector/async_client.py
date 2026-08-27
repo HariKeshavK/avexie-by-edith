@@ -1,7 +1,7 @@
 """
 Async facade over the synchronous VECTOR_DB_CLIENT.
 
-The vector DB backends bundled with Open WebUI (Chroma, pgvector, Qdrant,
+The vector DB backends bundled with AVEXIE (Chroma, pgvector, Qdrant,
 Milvus, OpenSearch, Pinecone, Weaviate, …) all expose a uniformly
 synchronous API. Each method performs blocking network or disk I/O — and
 some, like `insert`/`upsert`, can run for several seconds.
@@ -55,8 +55,8 @@ from __future__ import annotations
 import asyncio
 from typing import Dict, List, Optional, Union
 
-from open_webui.retrieval.vector.factory import VECTOR_DB_CLIENT
-from open_webui.retrieval.vector.main import (
+from avexie.retrieval.vector.factory import VECTOR_DB_CLIENT
+from avexie.retrieval.vector.main import (
     GetResult,
     SearchResult,
     VectorDBBase,

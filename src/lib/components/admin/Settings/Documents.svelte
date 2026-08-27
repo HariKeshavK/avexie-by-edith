@@ -640,7 +640,7 @@
 								<div>
 									{$i18n.t('Example')}:
 									<code class="text-gray-700 dark:text-gray-300"
-										>{'{"X-OpenWebUI-File-Id": "{{FILE_ID}}"}'}</code
+										>{'{"X-Avexie-File-Id": "{{FILE_ID}}"}'}</code
 									>
 								</div>
 								<div>

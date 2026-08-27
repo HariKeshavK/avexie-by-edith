@@ -10,10 +10,10 @@ from hatchling.builders.hooks.plugin.interface import BuildHookInterface
 class CustomBuildHook(BuildHookInterface):
     def initialize(self, version, build_data):
         super().initialize(version, build_data)
-        stderr.write('>>> Building Open Webui frontend\n')
+        stderr.write('>>> Building AVEXIE frontend\n')
         npm = shutil.which('npm')
         if npm is None:
-            raise RuntimeError('NodeJS `npm` is required for building Open Webui but it was not found')
+            raise RuntimeError('NodeJS `npm` is required for building AVEXIE but it was not found')
         stderr.write('### npm install\n')
         subprocess.run([npm, 'install', '--force'], check=True)  # noqa: S603
         stderr.write('\n### npm run build\n')

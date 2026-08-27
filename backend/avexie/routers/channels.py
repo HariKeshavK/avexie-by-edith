@@ -5,14 +5,14 @@ from typing import Optional
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from fastapi.responses import FileResponse, Response, StreamingResponse
-from open_webui.config import ENABLE_ADMIN_CHAT_ACCESS, ENABLE_ADMIN_EXPORT
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.env import STATIC_DIR
-from open_webui.internal.db import get_async_session
-from open_webui.models.access_grants import AccessGrants, has_public_read_access_grant, has_public_write_access_grant
-from open_webui.models.config import Config
-from open_webui.models.channels import (
+from avexie.config import ENABLE_ADMIN_CHAT_ACCESS, ENABLE_ADMIN_EXPORT
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.env import STATIC_DIR
+from avexie.internal.db import get_async_session
+from avexie.models.access_grants import AccessGrants, has_public_read_access_grant, has_public_write_access_grant
+from avexie.models.config import Config
+from avexie.models.channels import (
     ChannelForm,
     ChannelModel,
     ChannelResponse,
@@ -21,32 +21,32 @@ from open_webui.models.channels import (
     ChannelWebhookModel,
     CreateChannelForm,
 )
-from open_webui.models.groups import Groups
-from open_webui.models.messages import (
+from avexie.models.groups import Groups
+from avexie.models.messages import (
     MessageForm,
     MessageModel,
     MessageResponse,
     Messages,
     MessageWithReactionsResponse,
 )
-from open_webui.models.users import (
+from avexie.models.users import (
     UserIdNameResponse,
     UserIdNameStatusResponse,
     UserModel,
     UserNameResponse,
     Users,
 )
-from open_webui.socket.main import (
+from avexie.socket.main import (
     emit_to_users,
     enter_room_for_users,
     get_user_ids_from_room,
     sio,
 )
-from open_webui.utils.access_control import filter_allowed_access_grants, has_permission
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.channels import extract_mentions, replace_mentions
-from open_webui.utils.files import get_image_base64_from_file_id
-from open_webui.utils.models import (
+from avexie.utils.access_control import filter_allowed_access_grants, has_permission
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.channels import extract_mentions, replace_mentions
+from avexie.utils.files import get_image_base64_from_file_id
+from avexie.utils.models import (
     get_all_models,
     get_filtered_models,
 )
@@ -1100,7 +1100,7 @@ async def model_response_handler(request, channel, message, user, db=None):
                     ]
 
                 # Resolve model config (same path automations use)
-                from open_webui.utils.automations import _resolve_model_defaults
+                from avexie.utils.automations import _resolve_model_defaults
 
                 tool_ids, features, filter_ids, _ = await _resolve_model_defaults(request.app, model_id)
 
@@ -1828,7 +1828,7 @@ async def get_webhook_profile_image(webhook_id: str, user=Depends(get_verified_u
     webhook = await Channels.get_webhook_by_id(webhook_id)
     if not webhook:
         # Return default favicon if webhook not found
-        # LICENSE covers this Open WebUI fallback logo.
+        # LICENSE covers this AVEXIE fallback logo.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
         return FileResponse(f'{STATIC_DIR}/favicon.png')
@@ -1856,7 +1856,7 @@ async def get_webhook_profile_image(webhook_id: str, user=Depends(get_verified_u
                 pass
 
     # Return default favicon if no profile image
-    # LICENSE covers this Open WebUI fallback logo.
+    # LICENSE covers this AVEXIE fallback logo.
     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
     # https://docs.openwebui.com/license.
     return FileResponse(f'{STATIC_DIR}/favicon.png')
