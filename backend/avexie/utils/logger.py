@@ -5,7 +5,7 @@ import traceback
 from typing import TYPE_CHECKING
 
 from loguru import logger
-from open_webui.env import (
+from avexie.env import (
     _LEVEL_MAP,
     AUDIT_LOG_FILE_ROTATION_SIZE,
     AUDIT_LOG_LEVEL,
@@ -13,13 +13,11 @@ from open_webui.env import (
     AUDIT_UVICORN_LOGGER_NAMES,
     ENABLE_AUDIT_LOGS_FILE,
     ENABLE_AUDIT_STDOUT,
-    ENABLE_OTEL,
-    ENABLE_OTEL_LOGS,
     GLOBAL_LOG_LEVEL,
     LOG_FORMAT,
     LOGURU_DIAGNOSE,
 )
-from open_webui.utils.json_codec import JSONCodec
+from avexie.utils.json_codec import JSONCodec
 
 if TYPE_CHECKING:
     from loguru import Message, Record
@@ -113,27 +111,7 @@ class InterceptHandler(logging.Handler):
             depth += 1
 
         message = record.getMessage()
-        logger.opt(depth=depth, exception=record.exc_info).bind(**self._get_extras()).log(level, message)
-        if ENABLE_OTEL and ENABLE_OTEL_LOGS:
-            from open_webui.utils.telemetry.logs import otel_handler
-
-            # reuse the message we built so %-args format once; a non-str msg is left alone, otel exports it structured
-            if isinstance(record.msg, str):
-                record.msg, record.args = message, None
-            otel_handler.emit(record)
-
-    def _get_extras(self):
-        if not ENABLE_OTEL:
-            return {}
-
-        from opentelemetry import trace
-
-        extras = {}
-        context = trace.get_current_span().get_span_context()
-        if context.is_valid:
-            extras['trace_id'] = trace.format_trace_id(context.trace_id)
-            extras['span_id'] = trace.format_span_id(context.span_id)
-        return extras
+        logger.opt(depth=depth, exception=record.exc_info).log(level, message)
 
 
 def file_format(record: 'Record'):
