@@ -15,8 +15,8 @@ from typing import Callable, Optional, Sequence, Union
 
 import aiohttp
 import mimeparse
-from open_webui.env import CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE
-from open_webui.utils.json_codec import JSONCodec
+from avexie.env import CHAT_STREAM_RESPONSE_CHUNK_MAX_BUFFER_SIZE
+from avexie.utils.json_codec import JSONCodec
 
 log = logging.getLogger(__name__)
 SURROGATE_RE = re.compile('[\ud800-\udfff]')
@@ -543,7 +543,7 @@ def convert_output_to_messages(
             if reasoning_details:
                 pending_reasoning_details.extend(reasoning_details)
 
-        elif item_type == 'open_webui:code_interpreter':
+        elif item_type == 'avexie:code_interpreter':
             # Always include code interpreter content so the LLM knows
             # the code was already executed and doesn't retry.
             code = item.get('code', '')
@@ -562,7 +562,7 @@ def convert_output_to_messages(
                 if output_text:
                     pending_content.append(f'<code_interpreter_output>\n{output_text}\n</code_interpreter_output>')
 
-        elif item_type.startswith('open_webui:'):
+        elif item_type.startswith('avexie:'):
             # Skip other extension types
             pass
 
@@ -828,19 +828,6 @@ def openai_chat_completion_message_template(
         template['usage'] = usage
     return template
 
-
-def get_gravatar_url(email):
-    # Trim leading and trailing whitespace from
-    # an email address and force all characters
-    # to lower case
-    address = str(email).strip().lower()
-
-    # Create a SHA256 hash of the final string
-    hash_object = hashlib.sha256(address.encode())
-    hash_hex = hash_object.hexdigest()
-
-    # Grab the actual image URL
-    return f'https://www.gravatar.com/avatar/{hash_hex}?d=mp'
 
 
 # Give us each day the data we require, and forgive us our

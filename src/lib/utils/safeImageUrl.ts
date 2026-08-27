@@ -1,6 +1,6 @@
 import { WEBUI_BASE_URL } from '$lib/constants';
 
-// LICENSE covers this Open WebUI fallback logo.
+// LICENSE covers this AVEXIE fallback logo.
 // Do not alter, remove, obscure, or replace it except as LICENSE permits:
 // https://docs.openwebui.com/license.
 const PLACEHOLDER_IMAGE = '/favicon.png';
@@ -13,7 +13,6 @@ const PLACEHOLDER_IMAGE = '/favicon.png';
  *   - Relative paths (starting with '/')
  *   - data:image/* URIs
  *   - Same-origin URLs (starting with WEBUI_BASE_URL)
- *   - Gravatar URLs (https://www.gravatar.com/avatar/)
  *   - External HTTP(S) URLs when allowExternal is true
  *
  * All other URLs (including arbitrary http(s):// origins by default) are
@@ -26,7 +25,6 @@ export function safeImageUrl(url: string, allowExternal = false): string {
 
 	if (
 		(WEBUI_BASE_URL && url.startsWith(WEBUI_BASE_URL)) ||
-		url.startsWith('https://www.gravatar.com/avatar/') ||
 		(allowExternal && /^https?:\/\//i.test(url)) ||
 		url.startsWith('data:') ||
 		url.startsWith('/')

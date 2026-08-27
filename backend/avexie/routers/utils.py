@@ -4,25 +4,19 @@ import logging
 
 import black
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
-from open_webui.config import DATA_DIR, ENABLE_ADMIN_EXPORT
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.models.chats import ChatTitleMessagesForm
-from open_webui.models.config import Config
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.code_interpreter import execute_code_jupyter
-from open_webui.utils.misc import get_gravatar_url
-from open_webui.utils.pdf_generator import PDFGenerator
+from avexie.config import DATA_DIR, ENABLE_ADMIN_EXPORT
+from avexie.constants import ERROR_MESSAGES
+from avexie.models.chats import ChatTitleMessagesForm
+from avexie.models.config import Config
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.code_interpreter import execute_code_jupyter
+from avexie.utils.pdf_generator import PDFGenerator
 from pydantic import BaseModel
 from starlette.responses import FileResponse
 
 log = logging.getLogger(__name__)
 
 router = APIRouter()
-
-
-@router.get('/gravatar')
-async def get_gravatar(email: str, user=Depends(get_verified_user)):
-    return get_gravatar_url(email)
 
 
 class CodeForm(BaseModel):
@@ -100,7 +94,7 @@ async def download_db(user=Depends(get_admin_user)):
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, detail=ERROR_MESSAGES.ACCESS_PROHIBITED)
 
     # Lazy import avoids circular dependency at module load time
-    from open_webui.internal.db import engine
+    from avexie.internal.db import engine
 
     if engine.name != 'sqlite':
         raise HTTPException(status.HTTP_400_BAD_REQUEST, detail=ERROR_MESSAGES.DB_NOT_SQLITE)
