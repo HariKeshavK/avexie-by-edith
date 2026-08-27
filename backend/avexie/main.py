@@ -42,24 +42,21 @@ from starsessions import (
 )
 from starsessions.stores.redis import RedisStore
 
-from open_webui.config import (
+from avexie.config import (
     BYPASS_ADMIN_ACCESS_CONTROL,
     CACHE_DIR,
     CORS_ALLOW_ORIGIN,
     DEFAULT_LOCALE,
-    ENABLE_ADMIN_ANALYTICS,
     # Admin
     ENABLE_ADMIN_CHAT_ACCESS,
     ENABLE_ADMIN_EXPORT,
     ENABLE_ONEDRIVE_BUSINESS,
     ENABLE_ONEDRIVE_PERSONAL,
-    # OpenAI
     ENV,
     FRONTEND_BUILD_DIR,
     GOOGLE_DRIVE_API_KEY,
     GOOGLE_DRIVE_CLIENT_ID,
     IFRAME_CSP,
-    OAUTH_PROVIDERS,
     ONEDRIVE_CLIENT_ID_BUSINESS,
     ONEDRIVE_CLIENT_ID_PERSONAL,
     ONEDRIVE_SHAREPOINT_TENANT_ID,
@@ -73,8 +70,8 @@ from open_webui.config import (
     import_legacy_config_json,
     seed_registered_defaults,
 )
-from open_webui.constants import ERROR_MESSAGES, TASKS
-from open_webui.env import (
+from avexie.constants import ERROR_MESSAGES, TASKS
+from avexie.env import (
     AIOHTTP_CLIENT_SESSION_SSL,
     AUDIT_EXCLUDED_PATHS,
     AUDIT_INCLUDED_PATHS,
@@ -86,22 +83,15 @@ from open_webui.env import (
     ENABLE_COMPRESSION_MIDDLEWARE,
     ENABLE_CUSTOM_MODEL_FALLBACK,
     ENABLE_EASTER_EGGS,
-    # OAuth Back-Channel Logout
-    ENABLE_OAUTH_BACKCHANNEL_LOGOUT,
-    ENABLE_OTEL,
     ENABLE_PLUGINS,
     ENABLE_PUBLIC_ACTIVE_USERS_COUNT,
     ENABLE_PYODIDE_FILE_PERSISTENCE,
-    # SCIM
-    ENABLE_SCIM,
     ENABLE_SIGNUP_PASSWORD_CONFIRMATION,
     ENABLE_STAR_SESSIONS_MIDDLEWARE,
-    ENABLE_VERSION_UPDATE_CHECK,
     ENABLE_WEBSOCKET_SUPPORT,
     EXTERNAL_PWA_MANIFEST_URL,
     GLOBAL_LOG_LEVEL,
     INSTANCE_ID,
-    LICENSE_KEY,
     LOG_FORMAT,
     MAX_BODY_LOG_SIZE,
     # Redis
@@ -109,7 +99,6 @@ from open_webui.env import (
     REDIS_URL,
     RESET_CONFIG_ON_START,
     SAFE_MODE,
-    SCIM_TOKEN,
     VERSION,
     WEBSOCKET_HEARTBEAT_INTERVAL,
     # Admin Account Runtime Creation
@@ -122,7 +111,7 @@ from open_webui.env import (
     WEBUI_SESSION_COOKIE_SAME_SITE,
     WEBUI_SESSION_COOKIE_SECURE,
 )
-from open_webui.events import (
+from avexie.events import (
     EVENTS,
     delete_event_webhook,
     get_event_webhooks,
@@ -130,20 +119,19 @@ from open_webui.events import (
     publish_event,
     upsert_event_webhook,
 )
-from open_webui.events import (
+from avexie.events import (
     get_event_catalog as get_event_catalog_items,
 )
-from open_webui.internal.db import engine, get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.channels import Channels
-from open_webui.models.chats import ChatForm, Chats
-from open_webui.models.config import Config
-from open_webui.models.functions import Functions
-from open_webui.models.messages import Messages
-from open_webui.models.models import Models, normalize_model_tags
-from open_webui.models.users import Users
-from open_webui.routers import (
-    analytics,
+from avexie.internal.db import engine, get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.channels import Channels
+from avexie.models.chats import ChatForm, Chats
+from avexie.models.config import Config
+from avexie.models.functions import Functions
+from avexie.models.messages import Messages
+from avexie.models.models import Models, normalize_model_tags
+from avexie.models.users import Users
+from avexie.routers import (
     audio,
     auths,
     automations,
@@ -156,18 +144,15 @@ from open_webui.routers import (
     folders,
     functions,
     groups,
-    images,
     knowledge,
     memories,
     models,
     notes,
     notifications,
     ollama,
-    openai,
     pipelines,
     prompts,
     retrieval,
-    scim,
     skills,
     tasks,
     terminals,
@@ -175,13 +160,13 @@ from open_webui.routers import (
     users,
     utils,
 )
-from open_webui.routers.retrieval import (
+from avexie.routers.retrieval import (
     get_ef,
     get_embedding_function,
     get_reranking_function,
     get_rf,
 )
-from open_webui.socket.main import (
+from avexie.socket.main import (
     MODELS,
     get_event_emitter,
     get_models_in_use,
@@ -189,10 +174,10 @@ from open_webui.socket.main import (
     periodic_session_pool_cleanup,
     periodic_usage_pool_cleanup,
 )
-from open_webui.socket.main import (
+from avexie.socket.main import (
     app as socket_app,
 )
-from open_webui.tasks import (
+from avexie.tasks import (
     cleanup_task,
     create_task,
     has_active_tasks,
@@ -202,57 +187,55 @@ from open_webui.tasks import (
     stop_item_tasks,
     stop_task,
 )  # Import from tasks.py
-from open_webui.utils import logger
-from open_webui.utils.access_control import has_permission
-from open_webui.utils.access_control.folders import has_folder_write_access
-from open_webui.utils.actions import chat_action as chat_action_handler
-from open_webui.utils.asgi_middleware import AppHTTPMiddleware
-from open_webui.utils.audit import AuditLevel, AuditLoggingMiddleware
-from open_webui.utils.auth import (
+from avexie.utils import logger
+from avexie.utils.access_control import has_permission
+from avexie.utils.access_control.folders import has_folder_write_access
+from avexie.utils.actions import chat_action as chat_action_handler
+from avexie.utils.asgi_middleware import AppHTTPMiddleware
+from avexie.utils.audit import AuditLevel, AuditLoggingMiddleware
+from avexie.utils.auth import (
     create_admin_user,
     decode_token,
     get_admin_user,
     get_http_authorization_cred,
-    get_license_data,
     get_verified_user,
 )
-from open_webui.utils.chat import (
+from avexie.utils.chat import (
     chat_completed as chat_completed_handler,
 )
-from open_webui.utils.chat import (
+from avexie.utils.chat import (
     generate_chat_completion as chat_completion_handler,
 )
-from open_webui.utils.chat_id import (
+from avexie.utils.chat_id import (
     get_temporary_chat_session_id,
     is_saved_chat_id,
     is_temporary_chat_id,
 )
-from open_webui.utils.chat_variables import (
+from avexie.utils.chat_variables import (
     normalize_chat_variables,
 )
-from open_webui.utils.embeddings import generate_embeddings
-from open_webui.utils.json_codec import JSONCodec
-from open_webui.utils.json_response import apply_orjson_http_json
-from open_webui.utils.logger import start_logger
-from open_webui.utils.middleware import (
+from avexie.utils.embeddings import generate_embeddings
+from avexie.utils.json_codec import JSONCodec
+from avexie.utils.json_response import apply_orjson_http_json
+from avexie.utils.logger import start_logger
+from avexie.utils.middleware import (
     background_tasks_handler,
     build_chat_response_context,
     drain_approved_tool_calls,
     process_chat_payload,
     process_chat_response,
 )
-from open_webui.utils.misc import get_response_error_detail, merge_model_params
-from open_webui.utils.model_ids import strip_provider_model_prefix
-from open_webui.utils.models import (
+from avexie.utils.misc import get_response_error_detail, merge_model_params
+from avexie.utils.model_ids import strip_provider_model_prefix
+from avexie.utils.models import (
     check_model_access,
     get_all_base_models,
     get_all_models,
     get_filtered_models,
 )
-from open_webui.utils.oauth import (
+from avexie.utils.oauth import (
     OAuthClientInformationFull,
     OAuthClientManager,
-    OAuthManager,
     apply_connection_oauth_options,
     decrypt_data,
     encrypt_data,
@@ -261,15 +244,15 @@ from open_webui.utils.oauth import (
     recover_static_oauth_client_metadata,
     resolve_oauth_client_info,
 )
-from open_webui.utils.plugin import install_tool_and_function_dependencies
-from open_webui.utils.redis import get_redis_client
-from open_webui.utils.session_pool import cleanup_response, get_client_timeout, get_session, stream_wrapper
-from open_webui.utils.tool_approval import (
+from avexie.utils.plugin import install_tool_and_function_dependencies
+from avexie.utils.redis import get_redis_client
+from avexie.utils.session_pool import cleanup_response, get_client_timeout, get_session, stream_wrapper
+from avexie.utils.tool_approval import (
     ResolveToolCallForm,
     build_tool_approval_resume_payload,
     resolve_tool_call_output,
 )
-from open_webui.utils.tools import set_terminal_servers, set_tool_servers
+from avexie.utils.tools import set_terminal_servers, set_tool_servers
 
 if SAFE_MODE:
     print('SAFE MODE ENABLED')
@@ -323,16 +306,16 @@ if LOG_FORMAT != 'json':
 
 v{VERSION} - building the best AI user interface.
 {f'Commit: {WEBUI_BUILD_HASH}' if WEBUI_BUILD_HASH != 'dev-build' else ''}
-https://github.com/open-webui/open-webui
+
 """
     try:
         print(banner)
     except UnicodeEncodeError:
         # Stdout can't encode the box-drawing banner (Windows cp1252, redirected/headless stdout); fall back to ASCII.
-        # LICENSE covers this Open WebUI CLI identifier.
+        # LICENSE covers this AVEXIE CLI identifier.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
-        print(f'Open WebUI v{VERSION} - building the best AI user interface.\nhttps://github.com/open-webui/open-webui')
+        print(f'AVEXIE v{VERSION}.\n')
 
 
 @asynccontextmanager
@@ -363,10 +346,6 @@ async def lifespan(app: FastAPI):
     await migrate_legacy_webhook_config()
     await publish_event(app, EVENTS.SYSTEM_STARTUP_STARTED, source='system')
 
-    license_task = None
-    if LICENSE_KEY:
-        license_task = asyncio.create_task(asyncio.to_thread(get_license_data, app, LICENSE_KEY))
-
     # Create admin account from env vars if specified and no users exist
     if WEBUI_ADMIN_EMAIL and WEBUI_ADMIN_PASSWORD:
         if await create_admin_user(WEBUI_ADMIN_EMAIL, WEBUI_ADMIN_PASSWORD, WEBUI_ADMIN_NAME):
@@ -389,7 +368,7 @@ async def lifespan(app: FastAPI):
     app.state.periodic_usage_pool_cleanup = asyncio.create_task(periodic_usage_pool_cleanup())
     app.state.periodic_session_pool_cleanup = asyncio.create_task(periodic_session_pool_cleanup())
 
-    from open_webui.utils.automations import scheduler_worker_loop
+    from avexie.utils.automations import scheduler_worker_loop
 
     app.state.scheduler_worker_loop = asyncio.create_task(scheduler_worker_loop(app))
 
@@ -449,14 +428,6 @@ async def lifespan(app: FastAPI):
             log.warning(f'Failed to initialize terminal servers at startup: {e}')
 
     # Mark application as ready to accept traffic from a startup perspective.
-    if license_task:
-        try:
-            await asyncio.wait_for(asyncio.shield(license_task), timeout=2)
-        except asyncio.TimeoutError:
-            log.warning('License data retrieval is still pending; continuing startup without it')
-        except Exception as e:
-            log.warning(f'License data retrieval failed during startup: {e}')
-
     app.state.startup_complete = True
     await publish_event(app, EVENTS.SYSTEM_STARTUP_COMPLETED, source='system')
 
@@ -465,7 +436,7 @@ async def lifespan(app: FastAPI):
     await publish_event(app, EVENTS.SYSTEM_SHUTDOWN_STARTED, source='system')
 
     # Shutdown: clean up shared resources
-    from open_webui.utils.session_pool import close_session
+    from avexie.utils.session_pool import close_session
 
     await close_session()
 
@@ -483,11 +454,11 @@ async def lifespan(app: FastAPI):
 # response_model routes keep FastAPI's Pydantic fast path either way.
 apply_orjson_http_json()
 
-# LICENSE covers this Open WebUI API metadata identifier.
+# LICENSE covers this AVEXIE API metadata identifier.
 # Do not alter, remove, obscure, or replace it except as LICENSE permits:
 # https://docs.openwebui.com/license.
 app = FastAPI(
-    title='Open WebUI',
+    title='AVEXIE',
     docs_url='/docs' if ENV == 'dev' else None,
     openapi_url='/openapi.json' if ENV == 'dev' else None,
     redoc_url=None,
@@ -497,18 +468,14 @@ app = FastAPI(
 # Used by readiness checks to gate traffic until startup work is done.
 app.state.startup_complete = False
 
-# For Open WebUI OIDC/OAuth2
-oauth_manager = OAuthManager(app)
-app.state.oauth_manager = oauth_manager
-
-# For Integrations
+# For Integrations (tool server OAuth)
 oauth_client_manager = OAuthClientManager(app)
 app.state.oauth_client_manager = oauth_client_manager
 
 app.state.instance_id = None
 app.state.redis = None
 
-# LICENSE covers this Open WebUI branding surface, including name, logo,
+# LICENSE covers this AVEXIE branding surface, including name, logo,
 # visual, textual, symbolic identifiers, metadata, and surrounding UI.
 # Do not alter, remove, obscure, or replace it except as LICENSE permits:
 # https://docs.openwebui.com/license.
@@ -520,33 +487,12 @@ app.state.EXTERNAL_PWA_MANIFEST_URL = EXTERNAL_PWA_MANIFEST_URL
 
 ########################################
 #
-# OPENTELEMETRY
-#
-########################################
-
-if ENABLE_OTEL:
-    from open_webui.utils.telemetry.setup import setup as setup_opentelemetry
-
-    setup_opentelemetry(app=app, db_engine=engine)
-
-
-########################################
-#
 # OLLAMA
 #
 ########################################
 
 
 app.state.OLLAMA_MODELS = {}
-
-########################################
-#
-# OPENAI
-#
-########################################
-
-
-app.state.OPENAI_MODELS = {}
 
 ########################################
 #
@@ -571,14 +517,6 @@ app.state.TERMINAL_SERVERS = []
 ########################################
 
 
-########################################
-#
-# SCIM
-#
-########################################
-
-app.state.ENABLE_SCIM = ENABLE_SCIM
-app.state.SCIM_TOKEN = SCIM_TOKEN
 
 ########################################
 #
@@ -597,7 +535,7 @@ app.state.BASE_MODELS = []
 
 async def initialize_runtime_config(app: FastAPI):
     # Migrate legacy access_control → access_grants on boot.
-    from open_webui.utils.access_control import migrate_access_control
+    from avexie.utils.access_control import migrate_access_control
 
     connections = await Config.get('tool_server.connections', []) or []
     if any('access_control' in c.get('config', {}) for c in connections):
@@ -644,7 +582,6 @@ async def initialize_runtime_config(app: FastAPI):
     app.state.RERANKING_FUNCTION = None
     app.state.ef = None
     app.state.rf = None
-    app.state.YOUTUBE_LOADER_TRANSLATION = None
 
     try:
         rag_config = await Config.get_many(
@@ -801,7 +738,7 @@ if ENABLE_COMPRESSION_MIDDLEWARE:
 # response completion — which surfaced as noisy SQLAlchemy
 # `terminate_force_close` tracebacks under aiosqlite and as random
 # CancelledError storms across the request path. See
-# `open_webui.utils.asgi_middleware` for the rationale.
+# `avexie.utils.asgi_middleware` for the rationale.
 app.add_middleware(AppHTTPMiddleware)
 
 
@@ -818,12 +755,10 @@ app.mount('/ws', socket_app)
 
 
 app.include_router(ollama.router, prefix='/ollama', tags=['ollama'])
-app.include_router(openai.router, prefix='/openai', tags=['openai'])
 
 
 app.include_router(pipelines.router, prefix='/api/v1/pipelines', tags=['pipelines'])
 app.include_router(tasks.router, prefix='/api/v1/tasks', tags=['tasks'])
-app.include_router(images.router, prefix='/api/v1/images', tags=['images'])
 
 app.include_router(audio.router, prefix='/api/v1/audio', tags=['audio'])
 app.include_router(retrieval.router, prefix='/api/v1/retrieval', tags=['retrieval'])
@@ -852,16 +787,10 @@ app.include_router(groups.router, prefix='/api/v1/groups', tags=['groups'])
 app.include_router(files.router, prefix='/api/v1/files', tags=['files'])
 app.include_router(functions.router, prefix='/api/v1/functions', tags=['functions'])
 app.include_router(evaluations.router, prefix='/api/v1/evaluations', tags=['evaluations'])
-if ENABLE_ADMIN_ANALYTICS:
-    app.include_router(analytics.router, prefix='/api/v1/analytics', tags=['analytics'])
 app.include_router(utils.router, prefix='/api/v1/utils', tags=['utils'])
 app.include_router(terminals.router, prefix='/api/v1/terminals', tags=['terminals'])
 app.include_router(automations.router, prefix='/api/v1/automations', tags=['automations'])
 app.include_router(calendar.router, prefix='/api/v1/calendars', tags=['calendars'])
-
-# SCIM 2.0 API for identity management
-if ENABLE_SCIM:
-    app.include_router(scim.router, prefix='/api/v1/scim/v2', tags=['scim'])
 
 
 ##################################
@@ -940,10 +869,9 @@ async def unload_model(request: Request, form_data: ModelUnloadForm, user=Depend
     model_id = form_data.model
 
     ollama_models = getattr(request.app.state, 'OLLAMA_MODELS', None) or {}
-    openai_models = getattr(request.app.state, 'OPENAI_MODELS', None) or {}
 
     seen = set()
-    while model_id not in ollama_models and model_id not in openai_models and model_id not in seen:
+    while model_id not in ollama_models and model_id not in seen:
         seen.add(model_id)
         model_info = await Models.get_model_by_id(model_id)
         if not model_info or not model_info.base_model_id:
@@ -995,49 +923,6 @@ async def unload_model(request: Request, form_data: ModelUnloadForm, user=Depend
             )
         return {'status': True}
 
-    # --- OpenAI-compatible providers ---
-    if model_id in openai_models:
-        openai_config = await Config.get_many('openai.api_configs', 'openai.api_base_urls', 'openai.api_keys')
-        openai_api_configs = openai_config.get('openai.api_configs') or {}
-        openai_base_urls = openai_config.get('openai.api_base_urls') or []
-        openai_api_keys = openai_config.get('openai.api_keys') or []
-        model_info = openai_models[model_id]
-        idx = model_info.get('urlIdx')
-        api_config = openai_api_configs.get(str(idx), {})
-        provider = api_config.get('provider', '')
-        base_url = openai_base_urls[idx]
-        key = openai_api_keys[idx] if idx < len(openai_api_keys) else ''
-
-        if provider == 'llama.cpp':
-            root_url = base_url.rstrip('/').removesuffix('/v1')
-            actual_model = strip_provider_model_prefix(model_id, api_config.get('prefix_id'))
-            try:
-                timeout = aiohttp.ClientTimeout(total=30)
-                async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
-                    headers = {
-                        'Content-Type': 'application/json',
-                        **({'Authorization': f'Bearer {key}'} if key else {}),
-                    }
-                    async with session.post(
-                        f'{root_url}/models/unload',
-                        json={'model': actual_model},
-                        headers=headers,
-                    ) as r:
-                        if not r.ok:
-                            detail = await r.text()
-                            raise HTTPException(status_code=r.status, detail=detail)
-                        return await r.json()
-            except HTTPException:
-                raise
-            except Exception as e:
-                log.exception(f'Failed to unload model via llama.cpp: {e}')
-                raise HTTPException(status_code=500, detail=str(e))
-        else:
-            raise HTTPException(
-                status_code=400,
-                detail=f'Provider "{provider or "default"}" does not support model unloading',
-            )
-
     raise HTTPException(status_code=404, detail=f'Model "{model_id}" not found')
 
 
@@ -1075,7 +960,7 @@ async def _set_direct_model(request: Request, model_item: dict, user) -> None:
     model_meta = (model_item.get('info') or {}).get('meta') or {}
     knowledge_items = model_meta.get('knowledge')
     if knowledge_items:
-        from open_webui.utils.access_control.files import get_accessible_folder_files
+        from avexie.utils.access_control.files import get_accessible_folder_files
 
         model_meta['knowledge'] = await get_accessible_folder_files(knowledge_items, user)
     request.state.direct = True
@@ -1517,7 +1402,7 @@ async def chat_completion(
                             'internal'
                         ):
                             try:
-                                from open_webui.utils.timers import cancel_timers_for_chat
+                                from avexie.utils.timers import cancel_timers_for_chat
 
                                 await cancel_timers_for_chat(chat_id, 'chat.user_message', user.id)
                             except Exception:
@@ -1751,7 +1636,7 @@ async def chat_completion(
                     and getattr(request.state, 'internal', False) is not True
                     and not await has_active_tasks(request.app.state.redis, chat_id)
                 ):
-                    from open_webui.utils.subagents import process_pending_internal_messages
+                    from avexie.utils.subagents import process_pending_internal_messages
 
                     await process_pending_internal_messages(
                         request,
@@ -1886,159 +1771,6 @@ async def resolve_chat_message_tool_call(
 # Expose as app.state so internal callers (e.g. automations) can
 # use the full pipeline without importing from main.py (avoids circular deps).
 app.state.CHAT_COMPLETION_HANDLER = chat_completion
-
-
-##################################
-#
-# Anthropic Messages API Compatible Endpoint
-#
-##################################
-
-
-from open_webui.utils.anthropic import (
-    convert_anthropic_to_openai_payload,
-    convert_openai_to_anthropic_response,
-    is_anthropic_messages_passthrough,
-    openai_stream_to_anthropic_stream,
-)
-
-
-@app.post('/api/message/count_tokens')
-@app.post('/api/v1/messages/count_tokens')  # Anthropic Messages token-count endpoint
-async def count_message_tokens(
-    request: Request,
-    form_data: dict,
-    user=Depends(get_verified_user),
-):
-    return {'input_tokens': await openai.count_anthropic_tokens(request, form_data, user)}
-
-
-async def passthrough_anthropic_messages(request: Request, form_data: dict, user) -> Response | dict:
-    requested_model, payload, url, key, headers, cookies = await openai.get_anthropic_request_target(
-        request, form_data, user
-    )
-    request_url = f'{url.rstrip("/")}/messages'
-    response = None
-    streaming = False
-
-    try:
-        session = await get_session()
-        response = await session.request(
-            method='POST',
-            url=request_url,
-            data=JSONCodec.dumps(payload),
-            headers=headers,
-            cookies=cookies,
-            ssl=AIOHTTP_CLIENT_SESSION_SSL,
-            timeout=get_client_timeout(stream=bool(payload.get('stream'))),
-        )
-
-        if 'text/event-stream' in response.headers.get('Content-Type', ''):
-            streaming = True
-            return StreamingResponse(
-                stream_wrapper(response),
-                status_code=response.status,
-                headers=openai._clean_proxy_headers(response.headers),
-            )
-
-        try:
-            response_data = await response.json()
-        except Exception:
-            response_data = await response.text()
-
-        if response.status >= 400:
-            await openai.publish_model_provider_request_failed(
-                request,
-                actor=user,
-                provider='openai-compatible',
-                base_url=url,
-                api_key=key,
-                status=response.status,
-                requested_model=requested_model,
-                upstream_error=response_data,
-            )
-            if isinstance(response_data, (dict, list)):
-                return JSONResponse(status_code=response.status, content=response_data)
-            return Response(status_code=response.status, content=response_data)
-
-        return response_data
-    except HTTPException:
-        raise
-    except Exception:
-        log.exception('Failed to passthrough Anthropic Messages request for model %s', requested_model)
-        raise HTTPException(status_code=502, detail=ERROR_MESSAGES.SERVER_CONNECTION_ERROR)
-    finally:
-        if not streaming:
-            await cleanup_response(response)
-
-
-@app.post('/api/message')
-@app.post('/api/v1/messages')  # Anthropic Messages API compatible endpoint
-async def generate_messages(
-    request: Request,
-    form_data: dict,
-    user=Depends(get_verified_user),
-):
-    """
-    Anthropic Messages API compatible endpoint.
-
-    Accepts the Anthropic Messages API format, converts internally to OpenAI
-    Chat Completions format, routes through the existing chat completion
-    pipeline, then converts the response back to Anthropic Messages format.
-
-    Supports both streaming and non-streaming requests.
-    All models configured in Open WebUI are accessible via this endpoint.
-
-    Authentication: Supports both standard Authorization header and
-    Anthropic's x-api-key header (via middleware translation).
-    """
-    requested_model = form_data.get('model', '')
-    input_tokens = None
-    try:
-        input_tokens = await openai.count_anthropic_tokens(request, form_data, user)
-    except Exception:
-        # Counting must not turn a compatible generation request into an outage.
-        log.warning('Unable to count Anthropic input tokens for model %s', requested_model, exc_info=True)
-
-    model_id = requested_model
-    model_info = await Models.get_model_by_id(model_id)
-    if model_info and model_info.base_model_id:
-        model_id = model_info.base_model_id
-
-    passthrough_params = []
-    models = request.app.state.OPENAI_MODELS
-    if not models or model_id not in models:
-        await openai.get_all_models(request, user=user)
-        models = request.app.state.OPENAI_MODELS
-    model = models.get(model_id)
-    if model:
-        url, _, api_config = await openai.get_openai_connection(model['urlIdx'])
-        if is_anthropic_messages_passthrough(url, api_config):
-            return await passthrough_anthropic_messages(request, form_data, user)
-        passthrough_params = api_config.get('passthrough_params') or []
-
-    # Convert Anthropic payload to OpenAI format
-    openai_payload = convert_anthropic_to_openai_payload(form_data, passthrough_params)
-
-    # Route through the existing chat_completion handler
-    response = await chat_completion(request, openai_payload, user)
-
-    # Convert response back to Anthropic format
-    if isinstance(response, StreamingResponse):
-        # Streaming response: wrap the generator to convert SSE format
-        return StreamingResponse(
-            openai_stream_to_anthropic_stream(response.body_iterator, model=requested_model, input_tokens=input_tokens),
-            media_type='text/event-stream',
-            headers={
-                'Cache-Control': 'no-cache',
-                'Connection': 'keep-alive',
-            },
-        )
-    elif isinstance(response, dict):
-        return convert_openai_to_anthropic_response(response, model=requested_model, input_tokens=input_tokens)
-    else:
-        # Passthrough for error responses (JSONResponse, PlainTextResponse, etc.)
-        return response
 
 
 async def verify_chat_ownership(chat_id: str | None, user) -> None:
@@ -2227,8 +1959,6 @@ async def get_app_config(request: Request):
     license_metadata = getattr(app.state, 'LICENSE_METADATA', None)
     user_count = await Users.get_num_users() if license_metadata else None
     config = await Config.get_many(
-        'oauth.enable',
-        'oauth.auto_redirect',
         'ldap.enable',
         'ui.enable_signup',
         'ui.enable_login_form',
@@ -2243,12 +1973,8 @@ async def get_app_config(request: Request):
         'notes.enable',
         'chat.context_compaction.enable',
         'chat.tool_permissions.enable',
-        'web.search.enable',
-        'web.search.confirmation.enable',
-        'web.search.confirmation.content',
         'code_execution.enable',
         'code_interpreter.enable',
-        'image_generation.enable',
         'task.autocomplete.enable',
         'ui.enable_community_sharing',
         'ui.enable_message_rating',
@@ -2284,14 +2010,8 @@ async def get_app_config(request: Request):
         'version': VERSION,
         'default_locale': str(DEFAULT_LOCALE),
         'oauth': {
-            # Hide providers (and thus the login buttons / auto-redirect) when OAuth
-            # is disabled, without clearing the admin's provider configuration.
-            'providers': (
-                {name: provider.get('name', name) for name, provider in OAUTH_PROVIDERS.items()}
-                if config.get('oauth.enable', True)
-                else {}
-            ),
-            'auto_redirect': config.get('oauth.auto_redirect'),
+            'providers': {},
+            'auto_redirect': False,
         },
         'features': {
             # --- Public: required by login/signup page pre-auth ---
@@ -2312,7 +2032,7 @@ async def get_app_config(request: Request):
                 {
                     'enable_api_keys': config.get('auth.enable_api_keys'),
                     'enable_password_change_form': config.get('ui.enable_password_change_form'),
-                    'enable_version_update_check': ENABLE_VERSION_UPDATE_CHECK,
+                    'enable_version_update_check': False,
                     'enable_pyodide_file_persistence': ENABLE_PYODIDE_FILE_PERSISTENCE,
                     'enable_public_active_users_count': ENABLE_PUBLIC_ACTIVE_USERS_COUNT,
                     'enable_easter_eggs': ENABLE_EASTER_EGGS,
@@ -2326,12 +2046,12 @@ async def get_app_config(request: Request):
                     'enable_notes': config.get('notes.enable'),
                     'enable_context_compaction': config.get('chat.context_compaction.enable'),
                     'enable_tool_permissions': config.get('chat.tool_permissions.enable'),
-                    'enable_web_search': config.get('web.search.enable'),
-                    'enable_web_search_confirmation': config.get('web.search.confirmation.enable'),
-                    'web_search_confirmation_content': config.get('web.search.confirmation.content'),
+                    'enable_web_search': False,
+                    'enable_web_search_confirmation': False,
+                    'web_search_confirmation_content': '',
                     'enable_code_execution': config.get('code_execution.enable'),
                     'enable_code_interpreter': config.get('code_interpreter.enable'),
-                    'enable_image_generation': config.get('image_generation.enable'),
+                    'enable_image_generation': False,
                     'enable_autocomplete_generation': config.get('task.autocomplete.enable'),
                     'enable_community_sharing': config.get('ui.enable_community_sharing'),
                     'enable_message_rating': config.get('ui.enable_message_rating'),
@@ -2339,7 +2059,7 @@ async def get_app_config(request: Request):
                     'enable_user_status': config.get('users.enable_status'),
                     'enable_admin_export': ENABLE_ADMIN_EXPORT,
                     'enable_admin_chat_access': ENABLE_ADMIN_CHAT_ACCESS,
-                    'enable_admin_analytics': ENABLE_ADMIN_ANALYTICS,
+                    'enable_admin_analytics': False,
                     'enable_google_drive_integration': config.get('google_drive.enable'),
                     'enable_onedrive_integration': config.get('onedrive.enable'),
                     'enable_memories': config.get('memories.enable'),
@@ -2557,28 +2277,6 @@ async def get_app_version():
     }
 
 
-@app.get('/api/version/updates')
-async def get_app_latest_release_version(user=Depends(get_verified_user)):
-    if not ENABLE_VERSION_UPDATE_CHECK:
-        log.debug(f'Version update check is disabled, returning current version as latest version')
-        return {'current': VERSION, 'latest': VERSION}
-    try:
-        timeout = aiohttp.ClientTimeout(total=1)
-        async with aiohttp.ClientSession(timeout=timeout, trust_env=True) as session:
-            async with session.get(
-                'https://api.github.com/repos/open-webui/open-webui/releases/latest',
-                ssl=AIOHTTP_CLIENT_SESSION_SSL,
-            ) as response:
-                response.raise_for_status()
-                data = await response.json()
-                latest_version = data['tag_name']
-
-                return {'current': VERSION, 'latest': latest_version[1:]}
-    except Exception as e:
-        log.debug(e)
-        return {'current': VERSION, 'latest': VERSION}
-
-
 @app.get('/api/changelog')
 async def get_app_changelog():
     return {key: CHANGELOG[key] for idx, key in enumerate(CHANGELOG) if idx < 5}
@@ -2587,7 +2285,7 @@ async def get_app_changelog():
 @app.get('/api/usage')
 async def get_current_usage(user=Depends(get_verified_user)):
     """
-    Get current usage statistics for Open WebUI.
+    Get current usage statistics for AVEXIE.
     This is an experimental endpoint and subject to change.
     """
     try:
@@ -2791,51 +2489,11 @@ async def oauth_client_callback(
     )
 
 
-@app.get('/oauth/{provider}/login')
-async def oauth_login(provider: str, request: Request):
-    return await oauth_manager.handle_login(request, provider)
-
-
-@app.get('/oauth/{provider}/login/callback')
-@app.get('/oauth/{provider}/callback')  # Legacy endpoint
-async def oauth_login_callback(
-    provider: str,
-    request: Request,
-    response: Response,
-    db: AsyncSession = Depends(get_async_session),
-):
-    """Handle the OAuth provider callback.
-
-    Resolution order:
-    1. Match by subject ID bound to the provider.
-    2. If ``OAUTH_MERGE_ACCOUNTS_BY_EMAIL`` is enabled, match by email
-       (note: some providers do not verify email addresses).
-    3. If no match and ``ENABLE_OAUTH_SIGNUP`` is enabled, create a new user
-       (fails if the email is already registered).
-    """
-    return await oauth_manager.handle_callback(request, provider, response, db=db)
-
-
-############################
-# OIDC Back-Channel Logout
-############################
-
-
-@app.post('/oauth/backchannel-logout')
-async def oauth_backchannel_logout(
-    request: Request,
-    db: AsyncSession = Depends(get_async_session),
-):
-    if not ENABLE_OAUTH_BACKCHANNEL_LOGOUT:
-        raise HTTPException(status_code=404)
-    return await oauth_manager.handle_backchannel_logout(request, db=db)
-
-
 @app.get('/manifest.json')
 async def get_manifest_json():
     external_pwa_manifest_url = getattr(app.state, 'EXTERNAL_PWA_MANIFEST_URL', None)
     if external_pwa_manifest_url:
-        # LICENSE covers this install-time Open WebUI branding surface, including
+        # LICENSE covers this install-time AVEXIE branding surface, including
         # names, logos, manifests, metadata, and surrounding UI.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
@@ -2847,7 +2505,7 @@ async def get_manifest_json():
             r.raise_for_status()
             return await r.json()
     else:
-        # LICENSE covers this generated Open WebUI install branding surface,
+        # LICENSE covers this generated AVEXIE install branding surface,
         # including names, logos, manifests, metadata, and surrounding UI.
         # Do not alter, remove, obscure, or replace it except as LICENSE permits:
         # https://docs.openwebui.com/license.
@@ -2859,7 +2517,7 @@ async def get_manifest_json():
             'display': 'standalone',
             'background_color': '#343541',
             'icons': [
-                # LICENSE covers this Open WebUI install icon.
+                # LICENSE covers this AVEXIE install icon.
                 # Do not alter, remove, obscure, or replace it except as LICENSE permits:
                 # https://docs.openwebui.com/license.
                 {
@@ -2886,7 +2544,7 @@ async def get_manifest_json():
 @app.get('/opensearch.xml')
 async def get_opensearch_xml():
     webui_url = await Config.get('webui.url')
-    # LICENSE covers this Open WebUI search identifier.
+    # LICENSE covers this AVEXIE search identifier.
     # Do not alter, remove, obscure, or replace it except as LICENSE permits:
     # https://docs.openwebui.com/license.
     xml_content = rf"""
