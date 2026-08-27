@@ -1041,25 +1041,10 @@ ENABLE_WEB_LOADER_SSL_VERIFICATION = os.getenv('ENABLE_WEB_LOADER_SSL_VERIFICATI
 
 WEB_SEARCH_TRUST_ENV = os.getenv('WEB_SEARCH_TRUST_ENV', 'True').lower() == 'true'
 
-PLAYWRIGHT_WS_URL = os.getenv('PLAYWRIGHT_WS_URL', '')
-
+# Only local Playwright (in-process browser) is supported; remote browser
+# connections and third-party web-scraping backends (Firecrawl, Microsoft Web
+# IQ, generic external web loader) have been removed.
 PLAYWRIGHT_TIMEOUT = int(os.getenv('PLAYWRIGHT_TIMEOUT', '10000'))
-
-FIRECRAWL_API_KEY = os.getenv('FIRECRAWL_API_KEY', '')
-
-FIRECRAWL_API_BASE_URL = os.getenv('FIRECRAWL_API_BASE_URL', 'https://api.firecrawl.dev')
-
-FIRECRAWL_TIMEOUT = os.getenv('FIRECRAWL_TIMEOUT', '')
-
-EXTERNAL_WEB_LOADER_URL = os.getenv('EXTERNAL_WEB_LOADER_URL', '')
-
-EXTERNAL_WEB_LOADER_API_KEY = os.getenv('EXTERNAL_WEB_LOADER_API_KEY', '')
-
-MICROSOFT_WEB_IQ_API_BASE_URL = os.getenv('MICROSOFT_WEB_IQ_API_BASE_URL', 'https://api.microsoft.ai/v3')
-
-MICROSOFT_WEB_IQ_API_KEY = os.getenv('MICROSOFT_WEB_IQ_API_KEY', '')
-
-MICROSOFT_WEB_IQ_LANGUAGE = os.getenv('MICROSOFT_WEB_IQ_LANGUAGE', 'en')
 
 
 ####################################
@@ -2133,16 +2118,7 @@ DEFAULT_CONFIG = {
     'web.loader.concurrent_requests': WEB_LOADER_CONCURRENT_REQUESTS,
     'web.loader.timeout': WEB_LOADER_TIMEOUT,
     'web.loader.ssl_verification': ENABLE_WEB_LOADER_SSL_VERIFICATION,
-    'web.loader.playwright_ws_url': PLAYWRIGHT_WS_URL,
     'web.loader.playwright_timeout': PLAYWRIGHT_TIMEOUT,
-    'web.loader.firecrawl_api_key': FIRECRAWL_API_KEY,
-    'web.loader.firecrawl_api_url': FIRECRAWL_API_BASE_URL,
-    'web.loader.firecrawl_timeout': FIRECRAWL_TIMEOUT,
-    'web.loader.external_web_loader_url': EXTERNAL_WEB_LOADER_URL,
-    'web.loader.external_web_loader_api_key': EXTERNAL_WEB_LOADER_API_KEY,
-    'web.search.microsoft_web_iq_api_base_url': MICROSOFT_WEB_IQ_API_BASE_URL,
-    'web.search.microsoft_web_iq_api_key': MICROSOFT_WEB_IQ_API_KEY,
-    'web.search.microsoft_web_iq_language': MICROSOFT_WEB_IQ_LANGUAGE,
     'image_generation.enable': False,
     'images.edit.enable': False,
     'audio.stt.whisper_model': WHISPER_MODEL,

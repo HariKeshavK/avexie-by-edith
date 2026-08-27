@@ -251,17 +251,12 @@ RETRIEVAL_CONFIG_KEYS = {
     'ENABLE_WEB_SEARCH_CONFIRMATION': 'web.search.confirmation.enable',
     'WEB_SEARCH_CONFIRMATION_CONTENT': 'web.search.confirmation.content',
     'EXA_API_KEY': 'web.search.exa_api_key',
-    'EXTERNAL_WEB_LOADER_API_KEY': 'web.loader.external_web_loader_api_key',
-    'EXTERNAL_WEB_LOADER_URL': 'web.loader.external_web_loader_url',
     'EXTERNAL_WEB_SEARCH_API_KEY': 'web.search.external_web_search_api_key',
     'EXTERNAL_WEB_SEARCH_URL': 'web.search.external_web_search_url',
     'FILE_IMAGE_COMPRESSION_HEIGHT': 'file.image_compression_height',
     'FILE_IMAGE_COMPRESSION_WIDTH': 'file.image_compression_width',
     'FILE_MAX_COUNT': 'rag.file.max_count',
     'FILE_MAX_SIZE': 'rag.file.max_size',
-    'FIRECRAWL_API_BASE_URL': 'web.loader.firecrawl_api_url',
-    'FIRECRAWL_API_KEY': 'web.loader.firecrawl_api_key',
-    'FIRECRAWL_TIMEOUT': 'web.loader.firecrawl_timeout',
     'GOOGLE_PSE_API_KEY': 'web.search.google_pse_api_key',
     'GOOGLE_PSE_ENGINE_ID': 'web.search.google_pse_engine_id',
     'HYBRID_BM25_WEIGHT': 'rag.hybrid_bm25_weight',
@@ -276,9 +271,6 @@ RETRIEVAL_CONFIG_KEYS = {
     'MINERU_API_URL': 'rag.mineru_api_url',
     'MINERU_FILE_EXTENSIONS': 'rag.mineru_file_extensions',
     'MINERU_PARAMS': 'rag.mineru_params',
-    'MICROSOFT_WEB_IQ_API_BASE_URL': 'web.search.microsoft_web_iq_api_base_url',
-    'MICROSOFT_WEB_IQ_API_KEY': 'web.search.microsoft_web_iq_api_key',
-    'MICROSOFT_WEB_IQ_LANGUAGE': 'web.search.microsoft_web_iq_language',
     'MOJEEK_SEARCH_API_KEY': 'web.search.mojeek_search_api_key',
     'OLLAMA_CLOUD_WEB_SEARCH_API_KEY': 'web.search.ollama_cloud_api_key',
     'PADDLEOCR_VL_BASE_URL': 'rag.paddleocr_vl_base_url',
@@ -290,7 +282,6 @@ RETRIEVAL_CONFIG_KEYS = {
     'PERPLEXITY_SEARCH_API_URL': 'web.search.perplexity_search_api_url',
     'PERPLEXITY_SEARCH_CONTEXT_USAGE': 'web.search.perplexity_search_context_usage',
     'PLAYWRIGHT_TIMEOUT': 'web.loader.playwright_timeout',
-    'PLAYWRIGHT_WS_URL': 'web.loader.playwright_ws_url',
     'RAG_AZURE_OPENAI_API_KEY': 'rag.azure_openai.api_key',
     'RAG_AZURE_OPENAI_API_VERSION': 'rag.azure_openai.api_version',
     'RAG_AZURE_OPENAI_BASE_URL': 'rag.azure_openai.base_url',
@@ -670,23 +661,14 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
             'PERPLEXITY_MODEL': config.PERPLEXITY_MODEL,
             'PERPLEXITY_SEARCH_CONTEXT_USAGE': config.PERPLEXITY_SEARCH_CONTEXT_USAGE,
             'PERPLEXITY_SEARCH_API_URL': config.PERPLEXITY_SEARCH_API_URL,
-            'MICROSOFT_WEB_IQ_API_BASE_URL': config.MICROSOFT_WEB_IQ_API_BASE_URL,
-            'MICROSOFT_WEB_IQ_API_KEY': config.MICROSOFT_WEB_IQ_API_KEY,
-            'MICROSOFT_WEB_IQ_LANGUAGE': config.MICROSOFT_WEB_IQ_LANGUAGE,
             'SOUGOU_API_SID': config.SOUGOU_API_SID,
             'SOUGOU_API_SK': config.SOUGOU_API_SK,
             'WEB_LOADER_ENGINE': config.WEB_LOADER_ENGINE,
             'WEB_LOADER_TIMEOUT': config.WEB_LOADER_TIMEOUT,
             'ENABLE_WEB_LOADER_SSL_VERIFICATION': config.ENABLE_WEB_LOADER_SSL_VERIFICATION,
-            'PLAYWRIGHT_WS_URL': config.PLAYWRIGHT_WS_URL,
             'PLAYWRIGHT_TIMEOUT': config.PLAYWRIGHT_TIMEOUT,
-            'FIRECRAWL_API_KEY': config.FIRECRAWL_API_KEY,
-            'FIRECRAWL_API_BASE_URL': config.FIRECRAWL_API_BASE_URL,
-            'FIRECRAWL_TIMEOUT': config.FIRECRAWL_TIMEOUT,
             'EXTERNAL_WEB_SEARCH_URL': config.EXTERNAL_WEB_SEARCH_URL,
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
-            'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,
-            'EXTERNAL_WEB_LOADER_API_KEY': config.EXTERNAL_WEB_LOADER_API_KEY,
             'YANDEX_WEB_SEARCH_URL': config.YANDEX_WEB_SEARCH_URL,
             'YANDEX_WEB_SEARCH_API_KEY': config.YANDEX_WEB_SEARCH_API_KEY,
             'YANDEX_WEB_SEARCH_CONFIG': config.YANDEX_WEB_SEARCH_CONFIG,
@@ -744,23 +726,14 @@ class WebConfig(BaseModel):
     PERPLEXITY_MODEL: str | None = None
     PERPLEXITY_SEARCH_CONTEXT_USAGE: str | None = None
     PERPLEXITY_SEARCH_API_URL: str | None = None
-    MICROSOFT_WEB_IQ_API_BASE_URL: str | None = None
-    MICROSOFT_WEB_IQ_API_KEY: str | None = None
-    MICROSOFT_WEB_IQ_LANGUAGE: str | None = None
     SOUGOU_API_SID: str | None = None
     SOUGOU_API_SK: str | None = None
     WEB_LOADER_ENGINE: str | None = None
     WEB_LOADER_TIMEOUT: str | None = None
     ENABLE_WEB_LOADER_SSL_VERIFICATION: bool | None = None
-    PLAYWRIGHT_WS_URL: str | None = None
     PLAYWRIGHT_TIMEOUT: int | None = None
-    FIRECRAWL_API_KEY: str | None = None
-    FIRECRAWL_API_BASE_URL: str | None = None
-    FIRECRAWL_TIMEOUT: str | None = None
     EXTERNAL_WEB_SEARCH_URL: str | None = None
     EXTERNAL_WEB_SEARCH_API_KEY: str | None = None
-    EXTERNAL_WEB_LOADER_URL: str | None = None
-    EXTERNAL_WEB_LOADER_API_KEY: str | None = None
     YANDEX_WEB_SEARCH_URL: str | None = None
     YANDEX_WEB_SEARCH_API_KEY: str | None = None
     YANDEX_WEB_SEARCH_CONFIG: str | None = None
@@ -1098,9 +1071,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         config.PERPLEXITY_MODEL = form_data.web.PERPLEXITY_MODEL
         config.PERPLEXITY_SEARCH_CONTEXT_USAGE = form_data.web.PERPLEXITY_SEARCH_CONTEXT_USAGE
         config.PERPLEXITY_SEARCH_API_URL = form_data.web.PERPLEXITY_SEARCH_API_URL
-        config.MICROSOFT_WEB_IQ_API_BASE_URL = form_data.web.MICROSOFT_WEB_IQ_API_BASE_URL
-        config.MICROSOFT_WEB_IQ_API_KEY = form_data.web.MICROSOFT_WEB_IQ_API_KEY
-        config.MICROSOFT_WEB_IQ_LANGUAGE = form_data.web.MICROSOFT_WEB_IQ_LANGUAGE
         config.SOUGOU_API_SID = form_data.web.SOUGOU_API_SID
         config.SOUGOU_API_SK = form_data.web.SOUGOU_API_SK
 
@@ -1109,15 +1079,9 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         config.WEB_LOADER_TIMEOUT = form_data.web.WEB_LOADER_TIMEOUT
 
         config.ENABLE_WEB_LOADER_SSL_VERIFICATION = form_data.web.ENABLE_WEB_LOADER_SSL_VERIFICATION
-        config.PLAYWRIGHT_WS_URL = form_data.web.PLAYWRIGHT_WS_URL
         config.PLAYWRIGHT_TIMEOUT = form_data.web.PLAYWRIGHT_TIMEOUT
-        config.FIRECRAWL_API_KEY = form_data.web.FIRECRAWL_API_KEY
-        config.FIRECRAWL_API_BASE_URL = form_data.web.FIRECRAWL_API_BASE_URL
-        config.FIRECRAWL_TIMEOUT = form_data.web.FIRECRAWL_TIMEOUT
         config.EXTERNAL_WEB_SEARCH_URL = form_data.web.EXTERNAL_WEB_SEARCH_URL
         config.EXTERNAL_WEB_SEARCH_API_KEY = form_data.web.EXTERNAL_WEB_SEARCH_API_KEY
-        config.EXTERNAL_WEB_LOADER_URL = form_data.web.EXTERNAL_WEB_LOADER_URL
-        config.EXTERNAL_WEB_LOADER_API_KEY = form_data.web.EXTERNAL_WEB_LOADER_API_KEY
         config.YANDEX_WEB_SEARCH_URL = form_data.web.YANDEX_WEB_SEARCH_URL
         config.YANDEX_WEB_SEARCH_API_KEY = form_data.web.YANDEX_WEB_SEARCH_API_KEY
         config.YANDEX_WEB_SEARCH_CONFIG = form_data.web.YANDEX_WEB_SEARCH_CONFIG
@@ -1239,23 +1203,14 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
             'PERPLEXITY_MODEL': config.PERPLEXITY_MODEL,
             'PERPLEXITY_SEARCH_CONTEXT_USAGE': config.PERPLEXITY_SEARCH_CONTEXT_USAGE,
             'PERPLEXITY_SEARCH_API_URL': config.PERPLEXITY_SEARCH_API_URL,
-            'MICROSOFT_WEB_IQ_API_BASE_URL': config.MICROSOFT_WEB_IQ_API_BASE_URL,
-            'MICROSOFT_WEB_IQ_API_KEY': config.MICROSOFT_WEB_IQ_API_KEY,
-            'MICROSOFT_WEB_IQ_LANGUAGE': config.MICROSOFT_WEB_IQ_LANGUAGE,
             'SOUGOU_API_SID': config.SOUGOU_API_SID,
             'SOUGOU_API_SK': config.SOUGOU_API_SK,
             'WEB_LOADER_ENGINE': config.WEB_LOADER_ENGINE,
             'WEB_LOADER_TIMEOUT': config.WEB_LOADER_TIMEOUT,
             'ENABLE_WEB_LOADER_SSL_VERIFICATION': config.ENABLE_WEB_LOADER_SSL_VERIFICATION,
-            'PLAYWRIGHT_WS_URL': config.PLAYWRIGHT_WS_URL,
             'PLAYWRIGHT_TIMEOUT': config.PLAYWRIGHT_TIMEOUT,
-            'FIRECRAWL_API_KEY': config.FIRECRAWL_API_KEY,
-            'FIRECRAWL_API_BASE_URL': config.FIRECRAWL_API_BASE_URL,
-            'FIRECRAWL_TIMEOUT': config.FIRECRAWL_TIMEOUT,
             'EXTERNAL_WEB_SEARCH_URL': config.EXTERNAL_WEB_SEARCH_URL,
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
-            'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,
-            'EXTERNAL_WEB_LOADER_API_KEY': config.EXTERNAL_WEB_LOADER_API_KEY,
             'YANDEX_WEB_SEARCH_URL': config.YANDEX_WEB_SEARCH_URL,
             'YANDEX_WEB_SEARCH_API_KEY': config.YANDEX_WEB_SEARCH_API_KEY,
             'YANDEX_WEB_SEARCH_CONFIG': config.YANDEX_WEB_SEARCH_CONFIG,

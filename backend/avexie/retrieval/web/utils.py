@@ -35,16 +35,7 @@ from langchain_community.document_loaders.base import BaseLoader
 from langchain_core.documents import Document
 from avexie.config import (
     ENABLE_LOCAL_WEB_FETCH,
-    EXTERNAL_WEB_LOADER_API_KEY,
-    EXTERNAL_WEB_LOADER_URL,
-    FIRECRAWL_API_BASE_URL,
-    FIRECRAWL_API_KEY,
-    FIRECRAWL_TIMEOUT,
-    MICROSOFT_WEB_IQ_API_BASE_URL,
-    MICROSOFT_WEB_IQ_API_KEY,
-    MICROSOFT_WEB_IQ_LANGUAGE,
     PLAYWRIGHT_TIMEOUT,
-    PLAYWRIGHT_WS_URL,
     WEB_FETCH_FILTER_LIST,
     WEB_LOADER_ENGINE,
     WEB_LOADER_TIMEOUT,
@@ -57,9 +48,6 @@ from avexie.env import (
     AIOHTTP_CLIENT_TIMEOUT,
     USER_AGENT,
 )
-from avexie.retrieval.loaders.external_web import ExternalWebLoader
-from avexie.retrieval.loaders.microsoft_web_iq import MicrosoftWebIQLoader
-from avexie.retrieval.web.firecrawl import scrape_firecrawl_url
 from avexie.utils.misc import is_host_allowed, is_host_blocked
 
 log = logging.getLogger(__name__)
@@ -387,149 +375,8 @@ class URLProcessingMixin:
         return True
 
 
-class SafeFireCrawlLoader(BaseLoader, RateLimitMixin, URLProcessingMixin):
-    def __init__(
-        self,
-        web_paths,
-        verify_ssl: bool = True,
-        trust_env: bool = False,
-        requests_per_second: Optional[float] = None,
-        continue_on_failure: bool = True,
-        api_key: Optional[str] = None,
-        api_url: Optional[str] = None,
-        timeout: Optional[int] = None,
-        mode: Literal['crawl', 'scrape', 'map'] = 'scrape',
-        proxy: Optional[Dict[str, str]] = None,
-        params: Optional[Dict] = None,
-    ):
-        proxy_server = proxy.get('server') if proxy else None
-        if trust_env and not proxy_server:
-            env_proxies = urllib.request.getproxies()
-            env_proxy_server = env_proxies.get('https') or env_proxies.get('http')
-            if env_proxy_server:
-                if proxy:
-                    proxy['server'] = env_proxy_server
-                else:
-                    proxy = {'server': env_proxy_server}
-        self.web_paths = web_paths
-        self.verify_ssl = verify_ssl
-        self.requests_per_second = requests_per_second
-        self.last_request_time = None
-        self.trust_env = trust_env
-        self.continue_on_failure = continue_on_failure
-        self.api_key = api_key
-        self.api_url = (api_url or 'https://api.firecrawl.dev').rstrip('/')
-        self.timeout = timeout
-        self.mode = mode
-        self.params = params or {}
-
-    def lazy_load(self) -> Iterator[Document]:
-        for url in self.web_paths:
-            try:
-                self._sync_wait_for_rate_limit()
-                doc = scrape_firecrawl_url(
-                    self.api_url,
-                    self.api_key,
-                    url,
-                    verify_ssl=self.verify_ssl,
-                    timeout=self.timeout,
-                    params=self.params,
-                )
-                if doc is not None:
-                    yield doc
-            except Exception as e:
-                if self.continue_on_failure:
-                    log.warning(f'Error extracting content from {url} with Firecrawl: {e}')
-                    continue
-                raise
-
-    async def alazy_load(self):
-        for url in self.web_paths:
-            try:
-                await self._wait_for_rate_limit()
-                doc = await run_in_threadpool(
-                    scrape_firecrawl_url,
-                    self.api_url,
-                    self.api_key,
-                    url,
-                    verify_ssl=self.verify_ssl,
-                    timeout=self.timeout,
-                    params=self.params,
-                )
-                if doc is not None:
-                    yield doc
-            except Exception as e:
-                if self.continue_on_failure:
-                    log.warning(f'Error extracting content from {url} with Firecrawl: {e}')
-                    continue
-                raise
-
-
-class SafeMicrosoftWebIQLoader(BaseLoader, RateLimitMixin, URLProcessingMixin):
-    def __init__(
-        self,
-        web_paths: Union[str, List[str]],
-        api_key: str,
-        api_base_url: str = MICROSOFT_WEB_IQ_API_BASE_URL,
-        language: str = 'en',
-        verify_ssl: bool = True,
-        trust_env: bool = False,
-        requests_per_second: Optional[float] = None,
-        continue_on_failure: bool = True,
-        timeout: Optional[int] = None,
-    ):
-        self.web_paths = web_paths if isinstance(web_paths, list) else [web_paths]
-        self.api_key = api_key
-        self.api_base_url = api_base_url
-        self.language = language
-        self.verify_ssl = verify_ssl
-        self.trust_env = trust_env
-        self.requests_per_second = requests_per_second
-        self.last_request_time = None
-        self.continue_on_failure = continue_on_failure
-        self.timeout = timeout
-
-    def lazy_load(self) -> Iterator[Document]:
-        valid_urls = []
-        for url in self.web_paths:
-            try:
-                self._safe_process_url_sync(url)
-                valid_urls.append(url)
-            except Exception as e:
-                log.warning(f'SSL verification failed for {url}: {str(e)}')
-                if not self.continue_on_failure:
-                    raise e
-        if not valid_urls:
-            if self.continue_on_failure:
-                log.warning('No valid URLs to process after SSL verification')
-                return
-            raise ValueError('No valid URLs to process after SSL verification')
-
-        loader = MicrosoftWebIQLoader(
-            urls=valid_urls,
-            api_base_url=self.api_base_url,
-            api_key=self.api_key,
-            language=self.language,
-            verify_ssl=self.verify_ssl,
-            timeout=self.timeout,
-            continue_on_failure=self.continue_on_failure,
-        )
-        yield from loader.lazy_load()
-
-    async def alazy_load(self) -> AsyncIterator[Document]:
-        try:
-            docs = await run_in_threadpool(lambda: list(self.lazy_load()))
-            for doc in docs:
-                yield doc
-        except Exception as e:
-            if self.continue_on_failure:
-                log.warning(f'Error browsing URLs with Microsoft Web IQ: {e}')
-            else:
-                raise e
-
-
 class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessingMixin):
-    """Load HTML pages safely with Playwright, supporting SSL verification, rate limiting, and remote browser connection.
+    """Load HTML pages safely with a local Playwright browser, supporting SSL verification and rate limiting.
 
     Attributes:
         web_paths (List[str]): List of URLs to load.
@@ -541,7 +388,6 @@ class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessing
         proxy (dict): Proxy override settings for the Playwright session. Page requests are
             issued outside the browser, so they follow the environment proxy via trust_env
             rather than this setting.
-        playwright_ws_url (Optional[str]): WebSocket endpoint URI for remote browser connection.
         playwright_timeout (Optional[int]): Maximum operation time in milliseconds.
     """
 
@@ -555,10 +401,9 @@ class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessing
         headless: bool = True,
         remove_selectors: Optional[List[str]] = None,
         proxy: Optional[Dict[str, str]] = None,
-        playwright_ws_url: Optional[str] = None,
         playwright_timeout: Optional[int] = 10000,
     ):
-        """Initialize with additional safety parameters and remote browser support."""
+        """Initialize with additional safety parameters."""
 
         proxy_server = proxy.get('server') if proxy else None
         if trust_env and not proxy_server:
@@ -570,18 +415,16 @@ class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessing
                 else:
                     proxy = {'server': env_proxy_server}
 
-        # We'll set headless to False if using playwright_ws_url since it's handled by the remote browser
         super().__init__(
             urls=web_paths,
             continue_on_failure=continue_on_failure,
-            headless=headless if playwright_ws_url is None else False,
+            headless=headless,
             remove_selectors=remove_selectors,
             proxy=proxy,
         )
         self.verify_ssl = verify_ssl
         self.requests_per_second = requests_per_second
         self.last_request_time = None
-        self.playwright_ws_url = playwright_ws_url
         self.trust_env = trust_env
         self.playwright_timeout = playwright_timeout
 
@@ -712,15 +555,11 @@ class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessing
         )
 
     def lazy_load(self) -> Iterator[Document]:
-        """Safely load URLs synchronously with support for remote browser."""
+        """Safely load URLs synchronously using a local browser."""
         from playwright.sync_api import sync_playwright
 
         with sync_playwright() as p:
-            # Use remote browser if ws_endpoint is provided, otherwise use local browser
-            if self.playwright_ws_url:
-                browser = p.chromium.connect(self.playwright_ws_url)
-            else:
-                browser = p.chromium.launch(headless=self.headless, proxy=self.proxy)
+            browser = p.chromium.launch(headless=self.headless, proxy=self.proxy)
 
             with browser:
                 for url in self.urls:
@@ -747,15 +586,11 @@ class SafePlaywrightURLLoader(PlaywrightURLLoader, RateLimitMixin, URLProcessing
                         raise e
 
     async def alazy_load(self) -> AsyncIterator[Document]:
-        """Safely load URLs asynchronously with support for remote browser."""
+        """Safely load URLs asynchronously using a local browser."""
         from playwright.async_api import async_playwright
 
         async with async_playwright() as p:
-            # Use remote browser if ws_endpoint is provided, otherwise use local browser
-            if self.playwright_ws_url:
-                browser = await p.chromium.connect(self.playwright_ws_url)
-            else:
-                browser = await p.chromium.launch(headless=self.headless, proxy=self.proxy)
+            browser = await p.chromium.launch(headless=self.headless, proxy=self.proxy)
 
             async with browser:
                 for url in self.urls:
@@ -948,38 +783,10 @@ def get_web_loader(
             web_loader_args['requests_kwargs'] = request_kwargs
 
     if engine == 'playwright':
+        # Only local Playwright (a browser launched in-process) is supported;
+        # connecting to a remote browser over a websocket URL has been removed.
         WebLoaderClass = SafePlaywrightURLLoader
         web_loader_args['playwright_timeout'] = cfg('playwright_timeout', PLAYWRIGHT_TIMEOUT)
-        playwright_ws_url = cfg('playwright_ws_url', PLAYWRIGHT_WS_URL)
-        if playwright_ws_url:
-            web_loader_args['playwright_ws_url'] = playwright_ws_url
-
-    if engine == 'firecrawl':
-        WebLoaderClass = SafeFireCrawlLoader
-        web_loader_args['api_key'] = cfg('firecrawl_api_key', FIRECRAWL_API_KEY)
-        web_loader_args['api_url'] = cfg('firecrawl_api_url', FIRECRAWL_API_BASE_URL)
-        firecrawl_timeout = cfg('firecrawl_timeout', FIRECRAWL_TIMEOUT)
-        if firecrawl_timeout:
-            try:
-                web_loader_args['timeout'] = int(firecrawl_timeout)
-            except ValueError:
-                pass
-
-    if engine == 'microsoft_web_iq':
-        WebLoaderClass = SafeMicrosoftWebIQLoader
-        web_loader_args['api_base_url'] = cfg('microsoft_web_iq_api_base_url', MICROSOFT_WEB_IQ_API_BASE_URL)
-        web_loader_args['api_key'] = cfg('microsoft_web_iq_api_key', MICROSOFT_WEB_IQ_API_KEY)
-        web_loader_args['language'] = cfg('microsoft_web_iq_language', MICROSOFT_WEB_IQ_LANGUAGE)
-        if web_loader_timeout:
-            try:
-                web_loader_args['timeout'] = int(web_loader_timeout)
-            except ValueError:
-                pass
-
-    if engine == 'external':
-        WebLoaderClass = ExternalWebLoader
-        web_loader_args['external_url'] = cfg('external_web_loader_url', EXTERNAL_WEB_LOADER_URL)
-        web_loader_args['external_api_key'] = cfg('external_web_loader_api_key', EXTERNAL_WEB_LOADER_API_KEY)
 
     if WebLoaderClass:
         web_loader = WebLoaderClass(**web_loader_args)
@@ -992,7 +799,4 @@ def get_web_loader(
 
         return web_loader
     else:
-        raise ValueError(
-            f'Invalid WEB_LOADER_ENGINE: {engine}. '
-            "Please set it to 'safe_web', 'playwright', 'firecrawl', 'external', or 'microsoft_web_iq'."
-        )
+        raise ValueError(f"Invalid WEB_LOADER_ENGINE: {engine}. Please set it to 'safe_web' or 'playwright'.")
