@@ -815,30 +815,6 @@ CONTENT_EXTRACTION_SUPPORTED_MEDIA_MIME_TYPES = (
     else None
 )
 
-DATALAB_MARKER_API_KEY = os.getenv('DATALAB_MARKER_API_KEY', '')
-
-DATALAB_MARKER_API_BASE_URL = os.getenv('DATALAB_MARKER_API_BASE_URL', '')
-
-DATALAB_MARKER_ADDITIONAL_CONFIG = os.getenv('DATALAB_MARKER_ADDITIONAL_CONFIG', '')
-
-DATALAB_MARKER_USE_LLM = os.getenv('DATALAB_MARKER_USE_LLM', 'false').lower() == 'true'
-
-DATALAB_MARKER_SKIP_CACHE = os.getenv('DATALAB_MARKER_SKIP_CACHE', 'false').lower() == 'true'
-
-DATALAB_MARKER_FORCE_OCR = os.getenv('DATALAB_MARKER_FORCE_OCR', 'false').lower() == 'true'
-
-DATALAB_MARKER_PAGINATE = os.getenv('DATALAB_MARKER_PAGINATE', 'false').lower() == 'true'
-
-DATALAB_MARKER_STRIP_EXISTING_OCR = os.getenv('DATALAB_MARKER_STRIP_EXISTING_OCR', 'false').lower() == 'true'
-
-DATALAB_MARKER_DISABLE_IMAGE_EXTRACTION = (
-    os.getenv('DATALAB_MARKER_DISABLE_IMAGE_EXTRACTION', 'false').lower() == 'true'
-)
-
-DATALAB_MARKER_FORMAT_LINES = os.getenv('DATALAB_MARKER_FORMAT_LINES', 'false').lower() == 'true'
-
-DATALAB_MARKER_OUTPUT_FORMAT = os.getenv('DATALAB_MARKER_OUTPUT_FORMAT', 'markdown')
-
 MINERU_API_MODE = os.getenv('MINERU_API_MODE', 'local')
 
 MINERU_API_URL = os.getenv('MINERU_API_URL', 'http://localhost:8000')
@@ -857,20 +833,6 @@ MINERU_PARAMS = mineru_params
 
 MINERU_FILE_EXTENSIONS = [ext.strip() for ext in os.getenv('MINERU_FILE_EXTENSIONS', 'pdf').split(',') if ext.strip()]
 
-EXTERNAL_DOCUMENT_LOADER_URL = os.getenv('EXTERNAL_DOCUMENT_LOADER_URL', '')
-
-EXTERNAL_DOCUMENT_LOADER_API_KEY = os.getenv('EXTERNAL_DOCUMENT_LOADER_API_KEY', '')
-
-external_document_loader_headers = os.getenv('EXTERNAL_DOCUMENT_LOADER_HEADERS', '')
-try:
-    external_document_loader_headers = JSONCodec.loads(external_document_loader_headers)
-except JSONCodec.JSONDecodeError:
-    external_document_loader_headers = {}
-if not isinstance(external_document_loader_headers, dict):
-    external_document_loader_headers = {}
-
-EXTERNAL_DOCUMENT_LOADER_HEADERS = external_document_loader_headers
-
 TIKA_SERVER_URL = os.getenv('TIKA_SERVER_URL', 'http://tika:9998')
 
 TIKA_SERVER_VERSION = os.getenv('TIKA_SERVER_VERSION', '3')
@@ -886,18 +848,6 @@ except JSONCodec.JSONDecodeError:
     docling_params = {}
 
 DOCLING_PARAMS = docling_params
-
-DOCUMENT_INTELLIGENCE_ENDPOINT = os.getenv('DOCUMENT_INTELLIGENCE_ENDPOINT', '')
-
-DOCUMENT_INTELLIGENCE_KEY = os.getenv('DOCUMENT_INTELLIGENCE_KEY', '')
-
-DOCUMENT_INTELLIGENCE_MODEL = os.getenv('DOCUMENT_INTELLIGENCE_MODEL', 'prebuilt-layout')
-
-MISTRAL_OCR_API_BASE_URL = os.getenv('MISTRAL_OCR_API_BASE_URL', 'https://api.mistral.ai/v1')
-
-MISTRAL_OCR_API_KEY = os.getenv('MISTRAL_OCR_API_KEY', '')
-
-MISTRAL_OCR_USE_BASE64 = os.getenv('MISTRAL_OCR_USE_BASE64', 'False').lower() == 'true'
 
 PADDLEOCR_VL_BASE_URL = os.getenv('PADDLEOCR_VL_BASE_URL', 'http://localhost:8080')
 
@@ -1096,45 +1046,8 @@ YOUTUBE_LOADER_PROXY_URL = os.getenv('YOUTUBE_LOADER_PROXY_URL', '')
 
 
 ####################################
-# Web Search
+# Web Loader (used by RAG document ingestion)
 ####################################
-
-ENABLE_WEB_SEARCH = os.getenv('ENABLE_WEB_SEARCH', 'False').lower() == 'true'
-
-ENABLE_WEB_SEARCH_CONFIRMATION = os.getenv('ENABLE_WEB_SEARCH_CONFIRMATION', 'False').lower() == 'true'
-
-WEB_SEARCH_CONFIRMATION_CONTENT = os.getenv(
-    'WEB_SEARCH_CONFIRMATION_CONTENT',
-    'Your query will be sent to the configured web search provider.',
-)
-
-WEB_SEARCH_ENGINE = os.getenv('WEB_SEARCH_ENGINE', '')
-
-BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL = (
-    os.getenv('BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL', 'False').lower() == 'true'
-)
-
-
-BYPASS_WEB_SEARCH_WEB_LOADER = os.getenv('BYPASS_WEB_SEARCH_WEB_LOADER', 'False').lower() == 'true'
-
-WEB_SEARCH_RESULT_COUNT = int(os.getenv('WEB_SEARCH_RESULT_COUNT', '3'))
-
-
-try:
-    web_search_domain_filter_list = JSONCodec.loads(os.getenv('WEB_SEARCH_DOMAIN_FILTER_LIST', '[]'))
-except Exception as e:
-    web_search_domain_filter_list = [
-        # "wikipedia.com",
-        # "wikimedia.org",
-        # "wikidata.org",
-        # "!stackoverflow.com",
-    ]
-
-# You can provide a list of your own websites to filter after performing a web search.
-# This ensures the highest level of safety and reliability of the information sources.
-WEB_SEARCH_DOMAIN_FILTER_LIST = web_search_domain_filter_list
-
-WEB_SEARCH_CONCURRENT_REQUESTS = int(os.getenv('WEB_SEARCH_CONCURRENT_REQUESTS', '0'))
 
 WEB_FETCH_MAX_CONTENT_LENGTH = (
     int(os.getenv('WEB_FETCH_MAX_CONTENT_LENGTH')) if os.getenv('WEB_FETCH_MAX_CONTENT_LENGTH') else None
@@ -1142,103 +1055,13 @@ WEB_FETCH_MAX_CONTENT_LENGTH = (
 
 WEB_LOADER_ENGINE = os.getenv('WEB_LOADER_ENGINE', '')
 
-
 WEB_LOADER_CONCURRENT_REQUESTS = int(os.getenv('WEB_LOADER_CONCURRENT_REQUESTS', '10'))
 
 WEB_LOADER_TIMEOUT = os.getenv('WEB_LOADER_TIMEOUT', '')
 
-
 ENABLE_WEB_LOADER_SSL_VERIFICATION = os.getenv('ENABLE_WEB_LOADER_SSL_VERIFICATION', 'True').lower() == 'true'
 
 WEB_SEARCH_TRUST_ENV = os.getenv('WEB_SEARCH_TRUST_ENV', 'True').lower() == 'true'
-
-
-OLLAMA_CLOUD_WEB_SEARCH_API_KEY = os.getenv('OLLAMA_CLOUD_API_KEY', '')
-
-SEARXNG_QUERY_URL = os.getenv('SEARXNG_QUERY_URL', '')
-OPENSERP_BASE_URL = os.getenv('OPENSERP_BASE_URL', 'http://localhost:7000')
-
-SEARXNG_LANGUAGE = os.getenv('SEARXNG_LANGUAGE', 'all')
-
-YACY_QUERY_URL = os.getenv('YACY_QUERY_URL', '')
-
-YACY_USERNAME = os.getenv('YACY_USERNAME', '')
-
-YACY_PASSWORD = os.getenv('YACY_PASSWORD', '')
-
-GOOGLE_PSE_API_KEY = os.getenv('GOOGLE_PSE_API_KEY', '')
-
-GOOGLE_PSE_ENGINE_ID = os.getenv('GOOGLE_PSE_ENGINE_ID', '')
-
-BRAVE_SEARCH_API_KEY = os.getenv('BRAVE_SEARCH_API_KEY', '')
-
-BRAVE_SEARCH_CONTEXT_TOKENS = int(os.getenv('BRAVE_SEARCH_CONTEXT_TOKENS', '8192'))
-
-KAGI_SEARCH_API_KEY = os.getenv('KAGI_SEARCH_API_KEY', '')
-
-MOJEEK_SEARCH_API_KEY = os.getenv('MOJEEK_SEARCH_API_KEY', '')
-
-BOCHA_SEARCH_API_KEY = os.getenv('BOCHA_SEARCH_API_KEY', '')
-
-SERPSTACK_API_KEY = os.getenv('SERPSTACK_API_KEY', '')
-
-SERPSTACK_HTTPS = os.getenv('SERPSTACK_HTTPS', 'True').lower() == 'true'
-
-SERPER_API_KEY = os.getenv('SERPER_API_KEY', '')
-
-SERPLY_API_KEY = os.getenv('SERPLY_API_KEY', '')
-
-SERPHOUSE_API_KEY = os.getenv('SERPHOUSE_API_KEY', '')
-
-SERPHOUSE_DOMAIN = os.getenv('SERPHOUSE_DOMAIN', 'google.com')
-
-DDGS_BACKEND = os.getenv('DDGS_BACKEND', 'auto')
-
-JINA_API_KEY = os.getenv('JINA_API_KEY', '')
-
-JINA_API_BASE_URL = os.getenv('JINA_API_BASE_URL', '')
-
-SEARCHAPI_API_KEY = os.getenv('SEARCHAPI_API_KEY', '')
-
-SEARCHAPI_ENGINE = os.getenv('SEARCHAPI_ENGINE', '')
-
-SERPAPI_API_KEY = os.getenv('SERPAPI_API_KEY', '')
-
-SERPAPI_ENGINE = os.getenv('SERPAPI_ENGINE', '')
-
-BING_SEARCH_V7_ENDPOINT = os.getenv('BING_SEARCH_V7_ENDPOINT', 'https://api.bing.microsoft.com/v7.0/search')
-
-BING_SEARCH_V7_SUBSCRIPTION_KEY = os.getenv('BING_SEARCH_V7_SUBSCRIPTION_KEY', '')
-
-AZURE_AI_SEARCH_API_KEY = os.getenv('AZURE_AI_SEARCH_API_KEY', '')
-
-AZURE_AI_SEARCH_ENDPOINT = os.getenv('AZURE_AI_SEARCH_ENDPOINT', '')
-
-AZURE_AI_SEARCH_INDEX_NAME = os.getenv('AZURE_AI_SEARCH_INDEX_NAME', '')
-
-EXA_API_KEY = os.getenv('EXA_API_KEY', '')
-
-PERPLEXITY_API_KEY = os.getenv('PERPLEXITY_API_KEY', '')
-
-PERPLEXITY_MODEL = os.getenv('PERPLEXITY_MODEL', 'sonar')
-
-PERPLEXITY_SEARCH_CONTEXT_USAGE = os.getenv('PERPLEXITY_SEARCH_CONTEXT_USAGE', 'medium')
-
-PERPLEXITY_SEARCH_API_URL = os.getenv('PERPLEXITY_SEARCH_API_URL', 'https://api.perplexity.ai/search')
-
-MICROSOFT_WEB_IQ_API_BASE_URL = os.getenv('MICROSOFT_WEB_IQ_API_BASE_URL', 'https://api.microsoft.ai/v3')
-
-MICROSOFT_WEB_IQ_API_KEY = os.getenv('MICROSOFT_WEB_IQ_API_KEY', '')
-
-MICROSOFT_WEB_IQ_LANGUAGE = os.getenv('MICROSOFT_WEB_IQ_LANGUAGE', 'en')
-
-SOUGOU_API_SID = os.getenv('SOUGOU_API_SID', '')
-
-SOUGOU_API_SK = os.getenv('SOUGOU_API_SK', '')
-
-TAVILY_API_KEY = os.getenv('TAVILY_API_KEY', '')
-
-TAVILY_EXTRACT_DEPTH = os.getenv('TAVILY_EXTRACT_DEPTH', 'basic')
 
 PLAYWRIGHT_WS_URL = os.getenv('PLAYWRIGHT_WS_URL', '')
 
@@ -1250,31 +1073,20 @@ FIRECRAWL_API_BASE_URL = os.getenv('FIRECRAWL_API_BASE_URL', 'https://api.firecr
 
 FIRECRAWL_TIMEOUT = os.getenv('FIRECRAWL_TIMEOUT', '')
 
-EXTERNAL_WEB_SEARCH_URL = os.getenv('EXTERNAL_WEB_SEARCH_URL', '')
-
-EXTERNAL_WEB_SEARCH_API_KEY = os.getenv('EXTERNAL_WEB_SEARCH_API_KEY', '')
-
 EXTERNAL_WEB_LOADER_URL = os.getenv('EXTERNAL_WEB_LOADER_URL', '')
 
 EXTERNAL_WEB_LOADER_API_KEY = os.getenv('EXTERNAL_WEB_LOADER_API_KEY', '')
 
-YANDEX_WEB_SEARCH_URL = os.getenv('YANDEX_WEB_SEARCH_URL', '')
+TAVILY_API_KEY = os.getenv('TAVILY_API_KEY', '')
 
-YANDEX_WEB_SEARCH_API_KEY = os.getenv('YANDEX_WEB_SEARCH_API_KEY', '')
+TAVILY_EXTRACT_DEPTH = os.getenv('TAVILY_EXTRACT_DEPTH', 'basic')
 
-YANDEX_WEB_SEARCH_CONFIG = os.getenv('YANDEX_WEB_SEARCH_CONFIG', '')
+MICROSOFT_WEB_IQ_API_BASE_URL = os.getenv('MICROSOFT_WEB_IQ_API_BASE_URL', 'https://api.microsoft.ai/v3')
 
-YOUCOM_API_KEY = os.getenv('YOUCOM_API_KEY', os.getenv('YDC_API_KEY', ''))
+MICROSOFT_WEB_IQ_API_KEY = os.getenv('MICROSOFT_WEB_IQ_API_KEY', '')
 
-LINKUP_API_KEY = os.getenv('LINKUP_API_KEY', '')
+MICROSOFT_WEB_IQ_LANGUAGE = os.getenv('MICROSOFT_WEB_IQ_LANGUAGE', 'en')
 
-linkup_search_params = os.getenv('LINKUP_SEARCH_PARAMS', '')
-try:
-    linkup_search_params = JSONCodec.loads(linkup_search_params)
-except JSONCodec.JSONDecodeError:
-    linkup_search_params = {}
-
-LINKUP_SEARCH_PARAMS = linkup_search_params
 
 ####################################
 # Images
@@ -2817,37 +2629,17 @@ DEFAULT_CONFIG = {
     'onedrive.sharepoint_tenant_id': ONEDRIVE_SHAREPOINT_TENANT_ID,
     'rag.content_extraction_engine': CONTENT_EXTRACTION_ENGINE,
     'rag.content_extraction.supported_media_mime_types': CONTENT_EXTRACTION_SUPPORTED_MEDIA_MIME_TYPES,
-    'rag.datalab_marker_api_key': DATALAB_MARKER_API_KEY,
-    'rag.datalab_marker_api_base_url': DATALAB_MARKER_API_BASE_URL,
-    'rag.datalab_marker_additional_config': DATALAB_MARKER_ADDITIONAL_CONFIG,
-    'rag.datalab_marker_use_llm': DATALAB_MARKER_USE_LLM,
-    'rag.datalab_marker_skip_cache': DATALAB_MARKER_SKIP_CACHE,
-    'rag.datalab_marker_force_ocr': DATALAB_MARKER_FORCE_OCR,
-    'rag.datalab_marker_paginate': DATALAB_MARKER_PAGINATE,
-    'rag.datalab_marker_strip_existing_ocr': DATALAB_MARKER_STRIP_EXISTING_OCR,
-    'rag.datalab_marker_disable_image_extraction': DATALAB_MARKER_DISABLE_IMAGE_EXTRACTION,
-    'rag.datalab_marker_format_lines': DATALAB_MARKER_FORMAT_LINES,
-    'rag.datalab_marker_output_format': DATALAB_MARKER_OUTPUT_FORMAT,
     'rag.mineru_api_mode': MINERU_API_MODE,
     'rag.mineru_api_url': MINERU_API_URL,
     'rag.mineru_api_timeout': MINERU_API_TIMEOUT,
     'rag.mineru_api_key': MINERU_API_KEY,
     'rag.mineru_params': MINERU_PARAMS,
     'rag.mineru_file_extensions': MINERU_FILE_EXTENSIONS,
-    'rag.external_document_loader_url': EXTERNAL_DOCUMENT_LOADER_URL,
-    'rag.external_document_loader_api_key': EXTERNAL_DOCUMENT_LOADER_API_KEY,
-    'rag.external_document_loader_headers': EXTERNAL_DOCUMENT_LOADER_HEADERS,
     'rag.tika_server_url': TIKA_SERVER_URL,
     'rag.tika_server_version': TIKA_SERVER_VERSION,
     'rag.docling_server_url': DOCLING_SERVER_URL,
     'rag.docling_api_key': DOCLING_API_KEY,
     'rag.docling_params': DOCLING_PARAMS,
-    'rag.document_intelligence_endpoint': DOCUMENT_INTELLIGENCE_ENDPOINT,
-    'rag.document_intelligence_key': DOCUMENT_INTELLIGENCE_KEY,
-    'rag.document_intelligence_model': DOCUMENT_INTELLIGENCE_MODEL,
-    'rag.mistral_ocr_api_base_url': MISTRAL_OCR_API_BASE_URL,
-    'rag.mistral_ocr_api_key': MISTRAL_OCR_API_KEY,
-    'rag.mistral_ocr_use_base64': MISTRAL_OCR_USE_BASE64,
     'rag.paddleocr_vl_base_url': PADDLEOCR_VL_BASE_URL,
     'rag.paddleocr_vl_token': PADDLEOCR_VL_TOKEN,
     'rag.bypass_embedding_and_retrieval': BYPASS_EMBEDDING_AND_RETRIEVAL,
@@ -2893,80 +2685,25 @@ DEFAULT_CONFIG = {
     'rag.ollama.api_key': RAG_OLLAMA_API_KEY,
     'rag.youtube_loader_language': YOUTUBE_LOADER_LANGUAGE,
     'rag.youtube_loader_proxy_url': YOUTUBE_LOADER_PROXY_URL,
-    'web.search.enable': ENABLE_WEB_SEARCH,
-    'web.search.confirmation.enable': ENABLE_WEB_SEARCH_CONFIRMATION,
-    'web.search.confirmation.content': WEB_SEARCH_CONFIRMATION_CONTENT,
-    'web.search.engine': WEB_SEARCH_ENGINE,
-    'web.search.bypass_embedding_and_retrieval': BYPASS_WEB_SEARCH_EMBEDDING_AND_RETRIEVAL,
-    'web.search.bypass_web_loader': BYPASS_WEB_SEARCH_WEB_LOADER,
-    'web.search.result_count': WEB_SEARCH_RESULT_COUNT,
-    'web.search.domain.filter_list': WEB_SEARCH_DOMAIN_FILTER_LIST,
-    'web.search.concurrent_requests': WEB_SEARCH_CONCURRENT_REQUESTS,
+    'web.search.enable': False,
+    'web.search.trust_env': WEB_SEARCH_TRUST_ENV,
     'web.fetch.max_content_length': WEB_FETCH_MAX_CONTENT_LENGTH,
     'web.loader.engine': WEB_LOADER_ENGINE,
     'web.loader.concurrent_requests': WEB_LOADER_CONCURRENT_REQUESTS,
     'web.loader.timeout': WEB_LOADER_TIMEOUT,
     'web.loader.ssl_verification': ENABLE_WEB_LOADER_SSL_VERIFICATION,
-    'web.search.trust_env': WEB_SEARCH_TRUST_ENV,
-    'web.search.ollama_cloud_api_key': OLLAMA_CLOUD_WEB_SEARCH_API_KEY,
-    'web.search.searxng_query_url': SEARXNG_QUERY_URL,
-    'web.search.openserp_base_url': OPENSERP_BASE_URL,
-    'web.search.searxng_language': SEARXNG_LANGUAGE,
-    'web.search.yacy_query_url': YACY_QUERY_URL,
-    'web.search.yacy_username': YACY_USERNAME,
-    'web.search.yacy_password': YACY_PASSWORD,
-    'web.search.google_pse_api_key': GOOGLE_PSE_API_KEY,
-    'web.search.google_pse_engine_id': GOOGLE_PSE_ENGINE_ID,
-    'web.search.brave_search_api_key': BRAVE_SEARCH_API_KEY,
-    'web.search.brave_search_context_tokens': BRAVE_SEARCH_CONTEXT_TOKENS,
-    'web.search.kagi_search_api_key': KAGI_SEARCH_API_KEY,
-    'web.search.mojeek_search_api_key': MOJEEK_SEARCH_API_KEY,
-    'web.search.bocha_search_api_key': BOCHA_SEARCH_API_KEY,
-    'web.search.serpstack_api_key': SERPSTACK_API_KEY,
-    'web.search.serpstack_https': SERPSTACK_HTTPS,
-    'web.search.serper_api_key': SERPER_API_KEY,
-    'web.search.serply_api_key': SERPLY_API_KEY,
-    'web.search.serphouse_api_key': SERPHOUSE_API_KEY,
-    'web.search.serphouse_domain': SERPHOUSE_DOMAIN,
-    'web.search.ddgs_backend': DDGS_BACKEND,
-    'web.search.jina_api_key': JINA_API_KEY,
-    'web.search.jina_api_base_url': JINA_API_BASE_URL,
-    'web.search.searchapi_api_key': SEARCHAPI_API_KEY,
-    'web.search.searchapi_engine': SEARCHAPI_ENGINE,
-    'web.search.serpapi_api_key': SERPAPI_API_KEY,
-    'web.search.serpapi_engine': SERPAPI_ENGINE,
-    'web.search.bing_search_v7_endpoint': BING_SEARCH_V7_ENDPOINT,
-    'web.search.bing_search_v7_subscription_key': BING_SEARCH_V7_SUBSCRIPTION_KEY,
-    'web.search.azure_ai_search_api_key': AZURE_AI_SEARCH_API_KEY,
-    'web.search.azure_ai_search_endpoint': AZURE_AI_SEARCH_ENDPOINT,
-    'web.search.azure_ai_search_index_name': AZURE_AI_SEARCH_INDEX_NAME,
-    'web.search.exa_api_key': EXA_API_KEY,
-    'web.search.perplexity_api_key': PERPLEXITY_API_KEY,
-    'web.search.perplexity_model': PERPLEXITY_MODEL,
-    'web.search.perplexity_search_context_usage': PERPLEXITY_SEARCH_CONTEXT_USAGE,
-    'web.search.perplexity_search_api_url': PERPLEXITY_SEARCH_API_URL,
-    'web.search.microsoft_web_iq_api_base_url': MICROSOFT_WEB_IQ_API_BASE_URL,
-    'web.search.microsoft_web_iq_api_key': MICROSOFT_WEB_IQ_API_KEY,
-    'web.search.microsoft_web_iq_language': MICROSOFT_WEB_IQ_LANGUAGE,
-    'web.search.sougou_api_sid': SOUGOU_API_SID,
-    'web.search.sougou_api_sk': SOUGOU_API_SK,
-    'web.search.tavily_api_key': TAVILY_API_KEY,
-    'web.search.tavily_extract_depth': TAVILY_EXTRACT_DEPTH,
     'web.loader.playwright_ws_url': PLAYWRIGHT_WS_URL,
     'web.loader.playwright_timeout': PLAYWRIGHT_TIMEOUT,
     'web.loader.firecrawl_api_key': FIRECRAWL_API_KEY,
     'web.loader.firecrawl_api_url': FIRECRAWL_API_BASE_URL,
     'web.loader.firecrawl_timeout': FIRECRAWL_TIMEOUT,
-    'web.search.external_web_search_url': EXTERNAL_WEB_SEARCH_URL,
-    'web.search.external_web_search_api_key': EXTERNAL_WEB_SEARCH_API_KEY,
     'web.loader.external_web_loader_url': EXTERNAL_WEB_LOADER_URL,
     'web.loader.external_web_loader_api_key': EXTERNAL_WEB_LOADER_API_KEY,
-    'web.search.yandex_web_search_url': YANDEX_WEB_SEARCH_URL,
-    'web.search.yandex_web_search_api_key': YANDEX_WEB_SEARCH_API_KEY,
-    'web.search.yandex_web_search_config': YANDEX_WEB_SEARCH_CONFIG,
-    'web.search.youcom_api_key': YOUCOM_API_KEY,
-    'web.search.linkup_api_key': LINKUP_API_KEY,
-    'web.search.linkup_search_params': LINKUP_SEARCH_PARAMS,
+    'web.search.tavily_api_key': TAVILY_API_KEY,
+    'web.search.tavily_extract_depth': TAVILY_EXTRACT_DEPTH,
+    'web.search.microsoft_web_iq_api_base_url': MICROSOFT_WEB_IQ_API_BASE_URL,
+    'web.search.microsoft_web_iq_api_key': MICROSOFT_WEB_IQ_API_KEY,
+    'web.search.microsoft_web_iq_language': MICROSOFT_WEB_IQ_LANGUAGE,
     'image_generation.enable': ENABLE_IMAGE_GENERATION,
     'image_generation.engine': IMAGE_GENERATION_ENGINE,
     'image_generation.model': IMAGE_GENERATION_MODEL,
