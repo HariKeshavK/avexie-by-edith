@@ -1023,11 +1023,6 @@ else:
 WEB_FETCH_FILTER_LIST = list(set(DEFAULT_WEB_FETCH_FILTER_LIST + web_fetch_filter_list))
 
 
-YOUTUBE_LOADER_LANGUAGE = os.getenv('YOUTUBE_LOADER_LANGUAGE', 'en').split(',')
-
-YOUTUBE_LOADER_PROXY_URL = os.getenv('YOUTUBE_LOADER_PROXY_URL', '')
-
-
 ####################################
 # Web Loader (used by RAG document ingestion)
 ####################################
@@ -2131,8 +2126,6 @@ DEFAULT_CONFIG = {
     'rag.azure_openai.api_version': RAG_AZURE_OPENAI_API_VERSION,
     'rag.ollama.base_url': RAG_OLLAMA_BASE_URL,
     'rag.ollama.api_key': RAG_OLLAMA_API_KEY,
-    'rag.youtube_loader_language': YOUTUBE_LOADER_LANGUAGE,
-    'rag.youtube_loader_proxy_url': YOUTUBE_LOADER_PROXY_URL,
     'web.search.enable': False,
     'web.search.trust_env': WEB_SEARCH_TRUST_ENV,
     'web.fetch.max_content_length': WEB_FETCH_MAX_CONTENT_LENGTH,

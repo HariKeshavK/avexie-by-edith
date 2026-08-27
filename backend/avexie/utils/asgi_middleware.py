@@ -12,7 +12,7 @@ the inner task. That `CancelledError` then propagates into whatever
 the inner task was doing, including in-flight DB queries, embedding
 calls and disk I/O.
 
-In Open WebUI this surfaces as:
+In AVEXIE this surfaces as:
 
 * SQLAlchemy logging multi-page `NotImplementedError:
   terminate_force_close()` tracebacks at ERROR every time a request is
@@ -37,10 +37,10 @@ from urllib.parse import parse_qs, urlencode
 
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.security import HTTPAuthorizationCredentials
-from open_webui.env import CUSTOM_API_KEY_HEADER
-from open_webui.internal.db import ScopedSession
-from open_webui.utils.auth import get_http_authorization_cred
-from open_webui.utils.security_headers import set_security_headers
+from avexie.env import CUSTOM_API_KEY_HEADER
+from avexie.internal.db import ScopedSession
+from avexie.utils.auth import get_http_authorization_cred
+from avexie.utils.security_headers import set_security_headers
 from starlette.datastructures import MutableHeaders
 from starlette.requests import Request
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
@@ -49,7 +49,7 @@ log = logging.getLogger(__name__)
 
 
 class AppHTTPMiddleware:
-    """Open WebUI's pure-ASGI HTTP middleware.
+    """AVEXIE's pure-ASGI HTTP middleware.
 
     Keeps the app's request-wide behavior in one middleware layer without
     hiding the old concerns behind a stack of wrappers:
@@ -165,35 +165,23 @@ class AppHTTPMiddleware:
         if scope.get('method', '').upper() != 'GET':
             return False
 
-        path = scope.get('path', '')
         raw_query = scope.get('query_string', b'')
-        # This middleware only acts on /watch?v= and ?shared= URLs; skip the
-        # decode + parse_qs work for every other GET. (A false positive on the
-        # substring check just falls through to the full parse below.)
-        if not (path.endswith('/watch') or b'shared' in raw_query):
+        # This middleware only acts on ?shared= URLs; skip the decode + parse_qs
+        # work for every other GET. (A false positive on the substring check
+        # just falls through to the full parse below.)
+        if b'shared' not in raw_query:
             return False
 
         query_params = parse_qs(raw_query.decode('latin-1', errors='replace'))
 
         redirect_params: dict[str, str] = {}
-        if path.endswith('/watch') and 'v' in query_params and query_params['v']:
-            redirect_params['youtube'] = query_params['v'][0]
 
         if 'shared' in query_params and query_params['shared']:
             text = query_params['shared'][0]
             if text:
                 url_match = re.match(r'https://\S+', text)
                 if url_match:
-                    # Local import: youtube loader pulls heavy deps and is
-                    # only needed when a share-target actually contains a
-                    # YouTube URL.
-                    from open_webui.retrieval.loaders.youtube import _parse_video_id
-
-                    youtube_video_id = _parse_video_id(url_match[0])
-                    if youtube_video_id:
-                        redirect_params['youtube'] = youtube_video_id
-                    else:
-                        redirect_params['load-url'] = url_match[0]
+                    redirect_params['load-url'] = url_match[0]
                 else:
                     redirect_params['q'] = text
 

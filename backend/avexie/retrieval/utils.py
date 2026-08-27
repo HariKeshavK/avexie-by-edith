@@ -42,7 +42,6 @@ from avexie.models.knowledge import Knowledges
 from avexie.models.notes import Notes
 from avexie.models.config import Config
 from avexie.models.users import UserModel
-from avexie.retrieval.loaders.youtube import YoutubeLoader
 from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
 from avexie.retrieval.external import retrieve_external_knowledge
 from avexie.retrieval.vector.factory import VECTOR_DB_CLIENT
@@ -62,15 +61,8 @@ from langchain_core.callbacks import CallbackManagerForRetrieverRun
 from langchain_core.retrievers import BaseRetriever
 
 
-def is_youtube_url(url: str) -> bool:
-    youtube_regex = r'^(https?://)?(www\.)?(youtube\.com|youtu\.be)/.+$'
-    return re.match(youtube_regex, url) is not None
-
-
 LOADER_CONFIG_KEYS = {
     'file_max_size': 'rag.file.max_size',
-    'youtube_language': 'rag.youtube_loader_language',
-    'youtube_proxy_url': 'rag.youtube_loader_proxy_url',
     'web_loader_ssl_verification': 'web.loader.ssl_verification',
     'web_loader_concurrent_requests': 'web.loader.concurrent_requests',
     'web_search_trust_env': 'web.search.trust_env',
@@ -111,12 +103,6 @@ async def get_loader_config():
 
 
 def get_loader(request, url: str, config: dict):
-    if is_youtube_url(url):
-        return YoutubeLoader(
-            url,
-            language=config.get('youtube_language'),
-            proxy_url=config.get('youtube_proxy_url'),
-        )
     return get_web_loader(
         url,
         verify_ssl=config.get('web_loader_ssl_verification'),
@@ -222,18 +208,6 @@ def _get_content_from_url_sync(request, url: str, loader_config):
 
     # Validate URL before making any request (blocks private IPs, non-HTTP, filter list)
     validate_url(url)
-
-    # YouTube URLs (including youtu.be short links) should go straight to
-    # YoutubeLoader, which uses youtube-transcript-api and never needs the
-    # HTTP response body.  Probing the URL first is harmful for short URLs:
-    # youtu.be returns a 303 redirect with Content-Type: application/binary
-    # when allow_redirects=False, causing the binary-content path to run
-    # and produce empty docs → HTTP 400.
-    if is_youtube_url(url):
-        loader = get_loader(request, url, loader_config)
-        docs = loader.load()
-        content = ' '.join([doc.page_content for doc in docs])
-        return content, docs
 
     # Streamed GET to check Content-Type without downloading the body.
     # allow_redirects=False prevents redirect-based SSRF: validate_url() above is

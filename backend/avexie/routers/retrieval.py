@@ -66,7 +66,6 @@ from avexie.models.knowledge import Knowledges
 from avexie.models.config import Config
 
 # Document loaders
-from avexie.retrieval.loaders.youtube import YoutubeLoader, YoutubeTranscriptError
 from avexie.retrieval.utils import (
     build_loader_from_config,
     get_loader_config,
@@ -75,7 +74,6 @@ from avexie.retrieval.utils import (
     get_embedding_function,
     get_model_path,
     get_reranking_function,
-    is_youtube_url,
     query_collection,
     query_collection_with_hybrid_search,
     query_doc,
@@ -353,8 +351,6 @@ RETRIEVAL_CONFIG_KEYS = {
     'YANDEX_WEB_SEARCH_CONFIG': 'web.search.yandex_web_search_config',
     'YANDEX_WEB_SEARCH_URL': 'web.search.yandex_web_search_url',
     'YOUCOM_API_KEY': 'web.search.youcom_api_key',
-    'YOUTUBE_LOADER_LANGUAGE': 'rag.youtube_loader_language',
-    'YOUTUBE_LOADER_PROXY_URL': 'rag.youtube_loader_proxy_url',
 }
 
 
@@ -691,9 +687,6 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
             'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,
             'EXTERNAL_WEB_LOADER_API_KEY': config.EXTERNAL_WEB_LOADER_API_KEY,
-            'YOUTUBE_LOADER_LANGUAGE': config.YOUTUBE_LOADER_LANGUAGE,
-            'YOUTUBE_LOADER_PROXY_URL': config.YOUTUBE_LOADER_PROXY_URL,
-            'YOUTUBE_LOADER_TRANSLATION': request.app.state.YOUTUBE_LOADER_TRANSLATION,
             'YANDEX_WEB_SEARCH_URL': config.YANDEX_WEB_SEARCH_URL,
             'YANDEX_WEB_SEARCH_API_KEY': config.YANDEX_WEB_SEARCH_API_KEY,
             'YANDEX_WEB_SEARCH_CONFIG': config.YANDEX_WEB_SEARCH_CONFIG,
@@ -768,9 +761,6 @@ class WebConfig(BaseModel):
     EXTERNAL_WEB_SEARCH_API_KEY: str | None = None
     EXTERNAL_WEB_LOADER_URL: str | None = None
     EXTERNAL_WEB_LOADER_API_KEY: str | None = None
-    YOUTUBE_LOADER_LANGUAGE: list[str | None] = None
-    YOUTUBE_LOADER_PROXY_URL: str | None = None
-    YOUTUBE_LOADER_TRANSLATION: str | None = None
     YANDEX_WEB_SEARCH_URL: str | None = None
     YANDEX_WEB_SEARCH_API_KEY: str | None = None
     YANDEX_WEB_SEARCH_CONFIG: str | None = None
@@ -1128,9 +1118,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         config.EXTERNAL_WEB_SEARCH_API_KEY = form_data.web.EXTERNAL_WEB_SEARCH_API_KEY
         config.EXTERNAL_WEB_LOADER_URL = form_data.web.EXTERNAL_WEB_LOADER_URL
         config.EXTERNAL_WEB_LOADER_API_KEY = form_data.web.EXTERNAL_WEB_LOADER_API_KEY
-        config.YOUTUBE_LOADER_LANGUAGE = form_data.web.YOUTUBE_LOADER_LANGUAGE
-        config.YOUTUBE_LOADER_PROXY_URL = form_data.web.YOUTUBE_LOADER_PROXY_URL
-        request.app.state.YOUTUBE_LOADER_TRANSLATION = form_data.web.YOUTUBE_LOADER_TRANSLATION
         config.YANDEX_WEB_SEARCH_URL = form_data.web.YANDEX_WEB_SEARCH_URL
         config.YANDEX_WEB_SEARCH_API_KEY = form_data.web.YANDEX_WEB_SEARCH_API_KEY
         config.YANDEX_WEB_SEARCH_CONFIG = form_data.web.YANDEX_WEB_SEARCH_CONFIG
@@ -1269,9 +1256,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
             'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,
             'EXTERNAL_WEB_LOADER_API_KEY': config.EXTERNAL_WEB_LOADER_API_KEY,
-            'YOUTUBE_LOADER_LANGUAGE': config.YOUTUBE_LOADER_LANGUAGE,
-            'YOUTUBE_LOADER_PROXY_URL': config.YOUTUBE_LOADER_PROXY_URL,
-            'YOUTUBE_LOADER_TRANSLATION': request.app.state.YOUTUBE_LOADER_TRANSLATION,
             'YANDEX_WEB_SEARCH_URL': config.YANDEX_WEB_SEARCH_URL,
             'YANDEX_WEB_SEARCH_API_KEY': config.YANDEX_WEB_SEARCH_API_KEY,
             'YANDEX_WEB_SEARCH_CONFIG': config.YANDEX_WEB_SEARCH_CONFIG,
@@ -2081,17 +2065,6 @@ async def process_url(
     user=Depends(get_verified_user),
 ):
     try:
-        if is_youtube_url(form_data.url):
-            result = await process_web(request, form_data, process=process, user=user)
-            return {
-                'status': True,
-                'type': 'youtube',
-                'name': form_data.url,
-                'url': form_data.url,
-                'collection_name': result.get('collection_name'),
-                'content': result.get('content'),
-            }
-
         config = await get_retrieval_config()
         url_result = await _fetch_url(form_data.url, config.FILE_MAX_SIZE)
 
@@ -2146,7 +2119,6 @@ async def process_url(
         )
 
 
-@router.post('/process/youtube')
 @router.post('/process/web')
 async def process_web(
     request: Request,
@@ -2161,12 +2133,6 @@ async def process_web(
         content, docs = await get_content_from_url(request, form_data.url)
     except HTTPException:
         raise
-    except YoutubeTranscriptError as e:
-        log.warning('YouTube transcript unavailable for %s: %s', form_data.url, e)
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        )
     except Exception as e:
         log.exception(e)
         raise HTTPException(
