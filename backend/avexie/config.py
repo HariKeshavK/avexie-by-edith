@@ -763,30 +763,7 @@ VALKEY_HNSW_EF_RUNTIME = int(os.getenv('VALKEY_HNSW_EF_RUNTIME', '10'))
 ####################################
 
 
-# If configured, Google Drive will be available as an upload option.
-ENABLE_GOOGLE_DRIVE_INTEGRATION = os.getenv('ENABLE_GOOGLE_DRIVE_INTEGRATION', 'False').lower() == 'true'
-
-GOOGLE_DRIVE_CLIENT_ID = os.getenv('GOOGLE_DRIVE_CLIENT_ID', '')
-
-GOOGLE_DRIVE_API_KEY = os.getenv('GOOGLE_DRIVE_API_KEY', '')
-
-ENABLE_ONEDRIVE_INTEGRATION = os.getenv('ENABLE_ONEDRIVE_INTEGRATION', 'False').lower() == 'true'
-
-
-ONEDRIVE_CLIENT_ID = os.getenv('ONEDRIVE_CLIENT_ID', '')
-ONEDRIVE_CLIENT_ID_PERSONAL = os.getenv('ONEDRIVE_CLIENT_ID_PERSONAL', ONEDRIVE_CLIENT_ID)
-ONEDRIVE_CLIENT_ID_BUSINESS = os.getenv('ONEDRIVE_CLIENT_ID_BUSINESS', ONEDRIVE_CLIENT_ID)
-
-ENABLE_ONEDRIVE_PERSONAL = os.getenv('ENABLE_ONEDRIVE_PERSONAL', 'True').lower() == 'true' and bool(
-    ONEDRIVE_CLIENT_ID_PERSONAL
-)
-ENABLE_ONEDRIVE_BUSINESS = os.getenv('ENABLE_ONEDRIVE_BUSINESS', 'True').lower() == 'true' and bool(
-    ONEDRIVE_CLIENT_ID_BUSINESS
-)
-
-ONEDRIVE_SHAREPOINT_URL = os.getenv('ONEDRIVE_SHAREPOINT_URL', '')
-
-ONEDRIVE_SHAREPOINT_TENANT_ID = os.getenv('ONEDRIVE_SHAREPOINT_TENANT_ID', '')
+# Google Drive and OneDrive integrations have been removed.
 
 # RAG Content Extraction
 CONTENT_EXTRACTION_ENGINE = os.getenv('CONTENT_EXTRACTION_ENGINE', '').lower()
@@ -1990,12 +1967,6 @@ DEFAULT_CONFIG = {
     'code_interpreter.jupyter.auth_token': CODE_INTERPRETER_JUPYTER_AUTH_TOKEN,
     'code_interpreter.jupyter.auth_password': CODE_INTERPRETER_JUPYTER_AUTH_PASSWORD,
     'code_interpreter.jupyter.timeout': CODE_INTERPRETER_JUPYTER_TIMEOUT,
-    'google_drive.enable': ENABLE_GOOGLE_DRIVE_INTEGRATION,
-    'google_drive.client_id': GOOGLE_DRIVE_CLIENT_ID,
-    'google_drive.api_key': GOOGLE_DRIVE_API_KEY,
-    'onedrive.enable': ENABLE_ONEDRIVE_INTEGRATION,
-    'onedrive.sharepoint_url': ONEDRIVE_SHAREPOINT_URL,
-    'onedrive.sharepoint_tenant_id': ONEDRIVE_SHAREPOINT_TENANT_ID,
     'rag.content_extraction_engine': CONTENT_EXTRACTION_ENGINE,
     'rag.content_extraction.supported_media_mime_types': CONTENT_EXTRACTION_SUPPORTED_MEDIA_MIME_TYPES,
     'rag.mineru_api_mode': MINERU_API_MODE,

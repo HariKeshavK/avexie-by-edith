@@ -222,9 +222,7 @@ RETRIEVAL_CONFIG_KEYS = {
     'DOCLING_PARAMS': 'rag.docling_params',
     'DOCLING_SERVER_URL': 'rag.docling_server_url',
     'ENABLE_ASYNC_EMBEDDING': 'rag.enable_async_embedding',
-    'ENABLE_GOOGLE_DRIVE_INTEGRATION': 'google_drive.enable',
     'ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER': 'rag.enable_markdown_header_text_splitter',
-    'ENABLE_ONEDRIVE_INTEGRATION': 'onedrive.enable',
     'ENABLE_RAG_HYBRID_SEARCH': 'rag.enable_hybrid_search',
     'ENABLE_RAG_HYBRID_SEARCH_ENRICHED_TEXTS': 'rag.enable_hybrid_search_enriched_texts',
     'ENABLE_WEB_LOADER_SSL_VERIFICATION': 'web.loader.ssl_verification',
@@ -524,9 +522,6 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
         'FILE_IMAGE_COMPRESSION_WIDTH': config.FILE_IMAGE_COMPRESSION_WIDTH,
         'FILE_IMAGE_COMPRESSION_HEIGHT': config.FILE_IMAGE_COMPRESSION_HEIGHT,
         'ALLOWED_FILE_EXTENSIONS': config.ALLOWED_FILE_EXTENSIONS,
-        # Integration settings
-        'ENABLE_GOOGLE_DRIVE_INTEGRATION': config.ENABLE_GOOGLE_DRIVE_INTEGRATION,
-        'ENABLE_ONEDRIVE_INTEGRATION': config.ENABLE_ONEDRIVE_INTEGRATION,
         # Web search settings
         'web': {
             'ENABLE_WEB_SEARCH': config.ENABLE_WEB_SEARCH,
@@ -712,10 +707,6 @@ class ConfigForm(BaseModel):
     FILE_IMAGE_COMPRESSION_HEIGHT: Union[int, str | None] = None
     ALLOWED_FILE_EXTENSIONS: list[str | None] = None
 
-    # Integration settings
-    ENABLE_GOOGLE_DRIVE_INTEGRATION: bool | None = None
-    ENABLE_ONEDRIVE_INTEGRATION: bool | None = None
-
     # Web search settings
     web: WebConfig | None = None
 
@@ -900,18 +891,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         else config.ALLOWED_FILE_EXTENSIONS
     )
 
-    # Integration settings
-    config.ENABLE_GOOGLE_DRIVE_INTEGRATION = (
-        form_data.ENABLE_GOOGLE_DRIVE_INTEGRATION
-        if form_data.ENABLE_GOOGLE_DRIVE_INTEGRATION is not None
-        else config.ENABLE_GOOGLE_DRIVE_INTEGRATION
-    )
-    config.ENABLE_ONEDRIVE_INTEGRATION = (
-        form_data.ENABLE_ONEDRIVE_INTEGRATION
-        if form_data.ENABLE_ONEDRIVE_INTEGRATION is not None
-        else config.ENABLE_ONEDRIVE_INTEGRATION
-    )
-
     if form_data.web is not None:
         # Web search settings
         config.ENABLE_WEB_SEARCH = form_data.web.ENABLE_WEB_SEARCH
@@ -1040,9 +1019,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         'FILE_IMAGE_COMPRESSION_WIDTH': config.FILE_IMAGE_COMPRESSION_WIDTH,
         'FILE_IMAGE_COMPRESSION_HEIGHT': config.FILE_IMAGE_COMPRESSION_HEIGHT,
         'ALLOWED_FILE_EXTENSIONS': config.ALLOWED_FILE_EXTENSIONS,
-        # Integration settings
-        'ENABLE_GOOGLE_DRIVE_INTEGRATION': config.ENABLE_GOOGLE_DRIVE_INTEGRATION,
-        'ENABLE_ONEDRIVE_INTEGRATION': config.ENABLE_ONEDRIVE_INTEGRATION,
         # Web search settings
         'web': {
             'ENABLE_WEB_SEARCH': config.ENABLE_WEB_SEARCH,

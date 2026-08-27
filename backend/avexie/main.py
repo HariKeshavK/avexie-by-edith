@@ -50,17 +50,9 @@ from avexie.config import (
     # Admin
     ENABLE_ADMIN_CHAT_ACCESS,
     ENABLE_ADMIN_EXPORT,
-    ENABLE_ONEDRIVE_BUSINESS,
-    ENABLE_ONEDRIVE_PERSONAL,
     ENV,
     FRONTEND_BUILD_DIR,
-    GOOGLE_DRIVE_API_KEY,
-    GOOGLE_DRIVE_CLIENT_ID,
     IFRAME_CSP,
-    ONEDRIVE_CLIENT_ID_BUSINESS,
-    ONEDRIVE_CLIENT_ID_PERSONAL,
-    ONEDRIVE_SHAREPOINT_TENANT_ID,
-    ONEDRIVE_SHAREPOINT_URL,
     STATIC_DIR,
     THREAD_POOL_SIZE,
     THREAD_POOL_THREAD_NAME_PREFIX,
@@ -1974,8 +1966,6 @@ async def get_app_config(request: Request):
         'ui.enable_community_sharing',
         'ui.enable_message_rating',
         'users.enable_status',
-        'google_drive.enable',
-        'onedrive.enable',
         'memories.enable',
         'ui.default_models',
         'ui.default_pinned_models',
@@ -2054,17 +2044,7 @@ async def get_app_config(request: Request):
                     'enable_admin_export': ENABLE_ADMIN_EXPORT,
                     'enable_admin_chat_access': ENABLE_ADMIN_CHAT_ACCESS,
                     'enable_admin_analytics': False,
-                    'enable_google_drive_integration': config.get('google_drive.enable'),
-                    'enable_onedrive_integration': config.get('onedrive.enable'),
                     'enable_memories': config.get('memories.enable'),
-                    **(
-                        {
-                            'enable_onedrive_personal': ENABLE_ONEDRIVE_PERSONAL,
-                            'enable_onedrive_business': ENABLE_ONEDRIVE_BUSINESS,
-                        }
-                        if config.get('onedrive.enable')
-                        else {}
-                    ),
                 }
                 if user is not None
                 else {}
@@ -2099,16 +2079,6 @@ async def get_app_config(request: Request):
                     },
                 },
                 'permissions': {**(config.get('user.permissions') or {})},
-                'google_drive': {
-                    'client_id': GOOGLE_DRIVE_CLIENT_ID,
-                    'api_key': GOOGLE_DRIVE_API_KEY,
-                },
-                'onedrive': {
-                    'client_id_personal': ONEDRIVE_CLIENT_ID_PERSONAL,
-                    'client_id_business': ONEDRIVE_CLIENT_ID_BUSINESS,
-                    'sharepoint_url': ONEDRIVE_SHAREPOINT_URL,
-                    'sharepoint_tenant_id': ONEDRIVE_SHAREPOINT_TENANT_ID,
-                },
                 'ui': {
                     'default_interface_settings': config.get('ui.default_interface_settings'),
                     'pending_user_overlay_title': config.get('ui.pending_user_overlay_title'),
