@@ -144,26 +144,7 @@ if frontend_loader.exists():
 
 
 # --- Storage Provider ---
-
-STORAGE_PROVIDER = os.getenv('STORAGE_PROVIDER', 'local')  # defaults to local, s3
-STORAGE_LOCAL_CACHE = os.getenv('STORAGE_LOCAL_CACHE', 'true').lower() == 'true'
-
-S3_ACCESS_KEY_ID = os.getenv('S3_ACCESS_KEY_ID', None)
-S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY', None)
-S3_REGION_NAME = os.getenv('S3_REGION_NAME', None)
-S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', None)
-S3_KEY_PREFIX = os.getenv('S3_KEY_PREFIX', None)
-S3_ENDPOINT_URL = os.getenv('S3_ENDPOINT_URL', None)
-S3_USE_ACCELERATE_ENDPOINT = os.getenv('S3_USE_ACCELERATE_ENDPOINT', 'false').lower() == 'true'
-S3_ADDRESSING_STYLE = os.getenv('S3_ADDRESSING_STYLE', None)
-S3_ENABLE_TAGGING = os.getenv('S3_ENABLE_TAGGING', 'false').lower() == 'true'
-
-GCS_BUCKET_NAME = os.getenv('GCS_BUCKET_NAME', None)
-GOOGLE_APPLICATION_CREDENTIALS_JSON = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON', None)
-
-AZURE_STORAGE_ENDPOINT = os.getenv('AZURE_STORAGE_ENDPOINT', None)
-AZURE_STORAGE_CONTAINER_NAME = os.getenv('AZURE_STORAGE_CONTAINER_NAME', None)
-AZURE_STORAGE_KEY = os.getenv('AZURE_STORAGE_KEY', None)
+# Only local storage is supported.
 
 ####################################
 # File Upload DIR

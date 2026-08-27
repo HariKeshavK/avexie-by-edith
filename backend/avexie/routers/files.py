@@ -21,30 +21,30 @@ from fastapi import (
     status,
 )
 from fastapi.responses import FileResponse, StreamingResponse
-from open_webui.config import BYPASS_ADMIN_ACCESS_CONTROL, STORAGE_LOCAL_CACHE, STORAGE_PROVIDER, UPLOAD_DIR
-from open_webui.constants import ERROR_MESSAGES
-from open_webui.events import EVENTS, publish_event
-from open_webui.internal.db import get_async_db_context, get_async_session
-from open_webui.models.access_grants import AccessGrants
-from open_webui.models.channels import Channels
-from open_webui.models.chats import Chats
-from open_webui.models.config import Config
-from open_webui.models.files import (
+from avexie.config import BYPASS_ADMIN_ACCESS_CONTROL, UPLOAD_DIR
+from avexie.constants import ERROR_MESSAGES
+from avexie.events import EVENTS, publish_event
+from avexie.internal.db import get_async_db_context, get_async_session
+from avexie.models.access_grants import AccessGrants
+from avexie.models.channels import Channels
+from avexie.models.chats import Chats
+from avexie.models.config import Config
+from avexie.models.files import (
     FileForm,
     FileListResponse,
     FileModel,
     FileModelResponse,
     Files,
 )
-from open_webui.models.groups import Groups
-from open_webui.models.knowledge import Knowledges
-from open_webui.models.users import Users
-from open_webui.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
-from open_webui.routers.audio import transcribe
-from open_webui.routers.retrieval import ProcessFileForm, process_file
-from open_webui.storage.provider import Storage
-from open_webui.utils.auth import get_admin_user, get_verified_user
-from open_webui.utils.misc import strict_match_mime_type
+from avexie.models.groups import Groups
+from avexie.models.knowledge import Knowledges
+from avexie.models.users import Users
+from avexie.retrieval.vector.async_client import ASYNC_VECTOR_DB_CLIENT
+from avexie.routers.audio import transcribe
+from avexie.routers.retrieval import ProcessFileForm, process_file
+from avexie.storage.provider import Storage
+from avexie.utils.auth import get_admin_user, get_verified_user
+from avexie.utils.misc import strict_match_mime_type
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -53,8 +53,8 @@ log = logging.getLogger(__name__)
 router = APIRouter()
 
 
-from open_webui.utils.access_control.files import has_access_to_file
-from open_webui.utils.json_codec import JSONCodec
+from avexie.utils.access_control.files import has_access_to_file
+from avexie.utils.json_codec import JSONCodec
 
 ############################
 # Upload File
@@ -95,9 +95,8 @@ def _is_text_file(file_path: str, chunk_size: int = 8192) -> bool:
 
 
 def _cleanup_local_cache(file_path: str) -> None:
-    """Remove the local cached copy of a cloud-stored file after processing."""
-    if STORAGE_LOCAL_CACHE or STORAGE_PROVIDER == 'local':
-        return
+    """No-op for local-only storage."""
+    return
     try:
         local_filename = os.path.basename(file_path)
         local_path = os.path.join(UPLOAD_DIR, local_filename)
@@ -357,10 +356,10 @@ async def upload_file_handler(
         name = filename
         filename = f'{id}_{filename}'
         tags = {
-            'OpenWebUI-User-Email': user.email,
-            'OpenWebUI-User-Id': user.id,
-            'OpenWebUI-User-Name': user.name,
-            'OpenWebUI-File-Id': id,
+            'Avexie-User-Email': user.email,
+            'Avexie-User-Id': user.id,
+            'Avexie-User-Name': user.name,
+            'Avexie-File-Id': id,
         }
         try:
             contents, file_path = await asyncio.to_thread(Storage.upload_file, file.file, filename, tags)
