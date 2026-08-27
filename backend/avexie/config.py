@@ -1068,17 +1068,9 @@ WHISPER_MULTILINGUAL = os.getenv('WHISPER_MULTILINGUAL', 'False').lower() == 'tr
 
 WHISPER_LANGUAGE = os.getenv('WHISPER_LANGUAGE', '').lower() or None
 
-# Add Deepgram configuration
-DEEPGRAM_API_KEY = os.getenv('DEEPGRAM_API_KEY', '')
-
-# ElevenLabs configuration
-ELEVENLABS_API_BASE_URL = os.getenv('ELEVENLABS_API_BASE_URL', 'https://api.elevenlabs.io')
-
-AUDIO_STT_OPENAI_API_BASE_URL = os.getenv('AUDIO_STT_OPENAI_API_BASE_URL', OPENAI_API_BASE_URL)
-
-AUDIO_STT_OPENAI_API_KEY = os.getenv('AUDIO_STT_OPENAI_API_KEY', OPENAI_API_KEY)
-
-AUDIO_STT_OPENAI_API_REQUEST_FORMAT = os.getenv('AUDIO_STT_OPENAI_API_REQUEST_FORMAT', 'multipart')
+# External TTS/STT providers (OpenAI, Azure Speech, Deepgram, ElevenLabs,
+# Mistral) have been removed. Only the local Whisper STT engine and the
+# local (transformers) TTS engine are supported.
 
 AUDIO_STT_ENGINE = os.getenv('AUDIO_STT_ENGINE', '')
 
@@ -1099,56 +1091,13 @@ AUDIO_STT_ALLOWED_EXTENSIONS = [
     if ext.strip()
 ]
 
-AUDIO_STT_AZURE_API_KEY = os.getenv('AUDIO_STT_AZURE_API_KEY', '')
-
-AUDIO_STT_AZURE_REGION = os.getenv('AUDIO_STT_AZURE_REGION', '')
-
-AUDIO_STT_AZURE_LOCALES = os.getenv('AUDIO_STT_AZURE_LOCALES', '')
-
-AUDIO_STT_AZURE_BASE_URL = os.getenv('AUDIO_STT_AZURE_BASE_URL', '')
-
-AUDIO_STT_AZURE_MAX_SPEAKERS = os.getenv('AUDIO_STT_AZURE_MAX_SPEAKERS', '')
-
-AUDIO_STT_MISTRAL_API_KEY = os.getenv('AUDIO_STT_MISTRAL_API_KEY', '')
-
-AUDIO_STT_MISTRAL_API_BASE_URL = os.getenv('AUDIO_STT_MISTRAL_API_BASE_URL', 'https://api.mistral.ai/v1')
-
-AUDIO_STT_MISTRAL_USE_CHAT_COMPLETIONS = os.getenv('AUDIO_STT_MISTRAL_USE_CHAT_COMPLETIONS', 'false').lower() == 'true'
-
-AUDIO_TTS_OPENAI_API_BASE_URL = os.getenv('AUDIO_TTS_OPENAI_API_BASE_URL', OPENAI_API_BASE_URL)
-AUDIO_TTS_OPENAI_API_KEY = os.getenv('AUDIO_TTS_OPENAI_API_KEY', OPENAI_API_KEY)
-
-audio_tts_openai_params = os.getenv('AUDIO_TTS_OPENAI_PARAMS', '')
-try:
-    audio_tts_openai_params = JSONCodec.loads(audio_tts_openai_params)
-except JSONCodec.JSONDecodeError:
-    audio_tts_openai_params = {}
-
-AUDIO_TTS_OPENAI_PARAMS = audio_tts_openai_params
-
-
-AUDIO_TTS_API_KEY = os.getenv('AUDIO_TTS_API_KEY', '')
-
 AUDIO_TTS_ENGINE = os.getenv('AUDIO_TTS_ENGINE', '')
-
 
 AUDIO_TTS_MODEL = os.getenv('AUDIO_TTS_MODEL', 'tts-1')
 
 AUDIO_TTS_VOICE = os.getenv('AUDIO_TTS_VOICE', 'alloy')
 
 AUDIO_TTS_SPLIT_ON = os.getenv('AUDIO_TTS_SPLIT_ON', 'punctuation')
-
-AUDIO_TTS_AZURE_SPEECH_REGION = os.getenv('AUDIO_TTS_AZURE_SPEECH_REGION', '')
-
-AUDIO_TTS_AZURE_SPEECH_BASE_URL = os.getenv('AUDIO_TTS_AZURE_SPEECH_BASE_URL', '')
-
-AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT = os.getenv(
-    'AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT', 'audio-24khz-160kbitrate-mono-mp3'
-)
-
-AUDIO_TTS_MISTRAL_API_KEY = os.getenv('AUDIO_TTS_MISTRAL_API_KEY', '')
-
-AUDIO_TTS_MISTRAL_API_BASE_URL = os.getenv('AUDIO_TTS_MISTRAL_API_BASE_URL', 'https://api.mistral.ai/v1')
 
 ####################################
 # WEBUI
@@ -2106,35 +2055,14 @@ DEFAULT_CONFIG = {
     'image_generation.enable': False,
     'images.edit.enable': False,
     'audio.stt.whisper_model': WHISPER_MODEL,
-    'audio.stt.deepgram.api_key': DEEPGRAM_API_KEY,
-    'audio.stt.openai.api_base_url': AUDIO_STT_OPENAI_API_BASE_URL,
-    'audio.stt.openai.api_key': AUDIO_STT_OPENAI_API_KEY,
-    'audio.stt.openai.api_request_format': AUDIO_STT_OPENAI_API_REQUEST_FORMAT,
     'audio.stt.engine': AUDIO_STT_ENGINE,
     'audio.stt.model': AUDIO_STT_MODEL,
     'audio.stt.supported_content_types': AUDIO_STT_SUPPORTED_CONTENT_TYPES,
     'audio.stt.allowed_extensions': AUDIO_STT_ALLOWED_EXTENSIONS,
-    'audio.stt.azure.api_key': AUDIO_STT_AZURE_API_KEY,
-    'audio.stt.azure.region': AUDIO_STT_AZURE_REGION,
-    'audio.stt.azure.locales': AUDIO_STT_AZURE_LOCALES,
-    'audio.stt.azure.base_url': AUDIO_STT_AZURE_BASE_URL,
-    'audio.stt.azure.max_speakers': AUDIO_STT_AZURE_MAX_SPEAKERS,
-    'audio.stt.mistral.api_key': AUDIO_STT_MISTRAL_API_KEY,
-    'audio.stt.mistral.api_base_url': AUDIO_STT_MISTRAL_API_BASE_URL,
-    'audio.stt.mistral.use_chat_completions': AUDIO_STT_MISTRAL_USE_CHAT_COMPLETIONS,
-    'audio.tts.openai.api_base_url': AUDIO_TTS_OPENAI_API_BASE_URL,
-    'audio.tts.openai.api_key': AUDIO_TTS_OPENAI_API_KEY,
-    'audio.tts.openai.params': AUDIO_TTS_OPENAI_PARAMS,
-    'audio.tts.api_key': AUDIO_TTS_API_KEY,
     'audio.tts.engine': AUDIO_TTS_ENGINE,
     'audio.tts.model': AUDIO_TTS_MODEL,
     'audio.tts.voice': AUDIO_TTS_VOICE,
     'audio.tts.split_on': AUDIO_TTS_SPLIT_ON,
-    'audio.tts.azure.speech_region': AUDIO_TTS_AZURE_SPEECH_REGION,
-    'audio.tts.azure.speech_base_url': AUDIO_TTS_AZURE_SPEECH_BASE_URL,
-    'audio.tts.azure.speech_output_format': AUDIO_TTS_AZURE_SPEECH_OUTPUT_FORMAT,
-    'audio.tts.mistral.api_key': AUDIO_TTS_MISTRAL_API_KEY,
-    'audio.tts.mistral.api_base_url': AUDIO_TTS_MISTRAL_API_BASE_URL,
     'webui.url': WEBUI_URL,
     'ui.enable_signup': ENABLE_SIGNUP,
     'ui.enable_login_form': ENABLE_LOGIN_FORM,
