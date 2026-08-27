@@ -619,28 +619,9 @@ async def initialize_runtime_config(app: FastAPI):
         embedding_engine,
         rag_config.get('rag.embedding_model'),
         embedding_function=app.state.ef,
-        url=(
-            rag_config.get('rag.openai.api_base_url')
-            if embedding_engine == 'openai'
-            else (
-                rag_config.get('rag.ollama.base_url')
-                if embedding_engine == 'ollama'
-                else rag_config.get('rag.azure_openai.base_url')
-            )
-        ),
-        key=(
-            rag_config.get('rag.openai.api_key')
-            if embedding_engine == 'openai'
-            else (
-                rag_config.get('rag.ollama.api_key')
-                if embedding_engine == 'ollama'
-                else rag_config.get('rag.azure_openai.api_key')
-            )
-        ),
+        url=rag_config.get('rag.ollama.base_url') if embedding_engine == 'ollama' else None,
+        key=rag_config.get('rag.ollama.api_key') if embedding_engine == 'ollama' else None,
         embedding_batch_size=rag_config.get('rag.embedding_batch_size'),
-        azure_api_version=(
-            rag_config.get('rag.azure_openai.api_version') if embedding_engine == 'azure_openai' else None
-        ),
         enable_async=rag_config.get('rag.enable_async_embedding'),
         concurrent_requests=rag_config.get('rag.embedding_concurrent_requests'),
     )
