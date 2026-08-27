@@ -329,8 +329,6 @@ RETRIEVAL_CONFIG_KEYS = {
     'SERPSTACK_HTTPS': 'web.search.serpstack_https',
     'SOUGOU_API_SID': 'web.search.sougou_api_sid',
     'SOUGOU_API_SK': 'web.search.sougou_api_sk',
-    'TAVILY_API_KEY': 'web.search.tavily_api_key',
-    'TAVILY_EXTRACT_DEPTH': 'web.search.tavily_extract_depth',
     'TEXT_SPLITTER': 'rag.text_splitter',
     'TIKA_SERVER_URL': 'rag.tika_server_url',
     'TIKA_SERVER_VERSION': 'rag.tika_server_version',
@@ -663,7 +661,6 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
             'SERPHOUSE_DOMAIN': config.SERPHOUSE_DOMAIN,
             'SERPLY_API_KEY': config.SERPLY_API_KEY,
             'DDGS_BACKEND': config.DDGS_BACKEND,
-            'TAVILY_API_KEY': config.TAVILY_API_KEY,
             'SEARCHAPI_API_KEY': config.SEARCHAPI_API_KEY,
             'SEARCHAPI_ENGINE': config.SEARCHAPI_ENGINE,
             'SERPAPI_API_KEY': config.SERPAPI_API_KEY,
@@ -690,7 +687,6 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
             'FIRECRAWL_API_KEY': config.FIRECRAWL_API_KEY,
             'FIRECRAWL_API_BASE_URL': config.FIRECRAWL_API_BASE_URL,
             'FIRECRAWL_TIMEOUT': config.FIRECRAWL_TIMEOUT,
-            'TAVILY_EXTRACT_DEPTH': config.TAVILY_EXTRACT_DEPTH,
             'EXTERNAL_WEB_SEARCH_URL': config.EXTERNAL_WEB_SEARCH_URL,
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
             'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,
@@ -742,7 +738,6 @@ class WebConfig(BaseModel):
     SERPHOUSE_DOMAIN: str | None = None
     SERPLY_API_KEY: str | None = None
     DDGS_BACKEND: str | None = None
-    TAVILY_API_KEY: str | None = None
     SEARCHAPI_API_KEY: str | None = None
     SEARCHAPI_ENGINE: str | None = None
     SERPAPI_API_KEY: str | None = None
@@ -769,7 +764,6 @@ class WebConfig(BaseModel):
     FIRECRAWL_API_KEY: str | None = None
     FIRECRAWL_API_BASE_URL: str | None = None
     FIRECRAWL_TIMEOUT: str | None = None
-    TAVILY_EXTRACT_DEPTH: str | None = None
     EXTERNAL_WEB_SEARCH_URL: str | None = None
     EXTERNAL_WEB_SEARCH_API_KEY: str | None = None
     EXTERNAL_WEB_LOADER_URL: str | None = None
@@ -1101,7 +1095,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         config.SERPHOUSE_DOMAIN = form_data.web.SERPHOUSE_DOMAIN
         config.SERPLY_API_KEY = form_data.web.SERPLY_API_KEY
         config.DDGS_BACKEND = form_data.web.DDGS_BACKEND
-        config.TAVILY_API_KEY = form_data.web.TAVILY_API_KEY
         config.SEARCHAPI_API_KEY = form_data.web.SEARCHAPI_API_KEY
         config.SEARCHAPI_ENGINE = form_data.web.SEARCHAPI_ENGINE
         config.SERPAPI_API_KEY = form_data.web.SERPAPI_API_KEY
@@ -1135,7 +1128,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         config.EXTERNAL_WEB_SEARCH_API_KEY = form_data.web.EXTERNAL_WEB_SEARCH_API_KEY
         config.EXTERNAL_WEB_LOADER_URL = form_data.web.EXTERNAL_WEB_LOADER_URL
         config.EXTERNAL_WEB_LOADER_API_KEY = form_data.web.EXTERNAL_WEB_LOADER_API_KEY
-        config.TAVILY_EXTRACT_DEPTH = form_data.web.TAVILY_EXTRACT_DEPTH
         config.YOUTUBE_LOADER_LANGUAGE = form_data.web.YOUTUBE_LOADER_LANGUAGE
         config.YOUTUBE_LOADER_PROXY_URL = form_data.web.YOUTUBE_LOADER_PROXY_URL
         request.app.state.YOUTUBE_LOADER_TRANSLATION = form_data.web.YOUTUBE_LOADER_TRANSLATION
@@ -1247,7 +1239,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
             'SERPHOUSE_API_KEY': config.SERPHOUSE_API_KEY,
             'SERPHOUSE_DOMAIN': config.SERPHOUSE_DOMAIN,
             'SERPLY_API_KEY': config.SERPLY_API_KEY,
-            'TAVILY_API_KEY': config.TAVILY_API_KEY,
             'SEARCHAPI_API_KEY': config.SEARCHAPI_API_KEY,
             'SEARCHAPI_ENGINE': config.SEARCHAPI_ENGINE,
             'SERPAPI_API_KEY': config.SERPAPI_API_KEY,
@@ -1274,7 +1265,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
             'FIRECRAWL_API_KEY': config.FIRECRAWL_API_KEY,
             'FIRECRAWL_API_BASE_URL': config.FIRECRAWL_API_BASE_URL,
             'FIRECRAWL_TIMEOUT': config.FIRECRAWL_TIMEOUT,
-            'TAVILY_EXTRACT_DEPTH': config.TAVILY_EXTRACT_DEPTH,
             'EXTERNAL_WEB_SEARCH_URL': config.EXTERNAL_WEB_SEARCH_URL,
             'EXTERNAL_WEB_SEARCH_API_KEY': config.EXTERNAL_WEB_SEARCH_API_KEY,
             'EXTERNAL_WEB_LOADER_URL': config.EXTERNAL_WEB_LOADER_URL,

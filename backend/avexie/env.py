@@ -587,8 +587,6 @@ def _parse_ssl_env(value: str) -> 'bool | _ssl.SSLContext':
 
 REQUESTS_VERIFY = os.getenv('REQUESTS_VERIFY', 'True').lower() == 'true'
 
-TAVILY_API_BASE_URL = os.getenv('TAVILY_API_BASE_URL', 'https://api.tavily.com').rstrip('/')
-
 _aiohttp_timeout_raw = os.getenv('AIOHTTP_CLIENT_TIMEOUT', '')
 try:
     AIOHTTP_CLIENT_TIMEOUT = int(_aiohttp_timeout_raw) if _aiohttp_timeout_raw else None
@@ -850,39 +848,13 @@ WEBUI_AUTH_SIGNOUT_REDIRECT_URL = os.getenv('WEBUI_AUTH_SIGNOUT_REDIRECT_URL', N
 ####################################
 # OAUTH Configuration
 ####################################
-ENABLE_OAUTH_EMAIL_FALLBACK = os.getenv('ENABLE_OAUTH_EMAIL_FALLBACK', 'False').lower() == 'true'
-
-ENABLE_OAUTH_ID_TOKEN_COOKIE = os.getenv('ENABLE_OAUTH_ID_TOKEN_COOKIE', 'True').lower() == 'true'
+# OAuth/OIDC SSO login providers have been removed. The keys below remain
+# only to support encrypted OAuth client credentials for MCP tool-server
+# integrations (see utils/oauth.py: OAuthClientManager).
 
 OAUTH_CLIENT_INFO_ENCRYPTION_KEY = os.getenv('OAUTH_CLIENT_INFO_ENCRYPTION_KEY', WEBUI_SECRET_KEY)
 
 OAUTH_SESSION_TOKEN_ENCRYPTION_KEY = os.getenv('OAUTH_SESSION_TOKEN_ENCRYPTION_KEY', WEBUI_SECRET_KEY)
-
-# Maximum number of concurrent OAuth sessions per user per provider
-# This prevents unbounded session growth while allowing multi-device usage
-OAUTH_MAX_SESSIONS_PER_USER = int(os.getenv('OAUTH_MAX_SESSIONS_PER_USER', '10'))
-
-# Token Exchange Configuration
-# Allows external apps to exchange OAuth tokens for AVEXIE tokens
-ENABLE_OAUTH_TOKEN_EXCHANGE = os.getenv('ENABLE_OAUTH_TOKEN_EXCHANGE', 'False').lower() == 'true'
-_oauth_token_exchange_rate_limit = (os.getenv('OAUTH_TOKEN_EXCHANGE_RATE_LIMIT') or '').strip()
-OAUTH_TOKEN_EXCHANGE_RATE_LIMIT = (
-    int(_oauth_token_exchange_rate_limit)
-    if _oauth_token_exchange_rate_limit and _oauth_token_exchange_rate_limit.lower() != 'none'
-    else None
-)
-OAUTH_TOKEN_EXCHANGE_RATE_LIMIT_WINDOW = int(os.getenv('OAUTH_TOKEN_EXCHANGE_RATE_LIMIT_WINDOW', str(60 * 3)))
-OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS = [
-    client_id.strip()
-    for client_id in os.getenv('OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS', '').split(',')
-    if client_id.strip()
-]
-
-# Back-Channel Logout Configuration
-# When enabled, exposes POST /oauth/backchannel-logout for IdP-initiated logout
-# per OpenID Connect Back-Channel Logout 1.0 spec.
-# Requires Redis for JWT revocation.
-ENABLE_OAUTH_BACKCHANNEL_LOGOUT = os.getenv('ENABLE_OAUTH_BACKCHANNEL_LOGOUT', 'False').lower() == 'true'
 
 ####################################
 # WEBUI Identity
