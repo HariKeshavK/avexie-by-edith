@@ -919,12 +919,8 @@ RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = os.getenv('RAG_RERANKING_MODEL_TRUST_REM
 
 RAG_RERANKING_BATCH_SIZE = int(os.getenv('RAG_RERANKING_BATCH_SIZE', '32'))
 
-RAG_EXTERNAL_RERANKER_URL = os.getenv('RAG_EXTERNAL_RERANKER_URL', '')
-
-RAG_EXTERNAL_RERANKER_API_KEY = os.getenv('RAG_EXTERNAL_RERANKER_API_KEY', '')
-
-RAG_EXTERNAL_RERANKER_TIMEOUT = os.getenv('RAG_EXTERNAL_RERANKER_TIMEOUT', '')
-
+# External reranker endpoints have been removed; only local (sentence-transformers
+# CrossEncoder / ColBERT) reranking is supported.
 
 RAG_TEXT_SPLITTER = os.getenv('RAG_TEXT_SPLITTER', '')
 
@@ -969,12 +965,8 @@ Provide a clear and direct response to the user's query, including inline citati
 
 RAG_TEMPLATE = os.getenv('RAG_TEMPLATE', DEFAULT_RAG_TEMPLATE)
 
-RAG_OPENAI_API_BASE_URL = os.getenv('RAG_OPENAI_API_BASE_URL', OPENAI_API_BASE_URL)
-RAG_OPENAI_API_KEY = os.getenv('RAG_OPENAI_API_KEY', OPENAI_API_KEY)
-
-RAG_AZURE_OPENAI_BASE_URL = os.getenv('RAG_AZURE_OPENAI_BASE_URL', '')
-RAG_AZURE_OPENAI_API_KEY = os.getenv('RAG_AZURE_OPENAI_API_KEY', '')
-RAG_AZURE_OPENAI_API_VERSION = os.getenv('RAG_AZURE_OPENAI_API_VERSION', '')
+# OpenAI/Azure OpenAI embedding backends have been removed; only local
+# (sentence-transformers) and Ollama embedding engines are supported.
 
 RAG_OLLAMA_BASE_URL = os.getenv('RAG_OLLAMA_BASE_URL', OLLAMA_BASE_URL)
 
@@ -2094,9 +2086,6 @@ DEFAULT_CONFIG = {
     'rag.reranking_engine': RAG_RERANKING_ENGINE,
     'rag.reranking_model': RAG_RERANKING_MODEL,
     'rag.reranking_batch_size': RAG_RERANKING_BATCH_SIZE,
-    'rag.external_reranker_url': RAG_EXTERNAL_RERANKER_URL,
-    'rag.external_reranker_api_key': RAG_EXTERNAL_RERANKER_API_KEY,
-    'rag.external_reranker_timeout': RAG_EXTERNAL_RERANKER_TIMEOUT,
     'rag.text_splitter': RAG_TEXT_SPLITTER,
     'rag.enable_markdown_header_text_splitter': ENABLE_MARKDOWN_HEADER_TEXT_SPLITTER,
     'rag.tiktoken_encoding_name': TIKTOKEN_ENCODING_NAME,
@@ -2104,11 +2093,6 @@ DEFAULT_CONFIG = {
     'rag.chunk_min_size_target': CHUNK_MIN_SIZE_TARGET,
     'rag.chunk_overlap': CHUNK_OVERLAP,
     'rag.template': RAG_TEMPLATE,
-    'rag.openai.api_base_url': RAG_OPENAI_API_BASE_URL,
-    'rag.openai.api_key': RAG_OPENAI_API_KEY,
-    'rag.azure_openai.base_url': RAG_AZURE_OPENAI_BASE_URL,
-    'rag.azure_openai.api_key': RAG_AZURE_OPENAI_API_KEY,
-    'rag.azure_openai.api_version': RAG_AZURE_OPENAI_API_VERSION,
     'rag.ollama.base_url': RAG_OLLAMA_BASE_URL,
     'rag.ollama.api_key': RAG_OLLAMA_API_KEY,
     'web.search.enable': False,

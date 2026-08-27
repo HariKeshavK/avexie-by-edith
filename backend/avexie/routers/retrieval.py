@@ -134,14 +134,9 @@ def get_ef(
 def get_rf(
     engine: str = '',
     reranking_model: str | None = None,
-    external_reranker_url: str = '',
-    external_reranker_api_key: str = '',
-    external_reranker_timeout: str = '',
     auto_update: bool = RAG_RERANKING_MODEL_AUTO_UPDATE,
 ):
     rf = None
-    # Convert timeout string to int or None (system default)
-    timeout_value = int(external_reranker_timeout) if external_reranker_timeout else None
     if reranking_model:
         if any(model in reranking_model for model in ['jinaai/jina-colbert-v2']):
             try:
@@ -156,55 +151,41 @@ def get_rf(
                 log.error(f'ColBERT: {e}')
                 raise Exception(ERROR_MESSAGES.DEFAULT(e, 'Error loading reranking model'))
         else:
-            if engine == 'external':
-                try:
-                    from avexie.retrieval.models.external import ExternalReranker
+            import sentence_transformers
+            import torch
 
-                    rf = ExternalReranker(
-                        url=external_reranker_url,
-                        api_key=external_reranker_api_key,
-                        model=reranking_model,
-                        timeout=timeout_value,
-                    )
-                except Exception as e:
-                    log.error(f'ExternalReranking: {e}')
-                    raise Exception(ERROR_MESSAGES.DEFAULT(e, 'Error loading reranking model'))
-            else:
-                import sentence_transformers
-                import torch
+            try:
+                rf = sentence_transformers.CrossEncoder(
+                    get_model_path(reranking_model, auto_update),
+                    device=DEVICE_TYPE,
+                    trust_remote_code=RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
+                    backend=SENTENCE_TRANSFORMERS_CROSS_ENCODER_BACKEND,
+                    model_kwargs=SENTENCE_TRANSFORMERS_CROSS_ENCODER_MODEL_KWARGS,
+                    activation_fn=(
+                        torch.nn.Sigmoid()
+                        if SENTENCE_TRANSFORMERS_CROSS_ENCODER_SIGMOID_ACTIVATION_FUNCTION
+                        else None
+                    ),
+                )
+            except Exception as e:
+                log.error(f'CrossEncoder: {e}')
+                raise Exception(ERROR_MESSAGES.DEFAULT(e, 'CrossEncoder error'))
 
-                try:
-                    rf = sentence_transformers.CrossEncoder(
-                        get_model_path(reranking_model, auto_update),
-                        device=DEVICE_TYPE,
-                        trust_remote_code=RAG_RERANKING_MODEL_TRUST_REMOTE_CODE,
-                        backend=SENTENCE_TRANSFORMERS_CROSS_ENCODER_BACKEND,
-                        model_kwargs=SENTENCE_TRANSFORMERS_CROSS_ENCODER_MODEL_KWARGS,
-                        activation_fn=(
-                            torch.nn.Sigmoid()
-                            if SENTENCE_TRANSFORMERS_CROSS_ENCODER_SIGMOID_ACTIVATION_FUNCTION
-                            else None
-                        ),
-                    )
-                except Exception as e:
-                    log.error(f'CrossEncoder: {e}')
-                    raise Exception(ERROR_MESSAGES.DEFAULT(e, 'CrossEncoder error'))
-
-                # Safely adjust pad_token_id if missing as some models do not have this in config
-                try:
-                    model_cfg = getattr(rf, 'model', None)
-                    if model_cfg and hasattr(model_cfg, 'config'):
-                        cfg = model_cfg.config
-                        if getattr(cfg, 'pad_token_id', None) is None:
-                            # Fallback to eos_token_id when available
-                            eos = getattr(cfg, 'eos_token_id', None)
-                            if eos is not None:
-                                cfg.pad_token_id = eos
-                                log.debug('Missing pad_token_id detected; set to eos_token_id=%s', eos)
-                            else:
-                                log.warning('Neither pad_token_id nor eos_token_id present in model config')
-                except Exception as e2:
-                    log.warning(f'Failed to adjust pad_token_id on CrossEncoder: {e2}')
+            # Safely adjust pad_token_id if missing as some models do not have this in config
+            try:
+                model_cfg = getattr(rf, 'model', None)
+                if model_cfg and hasattr(model_cfg, 'config'):
+                    cfg = model_cfg.config
+                    if getattr(cfg, 'pad_token_id', None) is None:
+                        # Fallback to eos_token_id when available
+                        eos = getattr(cfg, 'eos_token_id', None)
+                        if eos is not None:
+                            cfg.pad_token_id = eos
+                            log.debug('Missing pad_token_id detected; set to eos_token_id=%s', eos)
+                        else:
+                            log.warning('Neither pad_token_id nor eos_token_id present in model config')
+            except Exception as e2:
+                log.warning(f'Failed to adjust pad_token_id on CrossEncoder: {e2}')
 
     return rf
 
@@ -282,22 +263,14 @@ RETRIEVAL_CONFIG_KEYS = {
     'PERPLEXITY_SEARCH_API_URL': 'web.search.perplexity_search_api_url',
     'PERPLEXITY_SEARCH_CONTEXT_USAGE': 'web.search.perplexity_search_context_usage',
     'PLAYWRIGHT_TIMEOUT': 'web.loader.playwright_timeout',
-    'RAG_AZURE_OPENAI_API_KEY': 'rag.azure_openai.api_key',
-    'RAG_AZURE_OPENAI_API_VERSION': 'rag.azure_openai.api_version',
-    'RAG_AZURE_OPENAI_BASE_URL': 'rag.azure_openai.base_url',
     'RAG_EMBEDDING_BATCH_SIZE': 'rag.embedding_batch_size',
     'RAG_EMBEDDING_CONCURRENT_REQUESTS': 'rag.embedding_concurrent_requests',
     'RAG_EMBEDDING_ENGINE': 'rag.embedding_engine',
     'RAG_EMBEDDING_MODEL': 'rag.embedding_model',
     'RAG_TOKENIZER_MODEL': 'rag.tokenizer_model',
-    'RAG_EXTERNAL_RERANKER_API_KEY': 'rag.external_reranker_api_key',
-    'RAG_EXTERNAL_RERANKER_TIMEOUT': 'rag.external_reranker_timeout',
-    'RAG_EXTERNAL_RERANKER_URL': 'rag.external_reranker_url',
     'RAG_FULL_CONTEXT': 'rag.full_context',
     'RAG_OLLAMA_API_KEY': 'rag.ollama.api_key',
     'RAG_OLLAMA_BASE_URL': 'rag.ollama.base_url',
-    'RAG_OPENAI_API_BASE_URL': 'rag.openai.api_base_url',
-    'RAG_OPENAI_API_KEY': 'rag.openai.api_key',
     'RAG_RERANKING_BATCH_SIZE': 'rag.reranking_batch_size',
     'RAG_RERANKING_ENGINE': 'rag.reranking_engine',
     'RAG_RERANKING_MODEL': 'rag.reranking_model',
@@ -405,25 +378,11 @@ async def get_embedding_config(request: Request, user=Depends(get_admin_user)):
         'RAG_EMBEDDING_BATCH_SIZE': config.RAG_EMBEDDING_BATCH_SIZE,
         'ENABLE_ASYNC_EMBEDDING': config.ENABLE_ASYNC_EMBEDDING,
         'RAG_EMBEDDING_CONCURRENT_REQUESTS': config.RAG_EMBEDDING_CONCURRENT_REQUESTS,
-        'openai_config': {
-            'url': config.RAG_OPENAI_API_BASE_URL,
-            'key': config.RAG_OPENAI_API_KEY,
-        },
         'ollama_config': {
             'url': config.RAG_OLLAMA_BASE_URL,
             'key': config.RAG_OLLAMA_API_KEY,
         },
-        'azure_openai_config': {
-            'url': config.RAG_AZURE_OPENAI_BASE_URL,
-            'key': config.RAG_AZURE_OPENAI_API_KEY,
-            'version': config.RAG_AZURE_OPENAI_API_VERSION,
-        },
     }
-
-
-class OpenAIConfigForm(BaseModel):
-    url: str | None = None
-    key: str | None = None
 
 
 class OllamaConfigForm(BaseModel):
@@ -431,16 +390,8 @@ class OllamaConfigForm(BaseModel):
     key: str | None = None
 
 
-class AzureOpenAIConfigForm(BaseModel):
-    url: str | None = None
-    key: str | None = None
-    version: str | None = None
-
-
 class EmbeddingModelUpdateForm(BaseModel):
-    openai_config: OpenAIConfigForm | None = None
     ollama_config: OllamaConfigForm | None = None
-    azure_openai_config: AzureOpenAIConfigForm | None = None
     RAG_EMBEDDING_ENGINE: str
     RAG_EMBEDDING_MODEL: str
     RAG_EMBEDDING_BATCH_SIZE: int | None = 1
@@ -470,24 +421,18 @@ async def update_embedding_config(request: Request, form_data: EmbeddingModelUpd
     log.info('Updating embedding model: %s to %s', config.RAG_EMBEDDING_MODEL, form_data.RAG_EMBEDDING_MODEL)
     await unload_embedding_model(request)
     try:
-        config.RAG_EMBEDDING_ENGINE = form_data.RAG_EMBEDDING_ENGINE
+        # Only local (sentence-transformers) and Ollama (local server) embedding
+        # engines are supported; OpenAI/Azure OpenAI embeddings have been removed.
+        engine = form_data.RAG_EMBEDDING_ENGINE
+        config.RAG_EMBEDDING_ENGINE = engine if engine in ('', 'ollama') else ''
         config.RAG_EMBEDDING_MODEL = form_data.RAG_EMBEDDING_MODEL.strip()
         config.RAG_EMBEDDING_BATCH_SIZE = form_data.RAG_EMBEDDING_BATCH_SIZE
         config.ENABLE_ASYNC_EMBEDDING = form_data.ENABLE_ASYNC_EMBEDDING
         config.RAG_EMBEDDING_CONCURRENT_REQUESTS = form_data.RAG_EMBEDDING_CONCURRENT_REQUESTS
 
-        if config.RAG_EMBEDDING_ENGINE == 'openai' and form_data.openai_config is not None:
-            config.RAG_OPENAI_API_BASE_URL = form_data.openai_config.url or ''
-            config.RAG_OPENAI_API_KEY = form_data.openai_config.key or ''
-
         if config.RAG_EMBEDDING_ENGINE == 'ollama' and form_data.ollama_config is not None:
             config.RAG_OLLAMA_BASE_URL = form_data.ollama_config.url or ''
             config.RAG_OLLAMA_API_KEY = form_data.ollama_config.key or ''
-
-        if config.RAG_EMBEDDING_ENGINE == 'azure_openai' and form_data.azure_openai_config is not None:
-            config.RAG_AZURE_OPENAI_BASE_URL = form_data.azure_openai_config.url or ''
-            config.RAG_AZURE_OPENAI_API_KEY = form_data.azure_openai_config.key or ''
-            config.RAG_AZURE_OPENAI_API_VERSION = form_data.azure_openai_config.version or ''
 
         request.app.state.ef = get_ef(
             config.RAG_EMBEDDING_ENGINE,
@@ -498,28 +443,9 @@ async def update_embedding_config(request: Request, form_data: EmbeddingModelUpd
             config.RAG_EMBEDDING_ENGINE,
             config.RAG_EMBEDDING_MODEL,
             request.app.state.ef,
-            (
-                config.RAG_OPENAI_API_BASE_URL
-                if config.RAG_EMBEDDING_ENGINE == 'openai'
-                else (
-                    config.RAG_OLLAMA_BASE_URL
-                    if config.RAG_EMBEDDING_ENGINE == 'ollama'
-                    else config.RAG_AZURE_OPENAI_BASE_URL
-                )
-            ),
-            (
-                config.RAG_OPENAI_API_KEY
-                if config.RAG_EMBEDDING_ENGINE == 'openai'
-                else (
-                    config.RAG_OLLAMA_API_KEY
-                    if config.RAG_EMBEDDING_ENGINE == 'ollama'
-                    else config.RAG_AZURE_OPENAI_API_KEY
-                )
-            ),
+            config.RAG_OLLAMA_BASE_URL,
+            config.RAG_OLLAMA_API_KEY,
             config.RAG_EMBEDDING_BATCH_SIZE,
-            azure_api_version=(
-                config.RAG_AZURE_OPENAI_API_VERSION if config.RAG_EMBEDDING_ENGINE == 'azure_openai' else None
-            ),
             enable_async=config.ENABLE_ASYNC_EMBEDDING,
             concurrent_requests=config.RAG_EMBEDDING_CONCURRENT_REQUESTS,
         )
@@ -532,18 +458,9 @@ async def update_embedding_config(request: Request, form_data: EmbeddingModelUpd
             'RAG_EMBEDDING_BATCH_SIZE': config.RAG_EMBEDDING_BATCH_SIZE,
             'ENABLE_ASYNC_EMBEDDING': config.ENABLE_ASYNC_EMBEDDING,
             'RAG_EMBEDDING_CONCURRENT_REQUESTS': config.RAG_EMBEDDING_CONCURRENT_REQUESTS,
-            'openai_config': {
-                'url': config.RAG_OPENAI_API_BASE_URL,
-                'key': config.RAG_OPENAI_API_KEY,
-            },
             'ollama_config': {
                 'url': config.RAG_OLLAMA_BASE_URL,
                 'key': config.RAG_OLLAMA_API_KEY,
-            },
-            'azure_openai_config': {
-                'url': config.RAG_AZURE_OPENAI_BASE_URL,
-                'key': config.RAG_AZURE_OPENAI_API_KEY,
-                'version': config.RAG_AZURE_OPENAI_API_VERSION,
             },
         }
     except Exception as e:
@@ -594,9 +511,6 @@ async def get_rag_config(request: Request, user=Depends(get_admin_user)):
         'RAG_RERANKING_MODEL': config.RAG_RERANKING_MODEL,
         'RAG_RERANKING_ENGINE': config.RAG_RERANKING_ENGINE,
         'RAG_RERANKING_BATCH_SIZE': config.RAG_RERANKING_BATCH_SIZE,
-        'RAG_EXTERNAL_RERANKER_URL': config.RAG_EXTERNAL_RERANKER_URL,
-        'RAG_EXTERNAL_RERANKER_API_KEY': config.RAG_EXTERNAL_RERANKER_API_KEY,
-        'RAG_EXTERNAL_RERANKER_TIMEOUT': config.RAG_EXTERNAL_RERANKER_TIMEOUT,
         # Chunking settings
         'TEXT_SPLITTER': config.TEXT_SPLITTER,
         'RAG_TOKENIZER_MODEL': config.RAG_TOKENIZER_MODEL,
@@ -782,9 +696,6 @@ class ConfigForm(BaseModel):
     RAG_RERANKING_MODEL: str | None = None
     RAG_RERANKING_ENGINE: str | None = None
     RAG_RERANKING_BATCH_SIZE: int | None = None
-    RAG_EXTERNAL_RERANKER_URL: str | None = None
-    RAG_EXTERNAL_RERANKER_API_KEY: str | None = None
-    RAG_EXTERNAL_RERANKER_TIMEOUT: str | None = None
 
     # Chunking settings
     TEXT_SPLITTER: str | None = None
@@ -910,27 +821,9 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
 
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
-    config.RAG_RERANKING_ENGINE = (
-        form_data.RAG_RERANKING_ENGINE if form_data.RAG_RERANKING_ENGINE is not None else config.RAG_RERANKING_ENGINE
-    )
-
-    config.RAG_EXTERNAL_RERANKER_URL = (
-        form_data.RAG_EXTERNAL_RERANKER_URL
-        if form_data.RAG_EXTERNAL_RERANKER_URL is not None
-        else config.RAG_EXTERNAL_RERANKER_URL
-    )
-
-    config.RAG_EXTERNAL_RERANKER_API_KEY = (
-        form_data.RAG_EXTERNAL_RERANKER_API_KEY
-        if form_data.RAG_EXTERNAL_RERANKER_API_KEY is not None
-        else config.RAG_EXTERNAL_RERANKER_API_KEY
-    )
-
-    config.RAG_EXTERNAL_RERANKER_TIMEOUT = (
-        form_data.RAG_EXTERNAL_RERANKER_TIMEOUT
-        if form_data.RAG_EXTERNAL_RERANKER_TIMEOUT is not None
-        else config.RAG_EXTERNAL_RERANKER_TIMEOUT
-    )
+    # Only the local reranking engine is supported; external reranker
+    # endpoints have been removed.
+    config.RAG_RERANKING_ENGINE = ''
 
     config.RAG_RERANKING_BATCH_SIZE = (
         form_data.RAG_RERANKING_BATCH_SIZE
@@ -949,9 +842,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
                 request.app.state.rf = get_rf(
                     config.RAG_RERANKING_ENGINE,
                     config.RAG_RERANKING_MODEL,
-                    config.RAG_EXTERNAL_RERANKER_URL,
-                    config.RAG_EXTERNAL_RERANKER_API_KEY,
-                    config.RAG_EXTERNAL_RERANKER_TIMEOUT,
                 )
 
                 request.app.state.RERANKING_FUNCTION = get_reranking_function(
@@ -1137,9 +1027,6 @@ async def update_rag_config(request: Request, form_data: ConfigForm, user=Depend
         # Reranking settings
         'RAG_RERANKING_MODEL': config.RAG_RERANKING_MODEL,
         'RAG_RERANKING_ENGINE': config.RAG_RERANKING_ENGINE,
-        'RAG_EXTERNAL_RERANKER_URL': config.RAG_EXTERNAL_RERANKER_URL,
-        'RAG_EXTERNAL_RERANKER_API_KEY': config.RAG_EXTERNAL_RERANKER_API_KEY,
-        'RAG_EXTERNAL_RERANKER_TIMEOUT': config.RAG_EXTERNAL_RERANKER_TIMEOUT,
         # Chunking settings
         'TEXT_SPLITTER': config.TEXT_SPLITTER,
         'RAG_TOKENIZER_MODEL': config.RAG_TOKENIZER_MODEL,
@@ -1508,28 +1395,9 @@ def save_docs_to_vector_db(
             config.RAG_EMBEDDING_ENGINE,
             config.RAG_EMBEDDING_MODEL,
             request.app.state.ef,
-            (
-                config.RAG_OPENAI_API_BASE_URL
-                if config.RAG_EMBEDDING_ENGINE == 'openai'
-                else (
-                    config.RAG_OLLAMA_BASE_URL
-                    if config.RAG_EMBEDDING_ENGINE == 'ollama'
-                    else config.RAG_AZURE_OPENAI_BASE_URL
-                )
-            ),
-            (
-                config.RAG_OPENAI_API_KEY
-                if config.RAG_EMBEDDING_ENGINE == 'openai'
-                else (
-                    config.RAG_OLLAMA_API_KEY
-                    if config.RAG_EMBEDDING_ENGINE == 'ollama'
-                    else config.RAG_AZURE_OPENAI_API_KEY
-                )
-            ),
+            config.RAG_OLLAMA_BASE_URL,
+            config.RAG_OLLAMA_API_KEY,
             config.RAG_EMBEDDING_BATCH_SIZE,
-            azure_api_version=(
-                config.RAG_AZURE_OPENAI_API_VERSION if config.RAG_EMBEDDING_ENGINE == 'azure_openai' else None
-            ),
             enable_async=config.ENABLE_ASYNC_EMBEDDING,
             concurrent_requests=config.RAG_EMBEDDING_CONCURRENT_REQUESTS,
         )
