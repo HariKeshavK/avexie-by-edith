@@ -902,7 +902,7 @@ log.info('Embedding model set: %s', RAG_EMBEDDING_MODEL)
 RAG_TOKENIZER_MODEL = os.getenv('RAG_TOKENIZER_MODEL', '')
 
 RAG_EMBEDDING_MODEL_AUTO_UPDATE = (
-    not OFFLINE_MODE and os.getenv('RAG_EMBEDDING_MODEL_AUTO_UPDATE', 'True').lower() == 'true'
+    not OFFLINE_MODE and os.getenv('RAG_EMBEDDING_MODEL_AUTO_UPDATE', 'False').lower() == 'true'
 )
 
 RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE = os.getenv('RAG_EMBEDDING_MODEL_TRUST_REMOTE_CODE', 'True').lower() == 'true'
@@ -929,7 +929,7 @@ if RAG_RERANKING_MODEL != '':
 
 
 RAG_RERANKING_MODEL_AUTO_UPDATE = (
-    not OFFLINE_MODE and os.getenv('RAG_RERANKING_MODEL_AUTO_UPDATE', 'True').lower() == 'true'
+    not OFFLINE_MODE and os.getenv('RAG_RERANKING_MODEL_AUTO_UPDATE', 'False').lower() == 'true'
 )
 
 RAG_RERANKING_MODEL_TRUST_REMOTE_CODE = os.getenv('RAG_RERANKING_MODEL_TRUST_REMOTE_CODE', 'True').lower() == 'true'
