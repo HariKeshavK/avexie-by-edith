@@ -885,21 +885,6 @@ OAUTH_TOKEN_EXCHANGE_TRUSTED_CLIENT_IDS = [
 ENABLE_OAUTH_BACKCHANNEL_LOGOUT = os.getenv('ENABLE_OAUTH_BACKCHANNEL_LOGOUT', 'False').lower() == 'true'
 
 ####################################
-# SCIM Configuration
-####################################
-
-ENABLE_SCIM = os.getenv('ENABLE_SCIM', os.getenv('SCIM_ENABLED', 'False')).lower() == 'true'
-SCIM_TOKEN = os.getenv('SCIM_TOKEN', '')
-SCIM_AUTH_PROVIDER = os.getenv('SCIM_AUTH_PROVIDER', '')
-
-if ENABLE_SCIM and not SCIM_AUTH_PROVIDER:
-    log.warning(
-        'SCIM is enabled but SCIM_AUTH_PROVIDER is not set. '
-        "Set SCIM_AUTH_PROVIDER to the OAuth provider name (e.g. 'microsoft', 'oidc') "
-        'to enable externalId storage.'
-    )
-
-####################################
 # WEBUI Identity
 ####################################
 
