@@ -138,6 +138,17 @@ export const showControls = writable(false);
 export const showEmbeds = writable(false);
 export const showOverview = writable(false);
 export const showArtifacts = writable(false);
+// --- BEGIN: sandbox (Judge0) — Codex ---
+export type AgenticIdeImport = {
+	path?: string;
+	language: string;
+	source: string;
+	stdin?: string;
+	result?: Record<string, unknown>;
+};
+export const showAgenticIDE = writable(false);
+export const agenticIdeImport: Writable<AgenticIdeImport | null> = writable(null);
+// --- END: sandbox ---
 export const showCallOverlay = writable(false);
 export const showFileNav = writable(false);
 export type FileNavOpenRequest = string | { path: string; page?: number | null };

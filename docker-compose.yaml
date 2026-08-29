@@ -23,10 +23,144 @@ services:
     environment:
       - 'OLLAMA_BASE_URL=http://ollama:11434'
       - 'WEBUI_SECRET_KEY='
+      # --- BEGIN: sandbox (Judge0) — Codex ---
+      - 'JUDGE0_URL=http://judge0:2358'
+      # --- END: sandbox ---
+    # --- BEGIN: sandbox (Judge0) — Codex ---
+    networks:
+      - default
+      - judge0_internal
+    # --- END: sandbox ---
     extra_hosts:
       - host.docker.internal:host-gateway
     restart: unless-stopped
 
+  # --- BEGIN: sandbox (Judge0) — Codex ---
+  judge0:
+    image: judge0/judge0:1.13.1
+    container_name: avexie-judge0
+    privileged: true
+    expose:
+      - '2358'
+    environment: &judge0-environment
+      JUDGE0_TELEMETRY_ENABLE: 'false'
+      ENABLE_WAIT_RESULT: 'true'
+      ENABLE_COMPILER_OPTIONS: 'false'
+      ENABLE_COMMAND_LINE_ARGUMENTS: 'false'
+      ENABLE_BATCHED_SUBMISSIONS: 'false'
+      ENABLE_CALLBACKS: 'false'
+      ENABLE_ADDITIONAL_FILES: 'false'
+      COUNT: '1'
+      REDIS_HOST: judge0-redis
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD-judge0-redis-local-only}
+      POSTGRES_HOST: judge0-db
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_POSTGRES_PASSWORD-judge0-postgres-local-only}
+      CPU_TIME_LIMIT: '2'
+      MAX_CPU_TIME_LIMIT: '2'
+      CPU_EXTRA_TIME: '0.5'
+      MAX_CPU_EXTRA_TIME: '0.5'
+      WALL_TIME_LIMIT: '5'
+      MAX_WALL_TIME_LIMIT: '5'
+      MEMORY_LIMIT: '512000'
+      MAX_MEMORY_LIMIT: '512000'
+      STACK_LIMIT: '64000'
+      MAX_STACK_LIMIT: '64000'
+      MAX_PROCESSES_AND_OR_THREADS: '30'
+      MAX_MAX_PROCESSES_AND_OR_THREADS: '30'
+      ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: 'true'
+      ALLOW_ENABLE_PER_PROCESS_AND_THREAD_TIME_LIMIT: 'true'
+      ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: 'true'
+      ALLOW_ENABLE_PER_PROCESS_AND_THREAD_MEMORY_LIMIT: 'true'
+      MAX_FILE_SIZE: '1024'
+      MAX_MAX_FILE_SIZE: '1024'
+      NUMBER_OF_RUNS: '1'
+      MAX_NUMBER_OF_RUNS: '1'
+      ALLOW_ENABLE_NETWORK: 'false'
+      ENABLE_NETWORK: 'false'
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    networks:
+      - judge0_internal
+    mem_limit: 512m
+    cpus: 1.0
+    pids_limit: 128
+    restart: unless-stopped
+
+  judge0-worker:
+    image: judge0/judge0:1.13.1
+    container_name: avexie-judge0-worker
+    command: ['./scripts/workers']
+    privileged: true
+    environment: *judge0-environment
+    depends_on:
+      judge0-db:
+        condition: service_healthy
+      judge0-redis:
+        condition: service_healthy
+    networks:
+      - judge0_internal
+    mem_limit: 768m
+    cpus: 1.0
+    pids_limit: 128
+    restart: unless-stopped
+
+  judge0-db:
+    image: postgres:16.2
+    container_name: avexie-judge0-db
+    environment:
+      POSTGRES_DB: judge0
+      POSTGRES_USER: judge0
+      POSTGRES_PASSWORD: ${JUDGE0_POSTGRES_PASSWORD-judge0-postgres-local-only}
+    volumes:
+      - judge0_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U judge0 -d judge0']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - judge0_internal
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    restart: unless-stopped
+
+  judge0-redis:
+    image: redis:7.2.4
+    container_name: avexie-judge0-redis
+    command:
+      - bash
+      - -c
+      - 'docker-entrypoint.sh --appendonly no --requirepass "$$REDIS_PASSWORD"'
+    environment:
+      REDIS_PASSWORD: ${JUDGE0_REDIS_PASSWORD-judge0-redis-local-only}
+    healthcheck:
+      test: ['CMD-SHELL', 'redis-cli -a "$$REDIS_PASSWORD" ping | grep PONG']
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    networks:
+      - judge0_internal
+    mem_limit: 128m
+    cpus: 0.25
+    pids_limit: 64
+    restart: unless-stopped
+  # --- END: sandbox ---
+
 volumes:
   ollama: {}
   avexie: {}
+  # --- BEGIN: sandbox (Judge0) — Codex ---
+  judge0_data: {}
+  # --- END: sandbox ---
+
+# --- BEGIN: sandbox (Judge0) — Codex ---
+networks:
+  judge0_internal:
+    internal: true
+# --- END: sandbox ---

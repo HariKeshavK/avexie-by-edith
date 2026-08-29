@@ -96,6 +96,10 @@ from avexie.tools.builtin import (
     view_skill,
     write_note,
 )
+# --- BEGIN: sandbox (Judge0) — Codex ---
+from avexie.tools.run_code import run_code
+
+# --- END: sandbox ---
 from avexie.utils.access_control import has_access, has_connection_access, has_permission
 from avexie.utils.chat_id import is_saved_chat_id
 from avexie.utils.headers import (
@@ -680,6 +684,13 @@ async def get_builtin_tools(
         and await has_user_permission('code_interpreter')
     ):
         builtin_functions.append(execute_code)
+
+    # --- BEGIN: sandbox (Judge0) — Codex ---
+    # Judge0 is an isolated native tool, distinct from the optional browser/Jupyter
+    # code interpreter. A future Track A registry can register this same plain callable.
+    if is_builtin_tool_enabled('sandbox'):
+        builtin_functions.append(run_code)
+    # --- END: sandbox ---
 
     # Notes tools - search, view, create, and update user's notes
     if is_note_chat or (

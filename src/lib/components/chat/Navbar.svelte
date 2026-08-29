@@ -10,6 +10,11 @@
 		mobile,
 		settings,
 		showControls,
+		// --- BEGIN: sandbox (Judge0) — Codex ---
+		showAgenticIDE,
+		showArtifacts,
+		showEmbeds,
+		// --- END: sandbox ---
 		showSidebar,
 		temporaryChatEnabled,
 		user
@@ -35,6 +40,9 @@
 	import ChatPlus from '../icons/ChatPlus.svelte';
 	import ChatCheck from '../icons/ChatCheck.svelte';
 	import Knobs from '../icons/Knobs.svelte';
+	// --- BEGIN: sandbox (Judge0) — Codex ---
+	import Terminal from '../icons/Terminal.svelte';
+	// --- END: sandbox ---
 	import { isTemporaryChatId } from '$lib/utils/chatId';
 
 	const i18n = getContext('i18n');
@@ -229,6 +237,26 @@
 							</button>
 						</Tooltip>
 					{/if}
+
+					<!-- --- BEGIN: sandbox (Judge0) — Codex --- -->
+					{#if !readOnly}
+						<Tooltip content="Agentic IDE">
+							<button
+								class="flex size-6 cursor-pointer items-center justify-center rounded-lg text-gray-500 transition hover:bg-gray-50/40 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800/40 dark:hover:text-gray-200"
+								id="agentic-ide-button"
+								on:click={async () => {
+									await showArtifacts.set(false);
+									await showEmbeds.set(false);
+									await showAgenticIDE.set(true);
+									await showControls.set(true);
+								}}
+								aria-label="Agentic IDE"
+							>
+								<Terminal className="size-4.5" strokeWidth="1.5" />
+							</button>
+						</Tooltip>
+					{/if}
+					<!-- --- END: sandbox --- -->
 
 					{#if $user?.role === 'admin' || ($user?.permissions.chat?.controls ?? true)}
 						<Tooltip content={$i18n.t('Controls')}>

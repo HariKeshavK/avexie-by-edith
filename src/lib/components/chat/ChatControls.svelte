@@ -10,6 +10,9 @@
 		showControls,
 		showCallOverlay,
 		showArtifacts,
+		// --- BEGIN: sandbox (Judge0) — Codex ---
+		showAgenticIDE,
+		// --- END: sandbox ---
 		showEmbeds,
 		settings,
 		showFileNavPath,
@@ -26,6 +29,9 @@
 	import FileNav from './FileNav.svelte';
 	import PyodideFileNav from './PyodideFileNav.svelte';
 	import Overview from './Overview.svelte';
+	// --- BEGIN: sandbox (Judge0) — Codex ---
+	import AgenticIDE from './AgenticIDE.svelte';
+	// --- END: sandbox ---
 	import { isSavedChatId } from '$lib/utils/chatId';
 
 	const i18n = getContext('i18n');
@@ -182,14 +188,15 @@
 			showControls.set(false);
 		}
 		showArtifacts.set(false);
+		showAgenticIDE.set(false);
 		showEmbeds.set(false);
 		if ($showCallOverlay) showCallOverlay.set(false);
 	};
 
-	$: if (mounted && !chatId) closeHandler();
+	$: if (mounted && !chatId && !$showAgenticIDE) closeHandler();
 
 	// Helper: is a "special" full-screen panel active?
-	$: specialPanel = $showCallOverlay || $showArtifacts || $showEmbeds;
+	$: specialPanel = $showCallOverlay || $showArtifacts || $showEmbeds || $showAgenticIDE;
 </script>
 
 {#if !largeScreen}
@@ -216,6 +223,10 @@
 					</div>
 				{:else if $showEmbeds}
 					<Embeds />
+					<!-- --- BEGIN: sandbox (Judge0) — Codex --- -->
+				{:else if $showAgenticIDE}
+					<AgenticIDE {chatId} {submitPrompt} />
+					<!-- --- END: sandbox --- -->
 				{:else if $showArtifacts}
 					<Artifacts {history} />
 				{:else}
@@ -309,7 +320,7 @@
 	<ResizableSidePanel
 		open={$showControls}
 		bind:width={controlsWidth}
-		minWidth={350}
+		minWidth={$showAgenticIDE ? 560 : 350}
 		minSiblingWidth={360}
 		closeOnDragBelowMinWidth
 		onClose={() => showControls.set(false)}
@@ -339,6 +350,10 @@
 					</div>
 				{:else if $showEmbeds}
 					<Embeds overlay={dragged} />
+				<!-- --- BEGIN: sandbox (Judge0) — Codex --- -->
+				{:else if $showAgenticIDE}
+					<AgenticIDE {chatId} {submitPrompt} />
+				<!-- --- END: sandbox --- -->
 				{:else if $showArtifacts}
 					<Artifacts {history} overlay={dragged} />
 				{:else}

@@ -1,4 +1,4 @@
-<script context="module">
+<script context="module" lang="ts">
 	// Persists across mount/unmount cycles (module-level, not per-instance)
 	let savedPath = '/';
 	let savedFileRoot = null;
