@@ -2623,6 +2623,13 @@ async def process_chat_payload(request, form_data, user, metadata, model):
     except Exception as e:
         raise e
 
+    # Run model router filter (hotswaps model & manage resource keep_alive)
+    try:
+        from avexie.router.filter import model_router_filter
+        form_data, model = await model_router_filter(request, form_data, user, model, extra_params)
+    except Exception as e:
+        log.exception("Error in model_router_filter: %s", e)
+
     if ENABLE_PLUGINS:
         try:
             filter_functions = await get_filter_functions(request, model, metadata.get('filter_ids', []))
