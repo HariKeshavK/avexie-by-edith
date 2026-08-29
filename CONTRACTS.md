@@ -88,6 +88,32 @@ application logic.
 - Errors must be raised as exceptions, not swallowed — the wrapper catches and records them as
   `status=error`.
 
+<!-- --- BEGIN: toaa — §1.4 working example --- -->
+
+### 1.4 Working example & implementation diffs
+
+A runnable echo tool wrapped end-to-end lives at
+`backend/avexie/toaa/example_tool.py` with tests in
+`backend/avexie/toaa/test_example_tool.py`. Copy this pattern when
+wrapping your own tool.
+
+The *implemented* `toaa_wrap` (in `backend/avexie/toaa/wrapper.py`)
+differs from the illustrative §1.1 signature in three ways:
+
+| §1.1 (illustrative) | Implementation | Why |
+|---|---|---|
+| `tool_fn: Callable[[dict], dict]` | `tool_fn: Callable[..., Awaitable]` | OWUI tools are async and accept `**kwargs`, not a single dict |
+| Returns `ToaaResult` | Returns `Any` (the raw tool result) | Downstream code expects the unwrapped value; the audit record is a side-effect |
+| Sync function | `async def` | All OWUI tool dispatch is async |
+
+The wrapper calls `tool_fn(**tool_input)` internally, so tool authors
+do not need to change their function signatures.
+
+Integration guide for wiring `toaa_wrap` into the three middleware
+dispatch sites: `backend/avexie/toaa/INTEGRATION.md`.
+
+<!-- --- END: toaa --- -->
+
 ---
 
 ## 2. Tool registration interface
