@@ -2517,7 +2517,8 @@
 								</div>
 
 								<div class="self-end flex space-x-1 mr-1 min-w-0 gap-[0.03125rem]">
-									<div class="flex min-w-0 max-w-[10rem] items-center sm:max-w-[13rem]">
+									<!-- AVEXIE ROUTER: model selection is handled server-side; selector hidden from UI -->
+									<div class="hidden" aria-hidden="true">
 										<ModelSelector
 											bind:this={modelSelector}
 											bind:selectedModels
