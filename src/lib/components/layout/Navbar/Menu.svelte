@@ -12,6 +12,9 @@
 	import {
 		showControls,
 		showArtifacts,
+		// --- BEGIN: sandbox (Judge0) — Codex ---
+		showAgenticIDE,
+		// --- END: sandbox ---
 		mobile,
 		temporaryChatEnabled,
 		theme,
@@ -37,6 +40,9 @@
 	import GarbageBin from '$lib/components/icons/GarbageBin.svelte';
 	import Messages from '$lib/components/chat/Messages.svelte';
 	import Download from '$lib/components/icons/Download.svelte';
+	// --- BEGIN: sandbox (Judge0) — Codex ---
+	import Terminal from '$lib/components/icons/Terminal.svelte';
+	// --- END: sandbox ---
 
 	const i18n = getContext('i18n');
 
@@ -365,6 +371,27 @@
 
 				<hr class="border-gray-50/30 dark:border-gray-800/30 mx-1 my-0.5" />
 			{/if}
+
+			<!-- --- BEGIN: sandbox (Judge0) — Codex --- -->
+			{#if !readOnly}
+				<button
+					draggable="false"
+					class="flex h-[1.6875rem] w-full items-center gap-2 rounded-xl px-2 text-[0.8125rem] cursor-pointer select-none hover:bg-gray-50/40 dark:hover:bg-gray-800/40"
+					id="chat-agentic-ide-button"
+					on:click={async () => {
+						await showControls.set(true);
+						await showArtifacts.set(false);
+						await showEmbeds.set(false);
+						await showAgenticIDE.set(true);
+					}}
+				>
+					<Terminal className="size-3.5" strokeWidth="1.5" />
+					<div class="flex items-center">Agentic IDE</div>
+				</button>
+
+				<hr class="border-gray-50/30 dark:border-gray-800/30 mx-1 my-0.5" />
+			{/if}
+			<!-- --- END: sandbox --- -->
 
 			{#if !readOnly && !$temporaryChatEnabled && ($user?.role === 'admin' || ($user.permissions?.chat?.share ?? true))}
 				<button

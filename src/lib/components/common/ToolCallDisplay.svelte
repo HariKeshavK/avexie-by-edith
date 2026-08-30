@@ -19,6 +19,9 @@
 	import Image from './Image.svelte';
 	import FullHeightIframe from './FullHeightIframe.svelte';
 	import { settings } from '$lib/stores';
+	// --- BEGIN: sandbox (Judge0) — Codex ---
+	import RunCodeToolPanel from './RunCodeToolPanel.svelte';
+	// --- END: sandbox ---
 
 	export let id: string = '';
 	export let attributes: {
@@ -124,6 +127,16 @@
 
 		const status = typeof result.status === 'string' ? result.status.trim().toLowerCase() : '';
 		if (status === 'error' || status === 'failed') return true;
+		// --- BEGIN: sandbox (Judge0) — Codex ---
+		if (
+			attributes?.name === 'run_code' &&
+			((typeof result.status_id === 'number' && result.status_id !== 3) ||
+				(typeof result.exit_code === 'number' && result.exit_code !== 0) ||
+				result.timed_out === true)
+		) {
+			return true;
+		}
+		// --- END: sandbox ---
 
 		const message = result.message;
 		return (
@@ -157,6 +170,14 @@
 
 	$: parsedArgs = parseArguments(args);
 	$: parsedResult = parseJSONString(result);
+	// --- BEGIN: sandbox (Judge0) — Codex ---
+	$: isRunCode = attributes?.name === 'run_code';
+	let runCodeAutoOpened = false;
+	$: if (isRunCode && !runCodeAutoOpened) {
+		open = true;
+		runCodeAutoOpened = true;
+	}
+	// --- END: sandbox ---
 
 	const toggleOpen = () => {
 		open = !open;
@@ -288,78 +309,91 @@
 				<div
 					class="border border-gray-50 dark:border-gray-850/30 rounded-2xl my-1.5 p-2.5 space-y-2"
 				>
-					{#if args}
-						<!-- Input -->
-						<div>
-							<div
-								class="text-[0.625rem] uppercase tracking-wider font-normal text-gray-400 dark:text-gray-500 mb-1.5 px-1"
-							>
-								{$i18n.t('Input')}
-							</div>
-
-							{#if parsedArgs}
-								<div class="px-1 space-y-0.5">
-									{#each Object.entries(parsedArgs) as [key, value]}
-										<div class="flex gap-2 text-xs py-0.5">
-											<span class="font-normal text-gray-600 dark:text-gray-400 shrink-0"
-												>{key}</span
-											>
-											<span class="text-gray-800 dark:text-gray-200 break-all"
-												>{typeof value === 'object' ? JSON.stringify(value) : value}</span
-											>
-										</div>
-									{/each}
+					<!-- --- BEGIN: sandbox (Judge0) — Codex --- -->
+					{#if isRunCode}
+						<RunCodeToolPanel
+							id={componentId}
+							argumentsContent={args}
+							resultContent={result}
+							lifecycleStatus={attributes?.status ?? ''}
+							done={isDone}
+						/>
+					{:else}
+						{#if args}
+							<!-- Input -->
+							<div>
+								<div
+									class="text-[0.625rem] uppercase tracking-wider font-normal text-gray-400 dark:text-gray-500 mb-1.5 px-1"
+								>
+									{$i18n.t('Input')}
 								</div>
-							{:else}
-								<div class="tool-call-body w-full max-w-none!">
-									<pre
-										class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre font-mono bg-gray-50 dark:bg-gray-900 rounded-lg p-2 overflow-x-auto">{formatJSONString(
-											args
-										)}</pre>
-								</div>
-							{/if}
-						</div>
-					{/if}
 
-					<!-- Output -->
-					{#if isDone && result}
-						<div>
-							<div
-								class="text-[0.625rem] uppercase tracking-wider font-normal text-gray-400 dark:text-gray-500 mb-1.5 px-1"
-							>
-								{$i18n.t('Output')}
-							</div>
-							<div class="w-full max-w-none!">
-								{#if typeof parsedResult === 'object' && parsedResult !== null}
-									<pre
-										class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre font-mono bg-gray-50 dark:bg-gray-900 rounded-lg p-2 overflow-x-auto">{JSON.stringify(
-											parsedResult,
-											null,
-											2
-										)}</pre>
+								{#if parsedArgs}
+									<div class="px-1 space-y-0.5">
+										{#each Object.entries(parsedArgs) as [key, value]}
+											<div class="flex gap-2 text-xs py-0.5">
+												<span class="font-normal text-gray-600 dark:text-gray-400 shrink-0"
+													>{key}</span
+												>
+												<span class="text-gray-800 dark:text-gray-200 break-all"
+													>{typeof value === 'object' ? JSON.stringify(value) : value}</span
+												>
+											</div>
+										{/each}
+									</div>
 								{:else}
-									{@const resultStr = String(parsedResult)}
-									{@const isTruncated = resultStr.length > RESULT_PREVIEW_LIMIT && !expandedResult}
-									<pre
-										class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">{isTruncated
-											? resultStr.slice(0, RESULT_PREVIEW_LIMIT)
-											: resultStr}</pre>
-									{#if isTruncated}
-										<button
-											class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
-											on:click|stopPropagation={() => {
-												expandedResult = true;
-											}}
-										>
-											{$i18n.t('Show all ({{COUNT}} characters)', {
-												COUNT: resultStr.length.toLocaleString()
-											})}
-										</button>
-									{/if}
+									<div class="tool-call-body w-full max-w-none!">
+										<pre
+											class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre font-mono bg-gray-50 dark:bg-gray-900 rounded-lg p-2 overflow-x-auto">{formatJSONString(
+												args
+											)}</pre>
+									</div>
 								{/if}
 							</div>
-						</div>
+						{/if}
+
+						<!-- Output -->
+						{#if isDone && result}
+							<div>
+								<div
+									class="text-[0.625rem] uppercase tracking-wider font-normal text-gray-400 dark:text-gray-500 mb-1.5 px-1"
+								>
+									{$i18n.t('Output')}
+								</div>
+								<div class="w-full max-w-none!">
+									{#if typeof parsedResult === 'object' && parsedResult !== null}
+										<pre
+											class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre font-mono bg-gray-50 dark:bg-gray-900 rounded-lg p-2 overflow-x-auto">{JSON.stringify(
+												parsedResult,
+												null,
+												2
+											)}</pre>
+									{:else}
+										{@const resultStr = String(parsedResult)}
+										{@const isTruncated =
+											resultStr.length > RESULT_PREVIEW_LIMIT && !expandedResult}
+										<pre
+											class="text-xs text-gray-600 dark:text-gray-300 whitespace-pre-wrap break-words font-mono">{isTruncated
+												? resultStr.slice(0, RESULT_PREVIEW_LIMIT)
+												: resultStr}</pre>
+										{#if isTruncated}
+											<button
+												class="mt-1 text-xs text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition"
+												on:click|stopPropagation={() => {
+													expandedResult = true;
+												}}
+											>
+												{$i18n.t('Show all ({{COUNT}} characters)', {
+													COUNT: resultStr.length.toLocaleString()
+												})}
+											</button>
+										{/if}
+									{/if}
+								</div>
+							</div>
+						{/if}
 					{/if}
+					<!-- --- END: sandbox --- -->
 				</div>
 			</div>
 		{/if}
