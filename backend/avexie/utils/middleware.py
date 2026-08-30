@@ -1389,22 +1389,39 @@ async def chat_completion_tools_handler(
                     allowed_params = spec.get('parameters', {}).get('properties', {}).keys()
                     tool_function_params = {k: v for k, v in tool_function_params.items() if k in allowed_params}
 
+                    from avexie.toaa.wrapper import toaa_wrap
+
                     if tool.get('direct', False):
-                        tool_result = await event_caller(
-                            {
-                                'type': 'execute:tool',
-                                'data': {
-                                    'id': str(uuid4()),
-                                    'name': tool_function_name,
-                                    'params': tool_function_params,
-                                    'server': tool.get('server', {}),
-                                    'session_id': metadata.get('session_id', None),
-                                },
-                            }
+                        async def _direct_tool_fn(**_kwargs):
+                            return await event_caller(
+                                {
+                                    'type': 'execute:tool',
+                                    'data': {
+                                        'id': str(uuid4()),
+                                        'name': tool_function_name,
+                                        'params': tool_function_params,
+                                        'server': tool.get('server', {}),
+                                        'session_id': metadata.get('session_id', None),
+                                    },
+                                }
+                            )
+
+                        tool_result = await toaa_wrap(
+                            tool_name=tool_function_name,
+                            tool_input=tool_function_params,
+                            tool_fn=_direct_tool_fn,
+                            session_id=metadata.get('session_id', ''),
+                            user_id=user.id,
                         )
                     else:
                         tool_function = tool['callable']
-                        tool_result = await tool_function(**tool_function_params)
+                        tool_result = await toaa_wrap(
+                            tool_name=tool_function_name,
+                            tool_input=tool_function_params,
+                            tool_fn=tool_function,
+                            session_id=metadata.get('session_id', ''),
+                            user_id=user.id,
+                        )
 
                 except Exception as e:
                     tool_result = {'error': str(e)}
@@ -3171,21 +3188,32 @@ async def execute_tool_call_for_output(request, form_data, user, metadata, event
     params = {key: value for key, value in params.items() if key in allowed_params}
 
     try:
+        from avexie.toaa.wrapper import toaa_wrap
+
         if direct_tool:
             if not event_caller:
                 result = 'Error: Browser session is not connected for this direct tool.'
             else:
-                result = await event_caller(
-                    {
-                        'type': 'execute:tool',
-                        'data': {
-                            'id': str(uuid4()),
-                            'name': name,
-                            'params': params,
-                            'server': tool.get('server', {}),
-                            'session_id': metadata.get('session_id'),
-                        },
-                    }
+                async def _direct_tool_fn(**_kwargs):
+                    return await event_caller(
+                        {
+                            'type': 'execute:tool',
+                            'data': {
+                                'id': str(uuid4()),
+                                'name': name,
+                                'params': params,
+                                'server': tool.get('server', {}),
+                                'session_id': metadata.get('session_id'),
+                            },
+                        }
+                    )
+
+                result = await toaa_wrap(
+                    tool_name=name,
+                    tool_input=params,
+                    tool_fn=_direct_tool_fn,
+                    session_id=metadata.get('session_id', ''),
+                    user_id=user.id,
                 )
         else:
             function = await get_updated_tool_function(
@@ -3195,7 +3223,13 @@ async def execute_tool_call_for_output(request, form_data, user, metadata, event
                     '__files__': metadata.get('files', []),
                 },
             )
-            result = await function(**params)
+            result = await toaa_wrap(
+                tool_name=name,
+                tool_input=params,
+                tool_fn=function,
+                session_id=metadata.get('session_id', ''),
+                user_id=user.id,
+            )
     except Exception as e:
         result = {'error': str(e)}
 
@@ -5630,18 +5664,29 @@ async def streaming_chat_response_handler(response, ctx):
                         allowed_params = spec.get('parameters', {}).get('properties', {}).keys()
                         params = {key: value for key, value in params.items() if key in allowed_params}
                         try:
+                            from avexie.toaa.wrapper import toaa_wrap
+
                             if direct_tool:
-                                result = await event_caller(
-                                    {
-                                        'type': 'execute:tool',
-                                        'data': {
-                                            'id': str(uuid4()),
-                                            'name': name,
-                                            'params': params,
-                                            'server': tool.get('server', {}),
-                                            'session_id': metadata.get('session_id'),
-                                        },
-                                    }
+                                async def _direct_tool_fn(**_kwargs):
+                                    return await event_caller(
+                                        {
+                                            'type': 'execute:tool',
+                                            'data': {
+                                                'id': str(uuid4()),
+                                                'name': name,
+                                                'params': params,
+                                                'server': tool.get('server', {}),
+                                                'session_id': metadata.get('session_id'),
+                                            },
+                                        }
+                                    )
+
+                                result = await toaa_wrap(
+                                    tool_name=name,
+                                    tool_input=params,
+                                    tool_fn=_direct_tool_fn,
+                                    session_id=metadata.get('session_id', ''),
+                                    user_id=user.id,
                                 )
                             else:
                                 function = await get_updated_tool_function(
@@ -5651,7 +5696,13 @@ async def streaming_chat_response_handler(response, ctx):
                                         '__files__': metadata.get('files', []),
                                     },
                                 )
-                                result = await function(**params)
+                                result = await toaa_wrap(
+                                    tool_name=name,
+                                    tool_input=params,
+                                    tool_fn=function,
+                                    session_id=metadata.get('session_id', ''),
+                                    user_id=user.id,
+                                )
                         except Exception as e:
                             result = {'error': str(e)}
                         return params, result, tool, tool_type, direct_tool
